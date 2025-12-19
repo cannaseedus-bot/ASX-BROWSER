@@ -1,1458 +1,1108 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MX2LM OS — LEGION TRINITY CLUSTER</title>
-  <link rel="manifest" href="manifest.json" />
-
-  <!-- =========================================================
-       BLOCK 1 — TOKENS & RESET
-       ========================================================= -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BLACK CODE BROWSER — ATOMIC ⊗ KUHUL v1.2.3</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#16f2aa">
   <style>
+    /* ═══════════════════════════════════════════════════════════
+       ATOMIC CSS CORE — Inline for instant render
+       ═══════════════════════════════════════════════════════════ */
     :root {
-      /* Colors */
-      --bg-primary: #020617;
-      --bg-secondary: #050b1c;
-      --bg-tertiary: #0a0f14;
-      --bg-surface: #101820;
-
-      --text-primary: #e6fffa;
-      --text-secondary: #7dd3fc;
-      --text-muted: #5d8ba3;
-
-      --emerald: #16f2aa;
-      --emerald-soft: rgba(22, 242, 170, 0.13);
-      --emerald-strong: rgba(22, 242, 170, 0.22);
-      --cyan: #22d3ee;
-      --cyan-soft: rgba(34, 211, 238, 0.16);
-
-      --accent-warning: #ffd166;
-      --accent-danger: #ff3366;
-      --accent-success: #00d9a6;
-
-      /* Spacing */
-      --sp-xs: 4px;
-      --sp-sm: 8px;
-      --sp-md: 16px;
-      --sp-lg: 24px;
-      --sp-xl: 32px;
-      --sp-2xl: 48px;
-
-      /* Radius */
-      --rad-sm: 8px;
-      --rad-md: 12px;
-      --rad-lg: 16px;
-      --rad-xl: 20px;
-      --rad-2xl: 24px;
-      --rad-pill: 999px;
-
-      /* Typography */
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", sans-serif;
-      --font-mono: "JetBrains Mono", "Fira Code", monospace;
-
-      --size-xs: 11px;
-      --size-sm: 13px;
-      --size-md: 14px;
-      --size-lg: 16px;
-      --size-xl: 20px;
-      --size-2xl: 24px;
-
-      /* Shadows */
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-      --shadow-glow: 0 0 40px rgba(22, 242, 170, 0.25);
-
-      /* Transitions */
-      --trans-fast: 0.15s ease;
-      --trans-normal: 0.3s ease;
-      --trans-slow: 0.5s ease;
+      --bg-0:#020409;--bg-1:#050912;--bg-2:#071022;--bg-3:#0a1530;
+      --panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.06);
+      --border:rgba(255,255,255,.14);--border-soft:rgba(255,255,255,.09);--border-strong:rgba(255,255,255,.22);
+      --fg-0:#eafff8;--fg-1:rgba(234,255,248,.78);--fg-2:rgba(234,255,248,.56);--fg-3:rgba(234,255,248,.38);
+      --accent:#16f2aa;--accent2:#61e7ff;--accent-soft:rgba(22,242,170,.14);--accent-glow:rgba(22,242,170,.35);
+      --danger:#ff6b6b;--danger-soft:rgba(255,107,107,.14);
+      --success:#00d9a6;--warning:#ffb300;
+      --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-pill:999px;
+      --sp-xs:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:32px;
+      --trans-fast:.15s ease;--trans-normal:.3s ease;
+      --shadow-md:0 8px 24px rgba(0,0,0,.4);--shadow-glow:0 0 40px var(--accent-glow);
+      --font-sans:system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono","Fira Code",monospace;
     }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;background:var(--bg-0);color:var(--fg-0);font-family:var(--font-sans);overflow:hidden}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      font-family: var(--font-sans);
-      color: var(--text-primary);
-      background:
-        radial-gradient(circle at 5% 0%, rgba(34, 211, 238, 0.12) 0, transparent 55%),
-        radial-gradient(circle at 95% 100%, rgba(16, 185, 129, 0.12) 0, transparent 55%),
-        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0, #020617 60%);
-      color-scheme: dark;
-      overflow: hidden;
-    }
-  </style>
-
-  <!-- =========================================================
-       BLOCK 2 — BASE & ATOMIC COMPONENTS
-       ========================================================= -->
-  <style>
-    h1, h2, h3, h4, h5, h6 {
-      font-weight: 600;
-      line-height: 1.2;
-    }
-
-    h1 { font-size: var(--size-2xl); }
-    h2 { font-size: var(--size-xl); }
-    h3 { font-size: var(--size-lg); }
-
-    p {
-      line-height: 1.6;
-      color: var(--text-secondary);
-    }
-
-    a {
-      color: var(--emerald);
-      text-decoration: none;
-      transition: color var(--trans-fast), text-decoration var(--trans-fast);
-    }
-
-    a:hover {
-      color: var(--cyan);
-      text-decoration: underline;
-    }
-
-    input, textarea, select {
-      font-family: inherit;
-      font-size: inherit;
-      color: var(--text-primary);
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      border-radius: var(--rad-md);
-      padding: var(--sp-sm) var(--sp-md);
-      transition: border-color var(--trans-fast), box-shadow var(--trans-fast), background var(--trans-fast);
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--emerald);
-      box-shadow: 0 0 16px rgba(22, 242, 170, 0.3);
-      background: rgba(15, 23, 42, 0.98);
-    }
+    /* Layout */
+    #app{height:100%;display:flex;flex-direction:column}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));border-bottom:1px solid var(--border);flex-shrink:0}
+    .header-left{display:flex;align-items:center;gap:12px}
+    .logo{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px}
+    .header-title{font-size:13px;line-height:1.3}
+    .header-title strong{font-size:14px;display:block}
+    .header-title span{color:var(--fg-2);font-size:11px}
+    .header-center{flex:1;max-width:600px;margin:0 24px}
+    .url-bar{display:flex;gap:8px}
+    .url-input{flex:1;padding:8px 16px;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--bg-1);color:var(--fg-0);font-size:13px}
+    .url-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft)}
+    .header-right{display:flex;align-items:center;gap:8px}
 
     /* Buttons */
-    .asx-btn {
-      border-radius: var(--rad-pill);
-      padding: 7px 14px;
-      font-size: var(--size-sm);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      border: 1px solid rgba(148, 163, 184, 0.55);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
-      color: var(--text-primary);
-      transition: transform var(--trans-fast), box-shadow var(--trans-fast), background var(--trans-fast);
-      outline: none;
-      white-space: nowrap;
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--panel);color:var(--fg-1);font-size:12px;cursor:pointer;transition:all var(--trans-fast);white-space:nowrap}
+    .btn:hover{background:var(--panel2);border-color:var(--border-strong);transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent-soft),transparent);border-color:var(--accent);color:var(--accent)}
+    .btn-primary:hover{background:var(--accent);color:var(--bg-0)}
+    .btn-sm{padding:5px 10px;font-size:11px}
+    .btn-icon{width:28px;height:28px;padding:0;justify-content:center}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border);font-size:11px;color:var(--fg-2)}
+    .chip-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success)}
+
+    /* Main Area */
+    .main{display:flex;flex:1;min-height:0}
+    .sidebar{width:280px;min-width:280px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--bg-1)}
+    .sidebar-header{padding:12px;border-bottom:1px solid var(--border-soft)}
+    .sidebar-tabs{display:flex;gap:2px;padding:3px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--border)}
+    .sidebar-tab{flex:1;padding:6px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--fg-2);font-size:11px;cursor:pointer;text-align:center}
+    .sidebar-tab.active{background:var(--bg-1);color:var(--fg-0);box-shadow:0 0 0 1px var(--border-strong)}
+    .sidebar-body{flex:1;overflow-y:auto;padding:12px}
+    .sidebar-section{margin-bottom:16px}
+    .sidebar-section-title{font-size:11px;color:var(--fg-2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+
+    /* Canvas Area */
+    .canvas-area{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg-0)}
+    .canvas-tabs{display:flex;gap:2px;padding:4px 8px;background:var(--bg-2);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+    .canvas-tabs::-webkit-scrollbar{height:4px}
+    .canvas-tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+    .canvas-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-sm);background:var(--panel);border:1px solid transparent;font-size:11px;color:var(--fg-2);cursor:pointer;white-space:nowrap;max-width:160px;min-width:80px}
+    .canvas-tab.active{background:var(--bg-1);border-color:var(--border);color:var(--fg-0)}
+    .canvas-tab-title{flex:1;overflow:hidden;text-overflow:ellipsis}
+    .canvas-tab-close{width:14px;height:14px;border-radius:50%;border:none;background:transparent;color:var(--fg-3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:0;transition:all var(--trans-fast)}
+    .canvas-tab:hover .canvas-tab-close{opacity:1}
+    .canvas-tab-close:hover{background:var(--danger-soft);color:var(--danger)}
+    .canvas-new{padding:6px 10px;border:1px dashed var(--border);color:var(--fg-3)}
+    .canvas-new:hover{border-color:var(--accent);color:var(--accent)}
+    .canvas-viewport{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
+    .canvas-frame{flex:1;border:none;background:var(--bg-0)}
+    .canvas-content{flex:1;overflow:auto;padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.6}
+    .canvas-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg-0);color:var(--fg-2)}
+    .canvas-loading.hidden{display:none}
+
+    /* Tape List */
+    .tape-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-md);border:1px solid var(--border-soft);background:var(--panel);margin-bottom:6px;cursor:pointer;transition:all var(--trans-fast)}
+    .tape-item:hover{border-color:var(--border);background:var(--panel2)}
+    .tape-icon{width:28px;height:28px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--accent-soft),transparent);display:flex;align-items:center;justify-content:center;font-size:12px}
+    .tape-info{flex:1;min-width:0}
+    .tape-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tape-meta{font-size:10px;color:var(--fg-3)}
+    .tape-actions{display:flex;gap:4px;opacity:0;transition:opacity var(--trans-fast)}
+    .tape-item:hover .tape-actions{opacity:1}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(2,4,9,.92);backdrop-filter:blur(20px);display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal.active{display:flex}
+    .modal-content{background:linear-gradient(145deg,var(--bg-1),var(--bg-2));border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;width:90%;max-width:560px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-md),var(--shadow-glow)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
+    .modal-title{font-size:16px;font-weight:600}
+    .modal-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--fg-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
+    .modal-body{display:flex;flex-direction:column;gap:16px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-label{font-size:11px;color:var(--fg-2);text-transform:uppercase;letter-spacing:.5px}
+    .form-input{padding:10px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--bg-0);color:var(--fg-0);font-size:13px}
+    .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 12px var(--accent-soft)}
+    .form-textarea{min-height:120px;resize:vertical;font-family:var(--font-mono)}
+    .form-row{display:flex;gap:12px}
+    .form-row > *{flex:1}
+    .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-soft)}
+
+    /* Settings */
+    .setting-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:var(--r-md);border:1px solid var(--border-soft);background:var(--panel);margin-bottom:8px}
+    .setting-info{flex:1}
+    .setting-name{font-size:13px;font-weight:500}
+    .setting-desc{font-size:11px;color:var(--fg-3)}
+    .toggle{width:40px;height:22px;border-radius:11px;background:var(--bg-2);border:1px solid var(--border);cursor:pointer;position:relative;transition:all var(--trans-fast)}
+    .toggle.active{background:var(--accent);border-color:var(--accent)}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--fg-0);transition:transform var(--trans-fast)}
+    .toggle.active::after{transform:translateX(18px)}
+
+    /* Status Bar */
+    .status-bar{padding:6px 16px;background:var(--bg-2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--fg-3);flex-shrink:0}
+    .status-left{display:flex;align-items:center;gap:16px}
+    .status-right{display:flex;align-items:center;gap:16px}
+
+    /* Drag handle for tabs */
+    .canvas-tab.dragging{opacity:.5}
+    .canvas-tab.drag-over{border-color:var(--accent)}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .header-center{margin:0 12px}
     }
-
-    .asx-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92));
-    }
-
-    .asx-btn-primary {
-      background:
-        radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.24), transparent 55%),
-        linear-gradient(140deg, rgba(15, 23, 42, 0.98), rgba(16, 185, 129, 0.25));
-      border-color: rgba(45, 212, 191, 0.9);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .asx-btn-primary:hover {
-      box-shadow: 0 0 32px rgba(22, 242, 170, 0.5);
-    }
-
-    .chip {
-      border-radius: var(--rad-pill);
-      padding: 5px 10px;
-      font-size: var(--size-xs);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.8));
-      color: var(--text-primary);
-    }
-
-    .chip-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent-success);
-      box-shadow: 0 0 12px rgba(0, 217, 166, 0.7);
-    }
-
-    .panel {
-      border-radius: var(--rad-xl);
-      padding: var(--sp-md);
-      background:
-        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.22), transparent 55%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.88));
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(22px);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .card {
-      border-radius: var(--rad-lg);
-      padding: var(--sp-md);
-      background:
-        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.18), transparent 55%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(22px);
-      transition: transform var(--trans-normal), box-shadow var(--trans-normal);
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg), var(--shadow-glow);
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
-      border-radius: var(--rad-pill);
-      font-size: var(--size-xs);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--text-secondary);
-    }
-
-    .badge {
-      padding: 3px 10px;
-      border-radius: var(--rad-pill);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      font-size: var(--size-xs);
-      color: var(--text-secondary);
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .section-title {
-      font-size: var(--size-md);
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--sp-sm);
-      margin-bottom: var(--sp-sm);
-    }
-
-    .section-subtitle {
-      font-size: var(--size-xs);
-      color: var(--text-muted);
-      margin-bottom: var(--sp-sm);
-    }
-
-    .pill-tabs {
-      display: inline-flex;
-      padding: 3px;
-      border-radius: var(--rad-pill);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: rgba(15, 23, 42, 0.9);
-      gap: 3px;
-    }
-
-    .pill-tab {
-      border-radius: var(--rad-pill);
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: var(--size-xs);
-      padding: 4px 10px;
-      cursor: pointer;
-      transition: background var(--trans-fast), color var(--trans-fast);
-    }
-
-    .pill-tab.active {
-      background: rgba(15, 23, 42, 0.98);
-      color: var(--text-primary);
-      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
-    }
-  </style>
-
-  <!-- =========================================================
-       BLOCK 3 — LAYOUTS (GHOST SHELL + PANELS + DOCK)
-       ========================================================= -->
-  <style>
-    #glyph-rain {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    #ghost-root {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .ghost-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background:
-        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.28), transparent 55%),
-        linear-gradient(120deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.86));
-      border-bottom: 1px solid rgba(148, 163, 184, 0.55);
-      box-shadow:
-        0 8px 24px rgba(15, 23, 42, 0.95),
-        0 0 32px rgba(22, 242, 170, 0.15);
-      backdrop-filter: blur(20px);
-      flex-shrink: 0;
-    }
-
-    .ghost-header-left {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-sm);
-    }
-
-    .ghost-logo {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background:
-        radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.28), transparent 55%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
-      border: 1px solid rgba(45, 212, 191, 0.8);
-      font-size: 18px;
-    }
-
-    .ghost-header-title {
-      display: flex;
-      flex-direction: column;
-      font-size: var(--size-xs);
-    }
-
-    .ghost-header-title strong {
-      font-size: var(--size-sm);
-    }
-
-    .ghost-header-right {
-      display: flex;
-      align-items: center;
-      gap: var(--sp-sm);
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .url-form {
-      display: flex;
-      gap: var(--sp-sm);
-      align-items: center;
-      flex: 1;
-      max-width: 600px;
-      margin: 0 var(--sp-md);
-    }
-
-    .url-input {
-      flex: 1;
-      border-radius: var(--rad-pill);
-      padding: 8px 16px;
-      font-size: var(--size-sm);
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: var(--text-primary);
-    }
-
-    .url-input:focus {
-      border-color: var(--emerald);
-      box-shadow: 0 0 16px rgba(22, 242, 170, 0.3);
-    }
-
-    .ghost-main {
-      display: flex;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    /* EDITOR SIDEBAR */
-    .editor-sidebar {
-      width: 320px;
-      min-width: 320px;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid rgba(148, 163, 184, 0.55);
-      background: linear-gradient(145deg, #020617, #050b1c);
-      overflow: hidden;
-    }
-
-    .editor-sidebar-header {
-      padding: var(--sp-md);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-    }
-
-    .editor-sidebar-tabs {
-      display: flex;
-      border-radius: var(--rad-md);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .editor-sidebar-tab {
-      flex: 1;
-      border-radius: var(--rad-sm);
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: var(--size-xs);
-      padding: 6px;
-      cursor: pointer;
-      text-align: center;
-      transition: background var(--trans-fast), color var(--trans-fast);
-    }
-
-    .editor-sidebar-tab.active {
-      background: rgba(15, 23, 42, 0.98);
-      color: var(--text-primary);
-      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
-    }
-
-    .editor-sidebar-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .editor-canvas-container {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .editor-canvas-container.active {
-      display: flex;
-    }
-
-    .editor-canvas-header {
-      padding: var(--sp-sm) var(--sp-md);
-      border-bottom: 1px solid rgba(51, 65, 85, 0.9);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: var(--size-xs);
-      color: var(--text-muted);
-    }
-
-    .editor-canvas-body {
-      flex: 1;
-      padding: var(--sp-md);
-      overflow-y: auto;
-      font-family: var(--font-mono);
-      font-size: var(--size-xs);
-      line-height: 1.5;
-      color: rgba(226, 232, 240, 0.9);
-      background: linear-gradient(145deg, #020617, #020617);
-    }
-
-    .editor-canvas-footer {
-      padding: var(--sp-sm) var(--sp-md);
-      border-top: 1px solid rgba(30, 64, 175, 0.6);
-      display: flex;
-      justify-content: space-between;
-      font-size: var(--size-xs);
-      color: var(--text-muted);
-    }
-
-    /* DASHBOARD MAIN AREA */
-    .dashboard-main {
-      flex: 1;
-      padding: var(--sp-md);
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-lg);
-    }
-
-    /* DASHBOARD HERO SECTION */
-    .dashboard-hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--sp-lg);
-    }
-
-    .hero-cta {
-      padding: var(--sp-xl);
-      border-radius: var(--rad-2xl);
-      background:
-        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.22), transparent 55%),
-        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.88));
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .hero-cta h1 {
-      font-size: var(--size-2xl);
-      margin-bottom: var(--sp-sm);
-      background: linear-gradient(135deg, var(--text-primary), var(--emerald));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-cta p {
-      margin-bottom: var(--sp-lg);
-      font-size: var(--size-md);
-      max-width: 80%;
-    }
-
-    .hero-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--sp-md);
-    }
-
-    .stat-card {
-      padding: var(--sp-lg);
-      border-radius: var(--rad-xl);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: var(--size-2xl);
-      font-weight: bold;
-      background: linear-gradient(135deg, var(--emerald), var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: var(--sp-xs);
-    }
-
-    .stat-label {
-      font-size: var(--size-xs);
-      color: var(--text-muted);
-    }
-
-    /* DASHBOARD HIGHLIGHTS */
-    .dashboard-highlights {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--sp-md);
-    }
-
-    .highlight-card {
-      padding: var(--sp-lg);
-      border-radius: var(--rad-xl);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      transition: transform var(--trans-normal), box-shadow var(--trans-normal);
-    }
-
-    .highlight-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg), var(--shadow-glow);
-    }
-
-    .highlight-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--rad-md);
-      background: linear-gradient(135deg, var(--emerald-soft), var(--cyan-soft));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: var(--sp-md);
-      font-size: var(--size-lg);
-    }
-
-    .highlight-card h3 {
-      margin-bottom: var(--sp-sm);
-    }
-
-    /* OPTIONS LIST */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: var(--sp-md);
-    }
-
-    .option-item {
-      padding: var(--sp-md);
-      border-radius: var(--rad-lg);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8));
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      display: flex;
-      align-items: center;
-      gap: var(--sp-md);
-      cursor: pointer;
-      transition: all var(--trans-fast);
-    }
-
-    .option-item:hover {
-      border-color: var(--emerald);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .option-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--rad-md);
-      background: linear-gradient(135deg, var(--emerald-soft), var(--cyan-soft));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--size-md);
-    }
-
-    .option-text {
-      flex: 1;
-    }
-
-    .option-text strong {
-      display: block;
-      font-size: var(--size-sm);
-      margin-bottom: 2px;
-    }
-
-    .option-text span {
-      font-size: var(--size-xs);
-      color: var(--text-muted);
-    }
-
-    /* CHAT INFERENCE FORM */
-    .chat-inference {
-      margin-top: var(--sp-lg);
-    }
-
-    .chat-stream {
-      height: 300px;
-      border-radius: var(--rad-lg);
-      border: 1px solid rgba(148, 163, 184, 0.55);
-      padding: var(--sp-md);
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-sm);
-      font-size: var(--size-sm);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92));
-      margin-bottom: var(--sp-md);
-    }
-
-    .chat-msg {
-      padding: var(--sp-sm);
-      border-radius: var(--rad-md);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      max-width: 80%;
-    }
-
-    .chat-msg.user {
-      align-self: flex-end;
-      background: rgba(16, 185, 129, 0.09);
-      border-color: rgba(16, 185, 129, 0.8);
-    }
-
-    .chat-msg.assistant {
-      align-self: flex-start;
-      background: rgba(15, 23, 42, 0.95);
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: var(--sp-sm);
-    }
-
-    .chat-input {
-      flex: 1;
-      border-radius: var(--rad-lg);
-    }
-
-    /* TAB CANVAS SYSTEM */
-    .tab-canvas-system {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(2, 6, 23, 0.95);
-      z-index: 1000;
-      display: none;
-      flex-direction: column;
-      backdrop-filter: blur(20px);
-    }
-
-    .tab-canvas-system.active {
-      display: flex;
-    }
-
-    .tab-canvas-header {
-      padding: var(--sp-md);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .tab-canvas-title {
-      font-size: var(--size-lg);
-      font-weight: 600;
-    }
-
-    .tab-canvas-close {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all var(--trans-fast);
-    }
-
-    .tab-canvas-close:hover {
-      border-color: var(--accent-danger);
-      background: rgba(255, 51, 102, 0.1);
-    }
-
-    .tab-canvas-body {
-      flex: 1;
-      padding: var(--sp-md);
-      overflow: auto;
-    }
-
-    .tab-canvas-content {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: var(--sp-lg);
-      border-radius: var(--rad-xl);
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
-      border: 1px solid rgba(148, 163, 184, 0.5);
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1100px) {
-      .dashboard-hero {
-        grid-template-columns: 1fr;
-      }
-      
-      .hero-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .ghost-main {
-        flex-direction: column;
-      }
-      
-      .editor-sidebar {
-        width: 100%;
-        min-width: 100%;
-        height: 300px;
-      }
-      
-      .dashboard-main {
-        height: auto;
-      }
-      
-      .options-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  </style>
-
-  <!-- =========================================================
-       BLOCK 4 — UTILITIES
-       ========================================================= -->
-  <style>
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .flex-row { flex-direction: row; }
-    .flex-center { justify-content: center; align-items: center; }
-    .flex-between { justify-content: space-between; align-items: center; }
-    .flex-wrap { flex-wrap: wrap; }
-    .gap-xs { gap: var(--sp-xs); }
-    .gap-sm { gap: var(--sp-sm); }
-    .gap-md { gap: var(--sp-md); }
-    .gap-lg { gap: var(--sp-lg); }
-    .mt-xs { margin-top: var(--sp-xs); }
-    .mt-sm { margin-top: var(--sp-sm); }
-    .mt-md { margin-top: var(--sp-md); }
-    .mt-lg { margin-top: var(--sp-lg); }
-    .text-xs { font-size: var(--size-xs); }
-    .text-sm { font-size: var(--size-sm); }
-    .text-md { font-size: var(--size-md); }
-    .text-lg { font-size: var(--size-lg); }
-    .text-muted { color: var(--text-muted); }
-    .text-secondary { color: var(--text-secondary); }
-    .overflow-y-auto { overflow-y: auto; }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <!-- Calm glyph rain behind everything -->
-  <canvas id="glyph-rain"></canvas>
-
-  <!-- Tab Canvas System (for URL opens) -->
-  <div class="tab-canvas-system" id="tabCanvas">
-    <div class="tab-canvas-header">
-      <div class="tab-canvas-title" id="tabCanvasTitle">Loading...</div>
-      <div class="tab-canvas-close" id="tabCanvasClose">✕</div>
-    </div>
-    <div class="tab-canvas-body">
-      <div class="tab-canvas-content" id="tabCanvasContent">
-        Loading content from API...
-      </div>
-    </div>
-  </div>
-
-  <div id="ghost-root" data-os="mx2lm_legion_trinity">
-    <!-- HEADER -->
-    <header class="ghost-header">
-      <div class="ghost-header-left">
-        <div class="ghost-logo">⟁</div>
-        <div class="ghost-header-title">
-          <strong>MX2LM OS — LEGION TRINITY</strong>
-          <span class="text-xs text-muted">Dashboard Mode</span>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">⟁</div>
+        <div class="header-title">
+          <strong>BLACK CODE BROWSER</strong>
+          <span>ATOMIC ⊗ KUHUL v1.2.3</span>
         </div>
       </div>
 
-      <!-- URL FORM -->
-      <div class="url-form">
-        <input type="text" 
-               class="url-input" 
-               id="urlInput" 
-               placeholder="Enter API URL to open in canvas (e.g., https://api.example.com/data)" />
-        <button class="asx-btn asx-btn-primary" id="urlOpenBtn">Open Canvas</button>
+      <div class="header-center">
+        <div class="url-bar">
+          <input type="text" class="url-input" id="urlInput" placeholder="Enter URL or API endpoint...">
+          <button class="btn btn-primary" id="urlGoBtn">Go</button>
+        </div>
       </div>
 
-      <div class="ghost-header-right">
+      <div class="header-right">
         <div class="chip">
           <div class="chip-dot"></div>
-          <span>Dashboard</span>
+          <span id="statusChip">Ready</span>
         </div>
-        <button class="asx-btn" id="toggleEditorBtn">Editor</button>
+        <button class="btn" id="settingsBtn">Settings</button>
+        <button class="btn" id="exportBtn">Export</button>
       </div>
     </header>
 
-    <!-- MAIN LAYOUT -->
-    <main class="ghost-main">
-      <!-- EDITOR SIDEBAR -->
-      <aside class="editor-sidebar" id="editorSidebar">
-        <div class="editor-sidebar-header">
-          <div class="section-title">
-            <span>Editor Canvas</span>
-            <span class="text-xs text-muted">Live Code Studio</span>
-          </div>
-          
-          <div class="editor-sidebar-tabs mt-sm">
-            <button class="editor-sidebar-tab active" data-target="html">HTML</button>
-            <button class="editor-sidebar-tab" data-target="css">CSS</button>
-            <button class="editor-sidebar-tab" data-target="js">JS</button>
-            <button class="editor-sidebar-tab" data-target="manifest">Manifest</button>
+    <!-- Main -->
+    <main class="main">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-tabs">
+            <button class="sidebar-tab active" data-view="tapes">Tapes</button>
+            <button class="sidebar-tab" data-view="api">API</button>
+            <button class="sidebar-tab" data-view="editor">Editor</button>
           </div>
         </div>
-
-        <div class="editor-sidebar-body">
-          <!-- HTML Editor -->
-          <div class="editor-canvas-container active" id="editor-html">
-            <div class="editor-canvas-header">
-              <span>index.html</span>
-              <div class="flex gap-xs">
-                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+        <div class="sidebar-body" id="sidebarBody">
+          <!-- Tapes View -->
+          <div class="sidebar-view active" id="view-tapes">
+            <div class="sidebar-section">
+              <div class="sidebar-section-title">
+                <span>Tapes</span>
+                <button class="btn btn-sm" id="newTapeBtn">+ New</button>
               </div>
-            </div>
-            <pre class="editor-canvas-body">&lt;!DOCTYPE html&gt;
-&lt;html lang="en" data-theme="dark"&gt;
-&lt;head&gt;
-  &lt;meta charset="utf-8" /&gt;
-  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
-  &lt;title&gt;MX2LM OS — LEGION TRINITY CLUSTER&lt;/title&gt;
-  &lt;link rel="manifest" href="manifest.json" /&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  &lt;div id="ghost-root" data-os="mx2lm_legion_trinity"&gt;
-    &lt;!-- K'UHUL renders content here --&gt;
-  &lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;</pre>
-            <div class="editor-canvas-footer">
-              <span>UTF-8 · 1:1</span>
-              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+              <div id="tapesList"></div>
             </div>
           </div>
 
-          <!-- CSS Editor -->
-          <div class="editor-canvas-container" id="editor-css">
-            <div class="editor-canvas-header">
-              <span>style.css</span>
-              <div class="flex gap-xs">
-                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
-              </div>
-            </div>
-            <pre class="editor-canvas-body">:root {
-  --bg-primary: #020617;
-  --text-primary: #e6fffa;
-  --emerald: #16f2aa;
-  --cyan: #22d3ee;
-}
-
-body {
-  font-family: system-ui, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}</pre>
-            <div class="editor-canvas-footer">
-              <span>CSS3 · 1:1</span>
-              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+          <!-- API View -->
+          <div class="sidebar-view" id="view-api" style="display:none">
+            <div class="sidebar-section">
+              <div class="sidebar-section-title"><span>Endpoints</span></div>
+              <div id="endpointsList"></div>
             </div>
           </div>
 
-          <!-- JS Editor -->
-          <div class="editor-canvas-container" id="editor-js">
-            <div class="editor-canvas-header">
-              <span>app.js</span>
-              <div class="flex gap-xs">
-                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+          <!-- Editor View -->
+          <div class="sidebar-view" id="view-editor" style="display:none">
+            <div class="sidebar-section">
+              <textarea id="editorArea" class="form-input form-textarea" style="height:300px" placeholder="Code editor..."></textarea>
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <button class="btn btn-sm" id="editorSaveBtn">Save as Tape</button>
+                <button class="btn btn-sm" id="editorRunBtn">Run</button>
               </div>
-            </div>
-            <pre class="editor-canvas-body">// MX2LM OS Kernel
-class MX2LMOS {
-  constructor() {
-    this.state = {
-      ready: false,
-      activeTape: null
-    };
-  }
-
-  boot() {
-    console.log('[MX2LM] Booting OS...');
-    this.state.ready = true;
-  }
-}</pre>
-            <div class="editor-canvas-footer">
-              <span>ES2022 · 1:1</span>
-              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
-            </div>
-          </div>
-
-          <!-- Manifest Editor -->
-          <div class="editor-canvas-container" id="editor-manifest">
-            <div class="editor-canvas-header">
-              <span>manifest.json</span>
-              <div class="flex gap-xs">
-                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
-                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
-              </div>
-            </div>
-            <pre class="editor-canvas-body">{
-  "name": "MX2LM OS",
-  "version": "1.0.0",
-  "description": "Legion Trinity Cluster",
-  "manifest_version": 3,
-  "permissions": ["tapes", "brains", "widgets"],
-  "background": {
-    "service_worker": "sw.js"
-  }
-}</pre>
-            <div class="editor-canvas-footer">
-              <span>JSON · 1:1</span>
-              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
             </div>
           </div>
         </div>
       </aside>
 
-      <!-- DASHBOARD MAIN AREA -->
-      <section class="dashboard-main">
-        <!-- HERO CTA SECTION -->
-        <div class="dashboard-hero">
-          <div class="hero-cta">
-            <h1>Welcome to MX2LM OS</h1>
-            <p>Your universal canvas for building, editing, and deploying intelligent applications across the Legion Trinity Cluster.</p>
-            <div class="flex gap-md mt-md">
-              <button class="asx-btn asx-btn-primary" id="createNewBtn">Create New Tape</button>
-              <button class="asx-btn" id="exploreBtn">Explore Gallery</button>
-              <button class="asx-btn" id="docsBtn">View Documentation</button>
-            </div>
+      <!-- Canvas Area -->
+      <section class="canvas-area">
+        <!-- Canvas Tabs -->
+        <div class="canvas-tabs" id="canvasTabs">
+          <div class="canvas-tab active" data-tab="welcome">
+            <span class="canvas-tab-title">Welcome</span>
           </div>
-
-          <div class="hero-stats">
-            <div class="stat-card">
-              <div class="stat-number">1,284</div>
-              <div class="stat-label">Active Tapes</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">42</div>
-              <div class="stat-label">Live Brains</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">89%</div>
-              <div class="stat-label">System Health</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">3.2K</div>
-              <div class="stat-label">API Calls Today</div>
-            </div>
-          </div>
+          <button class="canvas-tab canvas-new" id="newTabBtn">+</button>
         </div>
 
-        <!-- HIGHLIGHTS -->
-        <div>
-          <div class="section-title">
-            <span>Highlights</span>
-            <button class="asx-btn" style="font-size: var(--size-xs);">View All</button>
+        <!-- Canvas Viewport -->
+        <div class="canvas-viewport">
+          <div class="canvas-loading hidden" id="canvasLoading">
+            <span>Loading...</span>
           </div>
-          <div class="dashboard-highlights mt-md">
-            <div class="highlight-card">
-              <div class="highlight-icon">⚡</div>
-              <h3>Quick Start Templates</h3>
-              <p class="text-sm text-muted">Pre-configured tape templates for games, apps, and brains. One-click deployment.</p>
-            </div>
-            <div class="highlight-card">
-              <div class="highlight-icon">🔗</div>
-              <h3>API Integration Hub</h3>
-              <p class="text-sm text-muted">Connect to external APIs and services with built-in authentication and rate limiting.</p>
-            </div>
-            <div class="highlight-card">
-              <div class="highlight-icon">🧠</div>
-              <h3>Brain Training Studio</h3>
-              <p class="text-sm text-muted">Train and deploy ML models directly in the browser with our neural runtime.</p>
-            </div>
-            <div class="highlight-card">
-              <div class="highlight-icon">🌐</div>
-              <h3>Global Distribution</h3>
-              <p class="text-sm text-muted">Deploy your tapes worldwide with our edge network and CDN integration.</p>
-            </div>
-          </div>
-        </div>
+          <div class="canvas-content" id="canvasContent">
+            <h2 style="color:var(--accent);margin-bottom:16px">⟁ BLACK CODE BROWSER</h2>
+            <p style="color:var(--fg-2);margin-bottom:24px">Canvas-based DOM projection browser with KUHUL security runtime.</p>
 
-        <!-- OPTIONS LIST -->
-        <div>
-          <div class="section-title">
-            <span>Quick Actions</span>
-            <span class="text-xs text-muted">Frequently used operations</span>
-          </div>
-          <div class="options-grid mt-md">
-            <div class="option-item" data-action="new-tape">
-              <div class="option-icon">📝</div>
-              <div class="option-text">
-                <strong>New Tape</strong>
-                <span>Create application</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
+                <div style="font-size:24px;margin-bottom:8px">📼</div>
+                <h4 style="margin-bottom:4px">Tape Storage</h4>
+                <p style="font-size:11px;color:var(--fg-3)">Store and manage data with SCXQ2 compression</p>
+              </div>
+              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
+                <div style="font-size:24px;margin-bottom:8px">🎬</div>
+                <h4 style="margin-bottom:4px">π Routing</h4>
+                <p style="font-size:11px;color:var(--fg-3)">Auto-route video/audio to canvas renderers</p>
+              </div>
+              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
+                <div style="font-size:24px;margin-bottom:8px">🖼️</div>
+                <h4 style="margin-bottom:4px">Canvas Projection</h4>
+                <p style="font-size:11px;color:var(--fg-3)">DOM→Canvas rendering bypasses CORS</p>
+              </div>
+              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
+                <div style="font-size:24px;margin-bottom:8px">🔐</div>
+                <h4 style="margin-bottom:4px">KUHUL Security</h4>
+                <p style="font-size:11px;color:var(--fg-3)">Capability-based sandbox with IDB sessions</p>
               </div>
             </div>
-            <div class="option-item" data-action="import-api">
-              <div class="option-icon">📥</div>
-              <div class="option-text">
-                <strong>Import API</strong>
-                <span>Connect external service</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="train-brain">
-              <div class="option-icon">🧠</div>
-              <div class="option-text">
-                <strong>Train Brain</strong>
-                <span>ML model training</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="deploy">
-              <div class="option-icon">🚀</div>
-              <div class="option-text">
-                <strong>Deploy</strong>
-                <span>Publish to network</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="monitor">
-              <div class="option-icon">📊</div>
-              <div class="option-text">
-                <strong>Monitor</strong>
-                <span>System analytics</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="settings">
-              <div class="option-icon">⚙️</div>
-              <div class="option-text">
-                <strong>Settings</strong>
-                <span>System configuration</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="backup">
-              <div class="option-icon">💾</div>
-              <div class="option-text">
-                <strong>Backup</strong>
-                <span>Export data</span>
-              </div>
-            </div>
-            <div class="option-item" data-action="help">
-              <div class="option-icon">❓</div>
-              <div class="option-text">
-                <strong>Help & Docs</strong>
-                <span>Documentation</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- CHAT INFERENCE FORM -->
-        <div class="chat-inference">
-          <div class="section-title">
-            <span>Chat Inference</span>
-            <div class="pill-tabs" id="model-tabs">
-              <button class="pill-tab active" data-model="prime">MX2LM PRIME</button>
-              <button class="pill-tab" data-model="qwen">QWEN-ASX</button>
-              <button class="pill-tab" data-model="local">Local Inference</button>
-            </div>
-          </div>
-          <div class="section-subtitle">
-            Ask the system questions, get help with coding, or request system operations.
-          </div>
-
-          <div class="chat-stream" id="chatStream">
-            <div class="chat-msg assistant">
-              <strong>MX2LM Assistant:</strong> Hello! I'm your MX2LM OS assistant. How can I help you today? You can ask me to create tapes, explain features, or help with coding.
-            </div>
-          </div>
-
-          <div class="chat-input-row">
-            <input type="text" 
-                   class="chat-input" 
-                   id="chatInput" 
-                   placeholder="Type your message here..." />
-            <button class="asx-btn asx-btn-primary" id="sendChatBtn">Send</button>
+            <svg id="kuhul_svg_root" width="100%" height="120" style="margin-top:24px;border:1px solid var(--border);border-radius:12px;background:var(--bg-1)">
+              <defs>
+                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#16f2aa;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#61e7ff;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
         </div>
       </section>
     </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <span id="statusText">SW v1.2.3 Ready</span>
+        <span>|</span>
+        <span id="storageInfo">0 tapes • 0 MB</span>
+      </div>
+      <div class="status-right">
+        <span id="tabCount">1 tab</span>
+        <span>|</span>
+        <span>IDB Sessions</span>
+      </div>
+    </footer>
   </div>
 
+  <!-- Tape Modal -->
+  <div class="modal" id="tapeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="tapeModalTitle">New Tape</h3>
+        <button class="modal-close" id="tapeModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="tapeName" placeholder="my-file.json">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-input" id="tapeType">
+              <option value="json">JSON</option>
+              <option value="html">HTML</option>
+              <option value="javascript">JavaScript</option>
+              <option value="css">CSS</option>
+              <option value="markdown">Markdown</option>
+              <option value="text">Text</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Compression</label>
+            <select class="form-input" id="tapeCompression">
+              <option value="none">None</option>
+              <option value="scxq2">SCXQ2</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags (comma separated)</label>
+          <input type="text" class="form-input" id="tapeTags" placeholder="tag1, tag2">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Content</label>
+          <textarea class="form-input form-textarea" id="tapeContent" placeholder="Paste or type content..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="tapeModalCancel">Cancel</button>
+        <button class="btn btn-primary" id="tapeModalSave">Save Tape</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Settings</h3>
+        <button class="modal-close" id="settingsModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">Dark Mode</div>
+            <div class="setting-desc">Use dark theme (default)</div>
+          </div>
+          <div class="toggle active" data-setting="darkMode"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">Animations</div>
+            <div class="setting-desc">Enable UI animations</div>
+          </div>
+          <div class="toggle active" data-setting="animations"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">Auto Compression</div>
+            <div class="setting-desc">Compress tapes with SCXQ2</div>
+          </div>
+          <div class="toggle active" data-setting="autoCompression"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">Projection Cache</div>
+            <div class="setting-desc">Cache fetched content</div>
+          </div>
+          <div class="toggle active" data-setting="projectionCache"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">IDB Sessions</div>
+            <div class="setting-desc">Store sessions in IndexedDB</div>
+          </div>
+          <div class="toggle active" data-setting="idbSessions"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-name">π Auto-Routing</div>
+            <div class="setting-desc">Auto-route media to canvas</div>
+          </div>
+          <div class="toggle active" data-setting="piAutoRoute"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="importDataBtn">Import Data</button>
+        <button class="btn btn-primary" id="settingsSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Data</h3>
+        <button class="modal-close" id="exportModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Format</label>
+          <select class="form-input" id="exportFormat">
+            <option value="scxq2">SCXQ2 (Compressed)</option>
+            <option value="json">JSON (Readable)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Export Data</label>
+          <textarea class="form-input form-textarea" id="exportData" readonly style="height:200px"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="copyExportBtn">Copy</button>
+        <button class="btn btn-primary" id="downloadExportBtn">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KUHUL Runtime + App Logic -->
   <script>
-    // =========================================================
-    // Initialize Glyph Rain
-    // =========================================================
-    (function initGlyphRain() {
-      const canvas = document.getElementById('glyph-rain');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+  (function KUHUL_APP() {
+    'use strict';
 
-      const glyphs = '⟁ΩλπΣΞΦΨ✶✺✦✧＊01';
-      let width, height, columns, drops;
+    /* ═══════════════════════════════════════════════════════════
+       KUHUL SECURITY RUNTIME (embedded for index security)
+       ═══════════════════════════════════════════════════════════ */
 
-      function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        columns = Math.floor(width / 16);
-        drops = Array.from({ length: columns }, () => Math.random() * height);
+    const KUHUL = {
+      version: '1.2.3',
+      caps: {
+        dom_read: true,
+        dom_write: true,
+        net_fetch: true,
+        storage: true,
+        js_run: false,
+        console: true
+      },
+
+      // Deep freeze utility
+      freeze: (obj, seen = new Set()) => {
+        if (!obj || typeof obj !== 'object' || seen.has(obj)) return obj;
+        seen.add(obj);
+        Object.freeze(obj);
+        for (const k of Object.keys(obj)) KUHUL.freeze(obj[k], seen);
+        return obj;
+      },
+
+      // Safe JSON parse
+      parseJSON: (s, fallback = null) => {
+        try { return JSON.parse(s); } catch { return fallback; }
+      },
+
+      // UID generator
+      uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2),
+
+      // Clamp string length
+      clamp: (s, max = 4096) => {
+        s = String(s ?? '');
+        return s.length > max ? s.slice(0, max) : s;
+      },
+
+      // Logger device
+      log: {
+        info: (...args) => console.info('[KUHUL]', ...args),
+        warn: (...args) => console.warn('[KUHUL]', ...args),
+        error: (...args) => console.error('[KUHUL]', ...args)
+      },
+
+      // DOM device
+      dom: {
+        q: (sel) => document.querySelector(sel),
+        qa: (sel) => Array.from(document.querySelectorAll(sel)),
+        byId: (id) => document.getElementById(id),
+        setText: (el, text) => { if (el) el.textContent = String(text ?? ''); },
+        setHTML: (el, html) => { if (el) el.innerHTML = String(html ?? ''); },
+        addClass: (el, cls) => el?.classList.add(cls),
+        removeClass: (el, cls) => el?.classList.remove(cls),
+        toggle: (el, cls) => el?.classList.toggle(cls),
+        show: (el) => { if (el) el.style.display = ''; },
+        hide: (el) => { if (el) el.style.display = 'none'; }
+      },
+
+      // Event binding
+      on: (el, event, handler) => {
+        if (typeof el === 'string') el = document.querySelector(el);
+        el?.addEventListener(event, handler);
+      },
+
+      // Safe fetch wrapper
+      fetch: async (url, opts = {}) => {
+        try {
+          const res = await fetch(url, {
+            ...opts,
+            credentials: 'omit',
+            referrerPolicy: 'no-referrer'
+          });
+          return res;
+        } catch (err) {
+          KUHUL.log.error('Fetch failed:', err);
+          return null;
+        }
       }
+    };
 
-      function draw() {
-        if (!ctx) return;
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.16)';
-        ctx.fillRect(0, 0, width, height);
+    KUHUL.freeze(KUHUL.caps);
+    window.KUHUL = KUHUL;
 
-        ctx.fillStyle = 'rgba(34, 211, 238, 0.75)';
-        ctx.font = '14px "JetBrains Mono", monospace';
+    /* ═══════════════════════════════════════════════════════════
+       SERVICE WORKER BRIDGE
+       ═══════════════════════════════════════════════════════════ */
 
-        for (let i = 0; i < drops.length; i++) {
-          const text = glyphs[Math.floor(Math.random() * glyphs.length)];
-          const x = i * 16;
-          const y = drops[i] * 16;
-          ctx.fillText(text, x, y);
+    const SW = {
+      ready: false,
+      controller: null,
 
-          if (y > height && Math.random() > 0.975) {
-            drops[i] = 0;
+      async init() {
+        if (!('serviceWorker' in navigator)) {
+          KUHUL.log.warn('Service Worker not supported');
+          return;
+        }
+
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+          KUHUL.log.info('SW registered:', reg.scope);
+
+          navigator.serviceWorker.addEventListener('message', SW.onMessage);
+
+          // Wait for controller
+          if (navigator.serviceWorker.controller) {
+            SW.controller = navigator.serviceWorker.controller;
+            SW.ready = true;
+            SW.send({ t: 'BOOT' });
           } else {
-            drops[i] += 0.5 + Math.random() * 0.5;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              SW.controller = navigator.serviceWorker.controller;
+              SW.ready = true;
+              SW.send({ t: 'BOOT' });
+            });
           }
+        } catch (err) {
+          KUHUL.log.error('SW registration failed:', err);
         }
+      },
 
-        requestAnimationFrame(draw);
+      send(msg) {
+        if (SW.controller) {
+          SW.controller.postMessage(msg);
+        }
+      },
+
+      onMessage(event) {
+        const msg = event.data;
+        if (!msg || !msg.t) return;
+
+        switch (msg.t) {
+          case 'STATUS':
+            App.setStatus(msg.text);
+            break;
+          case 'UI_SYNC':
+            App.sync(msg);
+            break;
+          case 'TAPE_OPENED':
+            App.openTapeContent(msg.tape);
+            break;
+          case 'API_RESPONSE':
+            App.showAPIResponse(msg.result);
+            break;
+          case 'CANVAS_PROJECTED':
+            App.renderProjection(msg.projection);
+            break;
+          case 'TAPE_EXPORT_RESULT':
+            App.showExportData(msg.data);
+            break;
+          case 'TAPE_IMPORT_RESULT':
+            App.handleImportResult(msg);
+            break;
+          case 'TAB_CREATED':
+            App.addTab(msg.tab, msg.session);
+            break;
+          case 'TAB_CLOSED':
+            App.removeTab(msg.id);
+            break;
+          case 'CANVAS_FRAME':
+            App.renderFrame(msg.state);
+            break;
+          case 'SCX_RESULT':
+            KUHUL.log.info('Compression result:', msg);
+            break;
+        }
       }
+    };
 
-      window.addEventListener('resize', resize);
-      resize();
-      requestAnimationFrame(draw);
-    })();
+    /* ═══════════════════════════════════════════════════════════
+       APPLICATION STATE & UI
+       ═══════════════════════════════════════════════════════════ */
 
-    // =========================================================
-    // Editor Sidebar Toggle
-    // =========================================================
-    const toggleEditorBtn = document.getElementById('toggleEditorBtn');
-    const editorSidebar = document.getElementById('editorSidebar');
-    
-    toggleEditorBtn?.addEventListener('click', () => {
-      editorSidebar.style.display = editorSidebar.style.display === 'none' ? 'flex' : 'none';
-      toggleEditorBtn.textContent = editorSidebar.style.display === 'none' ? 'Show Editor' : 'Hide Editor';
-    });
+    const App = {
+      state: {
+        tapes: [],
+        endpoints: [],
+        tabs: [],
+        sessions: [],
+        settings: {},
+        activeTabId: 'welcome',
+        editingTapeId: null
+      },
 
-    // =========================================================
-    // Editor Tab Switching
-    // =========================================================
-    const editorTabs = document.querySelectorAll('.editor-sidebar-tab');
-    editorTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Remove active class from all tabs and containers
-        editorTabs.forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.editor-canvas-container').forEach(c => {
-          c.classList.remove('active');
+      // DOM refs
+      el: {},
+
+      init() {
+        // Cache DOM elements
+        App.el = {
+          urlInput: KUHUL.dom.byId('urlInput'),
+          urlGoBtn: KUHUL.dom.byId('urlGoBtn'),
+          statusChip: KUHUL.dom.byId('statusChip'),
+          statusText: KUHUL.dom.byId('statusText'),
+          storageInfo: KUHUL.dom.byId('storageInfo'),
+          tabCount: KUHUL.dom.byId('tabCount'),
+          tapesList: KUHUL.dom.byId('tapesList'),
+          endpointsList: KUHUL.dom.byId('endpointsList'),
+          canvasTabs: KUHUL.dom.byId('canvasTabs'),
+          canvasContent: KUHUL.dom.byId('canvasContent'),
+          canvasLoading: KUHUL.dom.byId('canvasLoading'),
+          editorArea: KUHUL.dom.byId('editorArea'),
+          // Modals
+          tapeModal: KUHUL.dom.byId('tapeModal'),
+          settingsModal: KUHUL.dom.byId('settingsModal'),
+          exportModal: KUHUL.dom.byId('exportModal')
+        };
+
+        App.bindEvents();
+        App.initSVGWave();
+        SW.init();
+      },
+
+      bindEvents() {
+        // URL bar
+        KUHUL.on('#urlGoBtn', 'click', App.navigateURL);
+        KUHUL.on('#urlInput', 'keydown', (e) => { if (e.key === 'Enter') App.navigateURL(); });
+
+        // Sidebar tabs
+        KUHUL.dom.qa('.sidebar-tab').forEach(tab => {
+          KUHUL.on(tab, 'click', () => App.switchSidebarView(tab.dataset.view));
         });
-        
-        // Add active class to clicked tab
-        tab.classList.add('active');
-        
-        // Show corresponding editor
-        const target = tab.getAttribute('data-target');
-        const editor = document.getElementById(`editor-${target}`);
-        if (editor) {
-          editor.classList.add('active');
+
+        // New tape
+        KUHUL.on('#newTapeBtn', 'click', () => App.openTapeModal());
+        KUHUL.on('#newTabBtn', 'click', () => App.promptNewTab());
+
+        // Tape modal
+        KUHUL.on('#tapeModalClose', 'click', () => App.closeModal('tapeModal'));
+        KUHUL.on('#tapeModalCancel', 'click', () => App.closeModal('tapeModal'));
+        KUHUL.on('#tapeModalSave', 'click', App.saveTape);
+
+        // Settings modal
+        KUHUL.on('#settingsBtn', 'click', () => App.openModal('settingsModal'));
+        KUHUL.on('#settingsModalClose', 'click', () => App.closeModal('settingsModal'));
+        KUHUL.on('#settingsSaveBtn', 'click', App.saveSettings);
+        KUHUL.on('#importDataBtn', 'click', App.promptImport);
+
+        // Export modal
+        KUHUL.on('#exportBtn', 'click', App.openExportModal);
+        KUHUL.on('#exportModalClose', 'click', () => App.closeModal('exportModal'));
+        KUHUL.on('#copyExportBtn', 'click', App.copyExport);
+        KUHUL.on('#downloadExportBtn', 'click', App.downloadExport);
+
+        // Settings toggles
+        KUHUL.dom.qa('.toggle').forEach(toggle => {
+          KUHUL.on(toggle, 'click', () => toggle.classList.toggle('active'));
+        });
+
+        // Editor
+        KUHUL.on('#editorSaveBtn', 'click', App.saveEditorAsTape);
+        KUHUL.on('#editorRunBtn', 'click', App.runEditor);
+
+        // Escape to close modals
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            App.closeModal('tapeModal');
+            App.closeModal('settingsModal');
+            App.closeModal('exportModal');
+          }
+        });
+      },
+
+      // Status
+      setStatus(text) {
+        KUHUL.dom.setText(App.el.statusText, text);
+        KUHUL.dom.setText(App.el.statusChip, text.split(' ')[0]);
+      },
+
+      // Sync from SW
+      sync(data) {
+        if (data.tapes) App.state.tapes = data.tapes;
+        if (data.endpoints) App.state.endpoints = data.endpoints;
+        if (data.tabs) App.state.tabs = data.tabs;
+        if (data.sessions) App.state.sessions = data.sessions;
+        if (data.settings) App.state.settings = data.settings;
+
+        App.renderTapes();
+        App.renderEndpoints();
+
+        if (data.dashboard) {
+          const d = data.dashboard;
+          KUHUL.dom.setText(App.el.storageInfo, `${d.totalTapes} tapes • ${d.storage?.usedMB || 0} MB`);
         }
-      });
-    });
 
-    // =========================================================
-    // Chat System
-    // =========================================================
-    const chatInput = document.getElementById('chatInput');
-    const sendChatBtn = document.getElementById('sendChatBtn');
-    const chatStream = document.getElementById('chatStream');
-    const modelTabs = document.querySelectorAll('#model-tabs .pill-tab');
-    
-    let activeModel = 'prime';
+        KUHUL.dom.setText(App.el.tabCount, `${App.state.tabs.length || 1} tab${App.state.tabs.length !== 1 ? 's' : ''}`);
+      },
 
-    // Model switching
-    modelTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        modelTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        activeModel = tab.getAttribute('data-model');
-      });
-    });
+      // Sidebar view switching
+      switchSidebarView(view) {
+        KUHUL.dom.qa('.sidebar-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+        KUHUL.dom.qa('.sidebar-view').forEach(v => v.style.display = v.id === `view-${view}` ? '' : 'none');
+      },
 
-    // Add message to chat
-    function addChatMessage(role, text) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `chat-msg ${role}`;
-      
-      const strong = document.createElement('strong');
-      strong.textContent = role === 'user' ? 'You:' : 'MX2LM Assistant:';
-      
-      msgDiv.appendChild(strong);
-      msgDiv.appendChild(document.createTextNode(' ' + text));
-      
-      chatStream.appendChild(msgDiv);
-      chatStream.scrollTop = chatStream.scrollHeight;
-    }
-
-    // Send message
-    function sendChatMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
-      
-      addChatMessage('user', text);
-      chatInput.value = '';
-      
-      // Simulate AI response
-      setTimeout(() => {
-        const responses = [
-          "I understand you're asking about '" + text + "'. I can help you with that. Would you like me to create a new tape or explain how the system works?",
-          "Based on your query, I recommend checking the documentation or creating a new tape template to get started.",
-          "I can help you implement that. Would you like me to generate some code or explain the API integration process?",
-          "That's an interesting request. Let me analyze the best approach for your use case...",
-          "I'm processing your request. Would you like me to show you some examples or proceed with implementation?"
-        ];
-        
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        addChatMessage('assistant', randomResponse);
-      }, 1000);
-    }
-
-    sendChatBtn?.addEventListener('click', sendChatMessage);
-    chatInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendChatMessage();
-      }
-    });
-
-    // =========================================================
-    // Quick Actions
-    // =========================================================
-    const optionItems = document.querySelectorAll('.option-item');
-    optionItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const action = item.getAttribute('data-action');
-        addChatMessage('user', `Clicked on ${action.replace('-', ' ')}`);
-        
-        setTimeout(() => {
-          addChatMessage('assistant', `Opening ${action.replace('-', ' ')} interface...`);
-        }, 500);
-      });
-    });
-
-    // =========================================================
-    // URL Canvas System
-    // =========================================================
-    const urlInput = document.getElementById('urlInput');
-    const urlOpenBtn = document.getElementById('urlOpenBtn');
-    const tabCanvas = document.getElementById('tabCanvas');
-    const tabCanvasClose = document.getElementById('tabCanvasClose');
-    const tabCanvasTitle = document.getElementById('tabCanvasTitle');
-    const tabCanvasContent = document.getElementById('tabCanvasContent');
-
-    // Open URL in canvas
-    async function openUrlInCanvas() {
-      const url = urlInput.value.trim();
-      if (!url) return;
-      
-      // Show loading state
-      tabCanvasTitle.textContent = 'Loading...';
-      tabCanvasContent.textContent = 'Fetching data from API...';
-      tabCanvas.classList.add('active');
-      
-      try {
-        // Try to fetch from the URL
-        const response = await fetch(url);
-        const data = await response.text();
-        
-        // Update canvas with content
-        tabCanvasTitle.textContent = `Canvas: ${url}`;
-        tabCanvasContent.innerHTML = `
-          <h3>API Response from ${url}</h3>
-          <div style="margin-top: var(--sp-md); padding: var(--sp-md); background: rgba(15, 23, 42, 0.7); border-radius: var(--rad-md); font-family: var(--font-mono); font-size: var(--size-xs); overflow-x: auto;">
-            <pre>${escapeHtml(data)}</pre>
+      // Render tapes list
+      renderTapes() {
+        const html = App.state.tapes.map(tape => `
+          <div class="tape-item" data-id="${tape.id}">
+            <div class="tape-icon">${tape.icon || '📄'}</div>
+            <div class="tape-info">
+              <div class="tape-name">${KUHUL.clamp(tape.name, 30)}</div>
+              <div class="tape-meta">${tape.sizeLabel} • ${tape.type}</div>
+            </div>
+            <div class="tape-actions">
+              <button class="btn btn-sm btn-icon tape-open" title="Open">📂</button>
+              <button class="btn btn-sm btn-icon tape-edit" title="Edit">✏️</button>
+              <button class="btn btn-sm btn-icon tape-delete" title="Delete">🗑️</button>
+            </div>
           </div>
-          <div class="mt-md">
-            <p class="text-sm text-muted">API response loaded successfully. You can now interact with this data in the canvas.</p>
+        `).join('');
+
+        KUHUL.dom.setHTML(App.el.tapesList, html);
+
+        // Bind tape actions
+        KUHUL.dom.qa('.tape-item').forEach(item => {
+          const id = item.dataset.id;
+          KUHUL.on(item.querySelector('.tape-open'), 'click', (e) => { e.stopPropagation(); App.openTape(id); });
+          KUHUL.on(item.querySelector('.tape-edit'), 'click', (e) => { e.stopPropagation(); App.editTape(id); });
+          KUHUL.on(item.querySelector('.tape-delete'), 'click', (e) => { e.stopPropagation(); App.deleteTape(id); });
+          KUHUL.on(item, 'click', () => App.openTape(id));
+        });
+      },
+
+      // Render endpoints
+      renderEndpoints() {
+        const html = App.state.endpoints.map(ep => `
+          <div class="tape-item" data-url="${ep.url}">
+            <div class="tape-icon">🔗</div>
+            <div class="tape-info">
+              <div class="tape-name">${ep.name}</div>
+              <div class="tape-meta">${ep.url}</div>
+            </div>
           </div>
+        `).join('');
+
+        KUHUL.dom.setHTML(App.el.endpointsList, html);
+
+        KUHUL.dom.qa('#endpointsList .tape-item').forEach(item => {
+          KUHUL.on(item, 'click', () => {
+            App.el.urlInput.value = item.dataset.url;
+            App.navigateURL();
+          });
+        });
+      },
+
+      // Navigate URL
+      navigateURL() {
+        const url = App.el.urlInput.value.trim();
+        if (!url) return;
+
+        App.el.canvasLoading.classList.remove('hidden');
+
+        if (url.startsWith('mx2db://')) {
+          SW.send({ t: 'API_SEND', url, method: 'GET' });
+        } else {
+          SW.send({ t: 'CANVAS_PROJECT', url });
+        }
+
+        SW.send({ t: 'TAB_CREATE', url, opts: { title: url } });
+      },
+
+      // Render projection in canvas
+      renderProjection(projection) {
+        App.el.canvasLoading.classList.add('hidden');
+
+        if (!projection.ok) {
+          KUHUL.dom.setHTML(App.el.canvasContent, `
+            <div style="color:var(--danger)">
+              <h3>Projection Failed</h3>
+              <p>${projection.error}</p>
+              <p style="color:var(--fg-3);font-size:11px;margin-top:8px">URL: ${projection.url}</p>
+            </div>
+          `);
+          return;
+        }
+
+        if (projection.renderer === 'json-view') {
+          const data = KUHUL.parseJSON(projection.html, projection.html);
+          KUHUL.dom.setHTML(App.el.canvasContent, `
+            <pre style="color:var(--accent);white-space:pre-wrap;word-break:break-all">${
+              typeof data === 'object' ? JSON.stringify(data, null, 2) : data
+            }</pre>
+          `);
+        } else {
+          // Render HTML safely (strip scripts)
+          const clean = projection.html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+          KUHUL.dom.setHTML(App.el.canvasContent, `
+            <div style="background:#fff;color:#000;padding:16px;border-radius:8px;overflow:auto;max-height:100%">
+              ${clean}
+            </div>
+          `);
+        }
+      },
+
+      // Show API response
+      showAPIResponse(result) {
+        App.el.canvasLoading.classList.add('hidden');
+
+        if (result.error) {
+          KUHUL.dom.setHTML(App.el.canvasContent, `
+            <div style="color:var(--danger)">
+              <h3>API Error</h3>
+              <p>${result.error}</p>
+            </div>
+          `);
+          return;
+        }
+
+        const data = typeof result.data === 'object' ? JSON.stringify(result.data, null, 2) : result.data;
+        KUHUL.dom.setHTML(App.el.canvasContent, `
+          <div style="color:var(--fg-2);margin-bottom:12px">
+            <span style="color:var(--success)">●</span> ${result.status} ${result.statusText || ''} • ${result.time}ms
+          </div>
+          <pre style="color:var(--accent);white-space:pre-wrap;word-break:break-all">${data}</pre>
+        `);
+      },
+
+      // Tab management
+      addTab(tab, session) {
+        const tabEl = document.createElement('div');
+        tabEl.className = 'canvas-tab';
+        tabEl.dataset.tab = tab.id;
+        tabEl.innerHTML = `
+          <span class="canvas-tab-title">${KUHUL.clamp(session?.title || session?.url || 'New Tab', 20)}</span>
+          <button class="canvas-tab-close">✕</button>
         `;
-        
-        // Log to chat
-        addChatMessage('user', `Opened URL canvas: ${url}`);
-        setTimeout(() => {
-          addChatMessage('assistant', `Loaded API response from ${url}. The canvas now displays the raw data which can be processed by the system.`);
-        }, 500);
-        
-      } catch (error) {
-        // Show error state
-        tabCanvasTitle.textContent = 'Error Loading URL';
-        tabCanvasContent.innerHTML = `
-          <h3>Failed to load: ${url}</h3>
-          <p class="text-muted">Error: ${error.message}</p>
-          <div class="mt-md">
-            <p class="text-sm">This might be due to:</p>
-            <ul class="text-sm text-muted" style="margin-left: var(--sp-md); margin-top: var(--sp-sm);">
-              <li>CORS restrictions</li>
-              <li>Invalid URL format</li>
-              <li>Server not responding</li>
-              <li>Network issues</li>
-            </ul>
-          </div>
-        `;
-        
-        addChatMessage('user', `Failed to open URL: ${url}`);
-        setTimeout(() => {
-          addChatMessage('assistant', `Could not load the API response. Check the URL format and CORS permissions. Try a public API endpoint like https://jsonplaceholder.typicode.com/posts/1`);
-        }, 500);
+
+        // Insert before + button
+        App.el.canvasTabs.insertBefore(tabEl, KUHUL.dom.byId('newTabBtn'));
+
+        // Bind events
+        KUHUL.on(tabEl, 'click', () => App.activateTab(tab.id));
+        KUHUL.on(tabEl.querySelector('.canvas-tab-close'), 'click', (e) => {
+          e.stopPropagation();
+          App.closeTab(tab.id);
+        });
+
+        // Make draggable
+        tabEl.draggable = true;
+        KUHUL.on(tabEl, 'dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', tab.id);
+          tabEl.classList.add('dragging');
+        });
+        KUHUL.on(tabEl, 'dragend', () => tabEl.classList.remove('dragging'));
+        KUHUL.on(tabEl, 'dragover', (e) => {
+          e.preventDefault();
+          tabEl.classList.add('drag-over');
+        });
+        KUHUL.on(tabEl, 'dragleave', () => tabEl.classList.remove('drag-over'));
+        KUHUL.on(tabEl, 'drop', (e) => {
+          e.preventDefault();
+          tabEl.classList.remove('drag-over');
+          const draggedId = e.dataTransfer.getData('text/plain');
+          if (draggedId !== tab.id) {
+            const order = Array.from(App.el.canvasTabs.querySelectorAll('.canvas-tab:not(.canvas-new)')).indexOf(tabEl);
+            SW.send({ t: 'TAB_REORDER', id: draggedId, order });
+          }
+        });
+
+        App.activateTab(tab.id);
+      },
+
+      activateTab(id) {
+        KUHUL.dom.qa('.canvas-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+        App.state.activeTabId = id;
+        SW.send({ t: 'TAB_ACTIVATE', id });
+      },
+
+      closeTab(id) {
+        SW.send({ t: 'TAB_CLOSE', id });
+      },
+
+      removeTab(id) {
+        const tab = KUHUL.dom.q(`.canvas-tab[data-tab="${id}"]`);
+        if (tab) tab.remove();
+      },
+
+      promptNewTab() {
+        const url = prompt('Enter URL:');
+        if (url) {
+          App.el.urlInput.value = url;
+          App.navigateURL();
+        }
+      },
+
+      // Tape CRUD
+      openTape(id) {
+        SW.send({ t: 'TAPE_OPEN', id });
+      },
+
+      openTapeContent(tape) {
+        App.el.editorArea.value = tape.content;
+        App.switchSidebarView('editor');
+
+        KUHUL.dom.setHTML(App.el.canvasContent, `
+          <h3 style="margin-bottom:12px">${tape.name}</h3>
+          <pre style="color:var(--fg-1);white-space:pre-wrap">${KUHUL.clamp(tape.content, 10000)}</pre>
+        `);
+      },
+
+      editTape(id) {
+        const tape = App.state.tapes.find(t => t.id === id);
+        if (!tape) return;
+
+        App.state.editingTapeId = id;
+        App.openTapeModal(tape);
+        SW.send({ t: 'TAPE_OPEN', id });
+      },
+
+      deleteTape(id) {
+        if (confirm('Delete this tape?')) {
+          SW.send({ t: 'TAPE_DELETE', id });
+        }
+      },
+
+      openTapeModal(tape = null) {
+        App.state.editingTapeId = tape?.id || null;
+        KUHUL.dom.setText(KUHUL.dom.byId('tapeModalTitle'), tape ? 'Edit Tape' : 'New Tape');
+
+        KUHUL.dom.byId('tapeName').value = tape?.name || '';
+        KUHUL.dom.byId('tapeType').value = tape?.type || 'json';
+        KUHUL.dom.byId('tapeCompression').value = tape?.compression || 'none';
+        KUHUL.dom.byId('tapeTags').value = (tape?.tags || []).join(', ');
+        KUHUL.dom.byId('tapeContent').value = tape?.content || '';
+
+        App.openModal('tapeModal');
+      },
+
+      saveTape() {
+        const name = KUHUL.dom.byId('tapeName').value.trim();
+        const type = KUHUL.dom.byId('tapeType').value;
+        const compression = KUHUL.dom.byId('tapeCompression').value;
+        const tags = KUHUL.dom.byId('tapeTags').value;
+        const content = KUHUL.dom.byId('tapeContent').value;
+
+        if (!name) {
+          alert('Name is required');
+          return;
+        }
+
+        if (App.state.editingTapeId) {
+          SW.send({
+            t: 'TAPE_UPDATE',
+            id: App.state.editingTapeId,
+            updates: { name, type, compression, tags, content }
+          });
+        } else {
+          SW.send({ t: 'TAPE_CREATE', name, type, compression, tags, content });
+        }
+
+        App.closeModal('tapeModal');
+      },
+
+      saveEditorAsTape() {
+        const content = App.el.editorArea.value;
+        const name = prompt('Save as:', `code-${Date.now()}.txt`);
+        if (name) {
+          SW.send({ t: 'EDITOR_SAVE_AS_TAPE', name, content, type: 'text' });
+        }
+      },
+
+      runEditor() {
+        const code = App.el.editorArea.value;
+        try {
+          // Safe eval in console only
+          KUHUL.log.info('Running code...');
+          const result = (new Function('KUHUL', code))(KUHUL);
+          KUHUL.log.info('Result:', result);
+        } catch (err) {
+          KUHUL.log.error('Run error:', err);
+        }
+      },
+
+      // Settings
+      saveSettings() {
+        const updates = {};
+        KUHUL.dom.qa('.toggle[data-setting]').forEach(toggle => {
+          updates[toggle.dataset.setting] = toggle.classList.contains('active');
+        });
+        SW.send({ t: 'SETTINGS_UPDATE', updates });
+        App.closeModal('settingsModal');
+      },
+
+      // Export/Import
+      openExportModal() {
+        App.openModal('exportModal');
+        SW.send({ t: 'TAPE_EXPORT_ALL', compress: KUHUL.dom.byId('exportFormat').value === 'scxq2' });
+      },
+
+      showExportData(data) {
+        KUHUL.dom.byId('exportData').value = data;
+      },
+
+      copyExport() {
+        const data = KUHUL.dom.byId('exportData').value;
+        navigator.clipboard.writeText(data).then(() => {
+          App.setStatus('Copied to clipboard');
+        });
+      },
+
+      downloadExport() {
+        const data = KUHUL.dom.byId('exportData').value;
+        const format = KUHUL.dom.byId('exportFormat').value;
+        const blob = new Blob([data], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `blackcode-export-${Date.now()}.${format === 'scxq2' ? 'scxq2' : 'json'}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      promptImport() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,.scxq2';
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const data = await file.text();
+          const merge = confirm('Merge with existing data? (Cancel to replace)');
+          SW.send({ t: 'TAPE_IMPORT', data, merge });
+        };
+        input.click();
+      },
+
+      handleImportResult(msg) {
+        if (msg.ok) {
+          App.setStatus(`Imported ${msg.imported} tapes`);
+          App.closeModal('settingsModal');
+        } else {
+          alert('Import failed: ' + msg.error);
+        }
+      },
+
+      // Modals
+      openModal(id) {
+        KUHUL.dom.byId(id).classList.add('active');
+      },
+
+      closeModal(id) {
+        KUHUL.dom.byId(id).classList.remove('active');
+      },
+
+      // SVG wave animation
+      initSVGWave() {
+        const svg = KUHUL.dom.byId('kuhul_svg_root');
+        if (!svg) return;
+
+        let frame = 0;
+        const animate = () => {
+          frame++;
+          const w = svg.clientWidth || 400;
+          const h = svg.clientHeight || 120;
+
+          let d = `M 0 ${h/2}`;
+          for (let x = 0; x <= w; x += 8) {
+            const y = (h/2) + Math.sin((x + frame * 2) / 30) * (h/3) * Math.sin(frame / 100);
+            d += ` L ${x} ${y}`;
+          }
+
+          svg.innerHTML = `
+            <defs>
+              <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#16f2aa" />
+                <stop offset="100%" style="stop-color:#61e7ff" />
+              </linearGradient>
+            </defs>
+            <path d="${d}" fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round"/>
+          `;
+
+          requestAnimationFrame(animate);
+        };
+
+        animate();
+      },
+
+      // Render canvas frame (from SW animation loop)
+      renderFrame(state) {
+        // Could update tick counter or other visualizations
       }
-    }
+    };
 
-    // Helper to escape HTML
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+    // Boot
+    document.addEventListener('DOMContentLoaded', () => App.init());
 
-    // Event listeners for URL system
-    urlOpenBtn?.addEventListener('click', openUrlInCanvas);
-    urlInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        openUrlInCanvas();
-      }
-    });
-    
-    tabCanvasClose?.addEventListener('click', () => {
-      tabCanvas.classList.remove('active');
-    });
-
-    // Close canvas with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && tabCanvas.classList.contains('active')) {
-        tabCanvas.classList.remove('active');
-      }
-    });
-
-    // =========================================================
-    // CTA Buttons
-    // =========================================================
-    document.getElementById('createNewBtn')?.addEventListener('click', () => {
-      addChatMessage('user', 'Clicked "Create New Tape"');
-      setTimeout(() => {
-        addChatMessage('assistant', 'Opening tape creation wizard. What type of tape would you like to create? (App, Game, Brain, or World)');
-      }, 500);
-    });
-
-    document.getElementById('exploreBtn')?.addEventListener('click', () => {
-      addChatMessage('user', 'Clicked "Explore Gallery"');
-      setTimeout(() => {
-        addChatMessage('assistant', 'Taking you to the tape gallery. You can browse community tapes, templates, and market listings.');
-      }, 500);
-    });
-
-    document.getElementById('docsBtn')?.addEventListener('click', () => {
-      addChatMessage('user', 'Clicked "View Documentation"');
-      setTimeout(() => {
-        addChatMessage('assistant', 'Opening documentation hub. You can find API references, tutorials, and system architecture docs.');
-      }, 500);
-    });
-
-    // =========================================================
-    // Example URLs for quick testing
-    // =========================================================
-    setTimeout(() => {
-      urlInput.value = 'https://jsonplaceholder.typicode.com/posts/1';
-      
-      // Add chat welcome message
-      setTimeout(() => {
-        addChatMessage('assistant', 'Try the URL form above with an API endpoint. Example URL already filled in.');
-      }, 1000);
-    }, 2000);
+  })();
   </script>
 </body>
 </html>
