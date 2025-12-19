@@ -1,0 +1,65 @@
+{
+  "name": "BLACK CODE BROWSER — ATOMIC ⊗ TAPE CMS ⊗ MX2DB",
+  "short_name": "BLACKCODE",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020409",
+  "theme_color": "#020409",
+  "description": "Three-file Atomic Browser + Tape CMS + MX2DB. JS runs in sw.js. Atomic assets served virtually from manifest DB.",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2316f2aa'/><stop offset='1' stop-color='%2361e7ff'/></linearGradient></defs><rect x='6' y='6' width='52' height='52' rx='12' fill='rgba(255,255,255,.03)' stroke='rgba(255,255,255,.14)'/><path d='M32 14 L46 32 L32 50 L18 32 Z' fill='url(%23g)'/><path d='M32 20 L40 32 L32 44 L24 32 Z' fill='rgba(0,0,0,.35)'/><circle cx='32' cy='32' r='3.2' fill='%23020409' stroke='rgba(255,255,255,.22)'/></svg>",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ],
+
+  "@atomic_law": "ASX = XCFE = XJSON = KUHUL = AST = ATOMIC_BLOCK",
+  "@runtime_binding": {
+    "index.html": "DOM_ROOT_FRAME",
+    "sw.js": "ROUTER_CACHE_IO_MESH",
+    "manifest.json": "MX2DB_USER_DB"
+  },
+
+  "mx2db": {
+    "version": "1.0.0",
+    "storage_limit_bytes": 104857600,
+    "users": {
+      "primary": {
+        "user_id": "local",
+        "display_name": "Local User",
+        "created": 0,
+        "securolink": {
+          "mode": "local",
+          "pin_policy": { "min_len": 4, "max_len": 12, "tries": 8 }
+        }
+      }
+    },
+    "settings": {
+      "theme": "matrix",
+      "darkMode": true,
+      "animations": true,
+      "autoCompression": true,
+      "backupIntervalSec": 86400,
+      "apiTimeoutMs": 10000,
+      "cors": true,
+      "cache": true
+    },
+    "api_endpoints": [
+      { "id": "jsonplaceholder", "name": "JSONPlaceholder", "url": "https://jsonplaceholder.typicode.com", "description": "Fake REST API for testing" },
+      { "id": "mockapi", "name": "MockAPI", "url": "https://mockapi.io", "description": "Mock API service" },
+      { "id": "local", "name": "Local MX2DB", "url": "mx2db://local", "description": "Local tape database" }
+    ],
+    "tapes": [],
+    "activity": []
+  },
+
+  "atomic": {
+    "fold": {
+      "atomic.css": "/* ATOMIC.CSS (served virtually by sw.js) */\n:root{\n  --bg-0:#020409;--bg-1:#050912;--bg-2:#071022;\n  --panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.06);\n  --border:rgba(255,255,255,.14);--border-soft:rgba(255,255,255,.09);\n  --fg-0:#eafff8;--fg-1:rgba(234,255,248,.78);--fg-2:rgba(234,255,248,.56);\n  --accent:#16f2aa;--accent2:#61e7ff;--accent-soft:rgba(22,242,170,.14);\n  --hazard:#ffb300;--hazard-soft:rgba(255,179,0,.14);\n  --danger:#ff6b6b;--success:#00d9a6;--warning:#ffb300;\n}\n/* Minimal atomic utilities (expand later into your full ATOMIC.CSS v5) */\n.asx-flex{display:flex}.asx-col{flex-direction:column}.asx-row{flex-direction:row}\n.asx-center{align-items:center;justify-content:center}\n.asx-card{background:var(--panel);border:1px solid var(--border);border-radius:12px}\n.asx-btn{background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--fg-1);padding:8px 12px;cursor:pointer}\n.asx-btn:hover{background:var(--panel2);border-color:var(--border-soft)}\n",
+      "atomic.xjson": "{\n  \"@id\":\"atomic.xjson\",\n  \"@role\":\"config\",\n  \"@note\":\"Machine-readable visual/runtime config (served virtually).\",\n  \"@securolink\":{ \"@enabled\":true, \"@mode\":\"pin+webauthn_optional\" },\n  \"@mesh\":{ \"@enabled\":true, \"@channels\":[\"broadcast\",\"direct\",\"tape\"] },\n  \"@routes\":{ \"/atomic.css\":\"virtual\",\"/atomic.xjson\":\"virtual\",\"/atomic.khl\":\"virtual\" }\n}\n",
+      "atomic.khl": "⟁KHL\n⟁id: atomic.khl\n⟁role: execution_engine\n⟁note: served virtually by sw.js; kernel-like blocks live here.\n\n⟁op dom.render\n⟁op mx2db.put\n⟁op mx2db.get\n⟁op scxq2.compress\n⟁op scxq2.decompress\n⟁op mesh.broadcast\n"
+    }
+  }
+}

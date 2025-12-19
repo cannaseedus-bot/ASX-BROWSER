@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MX2LM OS — LEGION TRINITY CLUSTER</title>
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- =========================================================
+       BLOCK 1 — TOKENS & RESET
+       ========================================================= -->
+  <style>
+    :root {
+      /* Colors */
+      --bg-primary: #020617;
+      --bg-secondary: #050b1c;
+      --bg-tertiary: #0a0f14;
+      --bg-surface: #101820;
+
+      --text-primary: #e6fffa;
+      --text-secondary: #7dd3fc;
+      --text-muted: #5d8ba3;
+
+      --emerald: #16f2aa;
+      --emerald-soft: rgba(22, 242, 170, 0.13);
+      --emerald-strong: rgba(22, 242, 170, 0.22);
+      --cyan: #22d3ee;
+      --cyan-soft: rgba(34, 211, 238, 0.16);
+
+      --accent-warning: #ffd166;
+      --accent-danger: #ff3366;
+      --accent-success: #00d9a6;
+
+      /* Spacing */
+      --sp-xs: 4px;
+      --sp-sm: 8px;
+      --sp-md: 16px;
+      --sp-lg: 24px;
+      --sp-xl: 32px;
+      --sp-2xl: 48px;
+
+      /* Radius */
+      --rad-sm: 8px;
+      --rad-md: 12px;
+      --rad-lg: 16px;
+      --rad-xl: 20px;
+      --rad-2xl: 24px;
+      --rad-pill: 999px;
+
+      /* Typography */
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+      --size-xs: 11px;
+      --size-sm: 13px;
+      --size-md: 14px;
+      --size-lg: 16px;
+      --size-xl: 20px;
+      --size-2xl: 24px;
+
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(22, 242, 170, 0.25);
+
+      /* Transitions */
+      --trans-fast: 0.15s ease;
+      --trans-normal: 0.3s ease;
+      --trans-slow: 0.5s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      background:
+        radial-gradient(circle at 5% 0%, rgba(34, 211, 238, 0.12) 0, transparent 55%),
+        radial-gradient(circle at 95% 100%, rgba(16, 185, 129, 0.12) 0, transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0, #020617 60%);
+      color-scheme: dark;
+      overflow: hidden;
+    }
+  </style>
+
+  <!-- =========================================================
+       BLOCK 2 — BASE & ATOMIC COMPONENTS
+       ========================================================= -->
+  <style>
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: var(--size-2xl); }
+    h2 { font-size: var(--size-xl); }
+    h3 { font-size: var(--size-lg); }
+
+    p {
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    a {
+      color: var(--emerald);
+      text-decoration: none;
+      transition: color var(--trans-fast), text-decoration var(--trans-fast);
+    }
+
+    a:hover {
+      color: var(--cyan);
+      text-decoration: underline;
+    }
+
+    input, textarea, select {
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--text-primary);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      border-radius: var(--rad-md);
+      padding: var(--sp-sm) var(--sp-md);
+      transition: border-color var(--trans-fast), box-shadow var(--trans-fast), background var(--trans-fast);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--emerald);
+      box-shadow: 0 0 16px rgba(22, 242, 170, 0.3);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    /* Buttons */
+    .asx-btn {
+      border-radius: var(--rad-pill);
+      padding: 7px 14px;
+      font-size: var(--size-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
+      color: var(--text-primary);
+      transition: transform var(--trans-fast), box-shadow var(--trans-fast), background var(--trans-fast);
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .asx-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92));
+    }
+
+    .asx-btn-primary {
+      background:
+        radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.24), transparent 55%),
+        linear-gradient(140deg, rgba(15, 23, 42, 0.98), rgba(16, 185, 129, 0.25));
+      border-color: rgba(45, 212, 191, 0.9);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .asx-btn-primary:hover {
+      box-shadow: 0 0 32px rgba(22, 242, 170, 0.5);
+    }
+
+    .chip {
+      border-radius: var(--rad-pill);
+      padding: 5px 10px;
+      font-size: var(--size-xs);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.8));
+      color: var(--text-primary);
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent-success);
+      box-shadow: 0 0 12px rgba(0, 217, 166, 0.7);
+    }
+
+    .panel {
+      border-radius: var(--rad-xl);
+      padding: var(--sp-md);
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.22), transparent 55%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.88));
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(22px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card {
+      border-radius: var(--rad-lg);
+      padding: var(--sp-md);
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.18), transparent 55%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(22px);
+      transition: transform var(--trans-normal), box-shadow var(--trans-normal);
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: var(--rad-pill);
+      font-size: var(--size-xs);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-secondary);
+    }
+
+    .badge {
+      padding: 3px 10px;
+      border-radius: var(--rad-pill);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: var(--size-xs);
+      color: var(--text-secondary);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .section-title {
+      font-size: var(--size-md);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .section-subtitle {
+      font-size: var(--size-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-sm);
+    }
+
+    .pill-tabs {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: var(--rad-pill);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      gap: 3px;
+    }
+
+    .pill-tab {
+      border-radius: var(--rad-pill);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: var(--size-xs);
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: background var(--trans-fast), color var(--trans-fast);
+    }
+
+    .pill-tab.active {
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
+    }
+  </style>
+
+  <!-- =========================================================
+       BLOCK 3 — LAYOUTS (GHOST SHELL + PANELS + DOCK)
+       ========================================================= -->
+  <style>
+    #glyph-rain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    #ghost-root {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ghost-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.28), transparent 55%),
+        linear-gradient(120deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.86));
+      border-bottom: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow:
+        0 8px 24px rgba(15, 23, 42, 0.95),
+        0 0 32px rgba(22, 242, 170, 0.15);
+      backdrop-filter: blur(20px);
+      flex-shrink: 0;
+    }
+
+    .ghost-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+
+    .ghost-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 0 0, rgba(45, 212, 191, 0.28), transparent 55%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(45, 212, 191, 0.8);
+      font-size: 18px;
+    }
+
+    .ghost-header-title {
+      display: flex;
+      flex-direction: column;
+      font-size: var(--size-xs);
+    }
+
+    .ghost-header-title strong {
+      font-size: var(--size-sm);
+    }
+
+    .ghost-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .url-form {
+      display: flex;
+      gap: var(--sp-sm);
+      align-items: center;
+      flex: 1;
+      max-width: 600px;
+      margin: 0 var(--sp-md);
+    }
+
+    .url-input {
+      flex: 1;
+      border-radius: var(--rad-pill);
+      padding: 8px 16px;
+      font-size: var(--size-sm);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-primary);
+    }
+
+    .url-input:focus {
+      border-color: var(--emerald);
+      box-shadow: 0 0 16px rgba(22, 242, 170, 0.3);
+    }
+
+    .ghost-main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* EDITOR SIDEBAR */
+    .editor-sidebar {
+      width: 320px;
+      min-width: 320px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(148, 163, 184, 0.55);
+      background: linear-gradient(145deg, #020617, #050b1c);
+      overflow: hidden;
+    }
+
+    .editor-sidebar-header {
+      padding: var(--sp-md);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .editor-sidebar-tabs {
+      display: flex;
+      border-radius: var(--rad-md);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .editor-sidebar-tab {
+      flex: 1;
+      border-radius: var(--rad-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: var(--size-xs);
+      padding: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: background var(--trans-fast), color var(--trans-fast);
+    }
+
+    .editor-sidebar-tab.active {
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text-primary);
+      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.6);
+    }
+
+    .editor-sidebar-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .editor-canvas-container {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .editor-canvas-container.active {
+      display: flex;
+    }
+
+    .editor-canvas-header {
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--size-xs);
+      color: var(--text-muted);
+    }
+
+    .editor-canvas-body {
+      flex: 1;
+      padding: var(--sp-md);
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: var(--size-xs);
+      line-height: 1.5;
+      color: rgba(226, 232, 240, 0.9);
+      background: linear-gradient(145deg, #020617, #020617);
+    }
+
+    .editor-canvas-footer {
+      padding: var(--sp-sm) var(--sp-md);
+      border-top: 1px solid rgba(30, 64, 175, 0.6);
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--size-xs);
+      color: var(--text-muted);
+    }
+
+    /* DASHBOARD MAIN AREA */
+    .dashboard-main {
+      flex: 1;
+      padding: var(--sp-md);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-lg);
+    }
+
+    /* DASHBOARD HERO SECTION */
+    .dashboard-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-lg);
+    }
+
+    .hero-cta {
+      padding: var(--sp-xl);
+      border-radius: var(--rad-2xl);
+      background:
+        radial-gradient(circle at 0 0, rgba(34, 211, 238, 0.22), transparent 55%),
+        linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.88));
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-cta h1 {
+      font-size: var(--size-2xl);
+      margin-bottom: var(--sp-sm);
+      background: linear-gradient(135deg, var(--text-primary), var(--emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-cta p {
+      margin-bottom: var(--sp-lg);
+      font-size: var(--size-md);
+      max-width: 80%;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+    }
+
+    .stat-card {
+      padding: var(--sp-lg);
+      border-radius: var(--rad-xl);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: var(--size-2xl);
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: var(--sp-xs);
+    }
+
+    .stat-label {
+      font-size: var(--size-xs);
+      color: var(--text-muted);
+    }
+
+    /* DASHBOARD HIGHLIGHTS */
+    .dashboard-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--sp-md);
+    }
+
+    .highlight-card {
+      padding: var(--sp-lg);
+      border-radius: var(--rad-xl);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      transition: transform var(--trans-normal), box-shadow var(--trans-normal);
+    }
+
+    .highlight-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+    }
+
+    .highlight-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--rad-md);
+      background: linear-gradient(135deg, var(--emerald-soft), var(--cyan-soft));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--sp-md);
+      font-size: var(--size-lg);
+    }
+
+    .highlight-card h3 {
+      margin-bottom: var(--sp-sm);
+    }
+
+    /* OPTIONS LIST */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--sp-md);
+    }
+
+    .option-item {
+      padding: var(--sp-md);
+      border-radius: var(--rad-lg);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8));
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-md);
+      cursor: pointer;
+      transition: all var(--trans-fast);
+    }
+
+    .option-item:hover {
+      border-color: var(--emerald);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .option-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--rad-md);
+      background: linear-gradient(135deg, var(--emerald-soft), var(--cyan-soft));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--size-md);
+    }
+
+    .option-text {
+      flex: 1;
+    }
+
+    .option-text strong {
+      display: block;
+      font-size: var(--size-sm);
+      margin-bottom: 2px;
+    }
+
+    .option-text span {
+      font-size: var(--size-xs);
+      color: var(--text-muted);
+    }
+
+    /* CHAT INFERENCE FORM */
+    .chat-inference {
+      margin-top: var(--sp-lg);
+    }
+
+    .chat-stream {
+      height: 300px;
+      border-radius: var(--rad-lg);
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      padding: var(--sp-md);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+      font-size: var(--size-sm);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92));
+      margin-bottom: var(--sp-md);
+    }
+
+    .chat-msg {
+      padding: var(--sp-sm);
+      border-radius: var(--rad-md);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      max-width: 80%;
+    }
+
+    .chat-msg.user {
+      align-self: flex-end;
+      background: rgba(16, 185, 129, 0.09);
+      border-color: rgba(16, 185, 129, 0.8);
+    }
+
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: var(--sp-sm);
+    }
+
+    .chat-input {
+      flex: 1;
+      border-radius: var(--rad-lg);
+    }
+
+    /* TAB CANVAS SYSTEM */
+    .tab-canvas-system {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(2, 6, 23, 0.95);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      backdrop-filter: blur(20px);
+    }
+
+    .tab-canvas-system.active {
+      display: flex;
+    }
+
+    .tab-canvas-header {
+      padding: var(--sp-md);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tab-canvas-title {
+      font-size: var(--size-lg);
+      font-weight: 600;
+    }
+
+    .tab-canvas-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--trans-fast);
+    }
+
+    .tab-canvas-close:hover {
+      border-color: var(--accent-danger);
+      background: rgba(255, 51, 102, 0.1);
+    }
+
+    .tab-canvas-body {
+      flex: 1;
+      padding: var(--sp-md);
+      overflow: auto;
+    }
+
+    .tab-canvas-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: var(--sp-lg);
+      border-radius: var(--rad-xl);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .dashboard-hero {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .ghost-main {
+        flex-direction: column;
+      }
+      
+      .editor-sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: 300px;
+      }
+      
+      .dashboard-main {
+        height: auto;
+      }
+      
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+
+  <!-- =========================================================
+       BLOCK 4 — UTILITIES
+       ========================================================= -->
+  <style>
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-row { flex-direction: row; }
+    .flex-center { justify-content: center; align-items: center; }
+    .flex-between { justify-content: space-between; align-items: center; }
+    .flex-wrap { flex-wrap: wrap; }
+    .gap-xs { gap: var(--sp-xs); }
+    .gap-sm { gap: var(--sp-sm); }
+    .gap-md { gap: var(--sp-md); }
+    .gap-lg { gap: var(--sp-lg); }
+    .mt-xs { margin-top: var(--sp-xs); }
+    .mt-sm { margin-top: var(--sp-sm); }
+    .mt-md { margin-top: var(--sp-md); }
+    .mt-lg { margin-top: var(--sp-lg); }
+    .text-xs { font-size: var(--size-xs); }
+    .text-sm { font-size: var(--size-sm); }
+    .text-md { font-size: var(--size-md); }
+    .text-lg { font-size: var(--size-lg); }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .overflow-y-auto { overflow-y: auto; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Calm glyph rain behind everything -->
+  <canvas id="glyph-rain"></canvas>
+
+  <!-- Tab Canvas System (for URL opens) -->
+  <div class="tab-canvas-system" id="tabCanvas">
+    <div class="tab-canvas-header">
+      <div class="tab-canvas-title" id="tabCanvasTitle">Loading...</div>
+      <div class="tab-canvas-close" id="tabCanvasClose">✕</div>
+    </div>
+    <div class="tab-canvas-body">
+      <div class="tab-canvas-content" id="tabCanvasContent">
+        Loading content from API...
+      </div>
+    </div>
+  </div>
+
+  <div id="ghost-root" data-os="mx2lm_legion_trinity">
+    <!-- HEADER -->
+    <header class="ghost-header">
+      <div class="ghost-header-left">
+        <div class="ghost-logo">⟁</div>
+        <div class="ghost-header-title">
+          <strong>MX2LM OS — LEGION TRINITY</strong>
+          <span class="text-xs text-muted">Dashboard Mode</span>
+        </div>
+      </div>
+
+      <!-- URL FORM -->
+      <div class="url-form">
+        <input type="text" 
+               class="url-input" 
+               id="urlInput" 
+               placeholder="Enter API URL to open in canvas (e.g., https://api.example.com/data)" />
+        <button class="asx-btn asx-btn-primary" id="urlOpenBtn">Open Canvas</button>
+      </div>
+
+      <div class="ghost-header-right">
+        <div class="chip">
+          <div class="chip-dot"></div>
+          <span>Dashboard</span>
+        </div>
+        <button class="asx-btn" id="toggleEditorBtn">Editor</button>
+      </div>
+    </header>
+
+    <!-- MAIN LAYOUT -->
+    <main class="ghost-main">
+      <!-- EDITOR SIDEBAR -->
+      <aside class="editor-sidebar" id="editorSidebar">
+        <div class="editor-sidebar-header">
+          <div class="section-title">
+            <span>Editor Canvas</span>
+            <span class="text-xs text-muted">Live Code Studio</span>
+          </div>
+          
+          <div class="editor-sidebar-tabs mt-sm">
+            <button class="editor-sidebar-tab active" data-target="html">HTML</button>
+            <button class="editor-sidebar-tab" data-target="css">CSS</button>
+            <button class="editor-sidebar-tab" data-target="js">JS</button>
+            <button class="editor-sidebar-tab" data-target="manifest">Manifest</button>
+          </div>
+        </div>
+
+        <div class="editor-sidebar-body">
+          <!-- HTML Editor -->
+          <div class="editor-canvas-container active" id="editor-html">
+            <div class="editor-canvas-header">
+              <span>index.html</span>
+              <div class="flex gap-xs">
+                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+              </div>
+            </div>
+            <pre class="editor-canvas-body">&lt;!DOCTYPE html&gt;
+&lt;html lang="en" data-theme="dark"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;title&gt;MX2LM OS — LEGION TRINITY CLUSTER&lt;/title&gt;
+  &lt;link rel="manifest" href="manifest.json" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="ghost-root" data-os="mx2lm_legion_trinity"&gt;
+    &lt;!-- K'UHUL renders content here --&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+            <div class="editor-canvas-footer">
+              <span>UTF-8 · 1:1</span>
+              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+            </div>
+          </div>
+
+          <!-- CSS Editor -->
+          <div class="editor-canvas-container" id="editor-css">
+            <div class="editor-canvas-header">
+              <span>style.css</span>
+              <div class="flex gap-xs">
+                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+              </div>
+            </div>
+            <pre class="editor-canvas-body">:root {
+  --bg-primary: #020617;
+  --text-primary: #e6fffa;
+  --emerald: #16f2aa;
+  --cyan: #22d3ee;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}</pre>
+            <div class="editor-canvas-footer">
+              <span>CSS3 · 1:1</span>
+              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+            </div>
+          </div>
+
+          <!-- JS Editor -->
+          <div class="editor-canvas-container" id="editor-js">
+            <div class="editor-canvas-header">
+              <span>app.js</span>
+              <div class="flex gap-xs">
+                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+              </div>
+            </div>
+            <pre class="editor-canvas-body">// MX2LM OS Kernel
+class MX2LMOS {
+  constructor() {
+    this.state = {
+      ready: false,
+      activeTape: null
+    };
+  }
+
+  boot() {
+    console.log('[MX2LM] Booting OS...');
+    this.state.ready = true;
+  }
+}</pre>
+            <div class="editor-canvas-footer">
+              <span>ES2022 · 1:1</span>
+              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+            </div>
+          </div>
+
+          <!-- Manifest Editor -->
+          <div class="editor-canvas-container" id="editor-manifest">
+            <div class="editor-canvas-header">
+              <span>manifest.json</span>
+              <div class="flex gap-xs">
+                <span style="width:7px;height:7px;border-radius:999px;background:#f87171;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#facc15;"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#4ade80;"></span>
+              </div>
+            </div>
+            <pre class="editor-canvas-body">{
+  "name": "MX2LM OS",
+  "version": "1.0.0",
+  "description": "Legion Trinity Cluster",
+  "manifest_version": 3,
+  "permissions": ["tapes", "brains", "widgets"],
+  "background": {
+    "service_worker": "sw.js"
+  }
+}</pre>
+            <div class="editor-canvas-footer">
+              <span>JSON · 1:1</span>
+              <button class="asx-btn" style="padding: 2px 8px; font-size: var(--size-xs);">Save</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- DASHBOARD MAIN AREA -->
+      <section class="dashboard-main">
+        <!-- HERO CTA SECTION -->
+        <div class="dashboard-hero">
+          <div class="hero-cta">
+            <h1>Welcome to MX2LM OS</h1>
+            <p>Your universal canvas for building, editing, and deploying intelligent applications across the Legion Trinity Cluster.</p>
+            <div class="flex gap-md mt-md">
+              <button class="asx-btn asx-btn-primary" id="createNewBtn">Create New Tape</button>
+              <button class="asx-btn" id="exploreBtn">Explore Gallery</button>
+              <button class="asx-btn" id="docsBtn">View Documentation</button>
+            </div>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-number">1,284</div>
+              <div class="stat-label">Active Tapes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">42</div>
+              <div class="stat-label">Live Brains</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">89%</div>
+              <div class="stat-label">System Health</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">3.2K</div>
+              <div class="stat-label">API Calls Today</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGHLIGHTS -->
+        <div>
+          <div class="section-title">
+            <span>Highlights</span>
+            <button class="asx-btn" style="font-size: var(--size-xs);">View All</button>
+          </div>
+          <div class="dashboard-highlights mt-md">
+            <div class="highlight-card">
+              <div class="highlight-icon">⚡</div>
+              <h3>Quick Start Templates</h3>
+              <p class="text-sm text-muted">Pre-configured tape templates for games, apps, and brains. One-click deployment.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🔗</div>
+              <h3>API Integration Hub</h3>
+              <p class="text-sm text-muted">Connect to external APIs and services with built-in authentication and rate limiting.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🧠</div>
+              <h3>Brain Training Studio</h3>
+              <p class="text-sm text-muted">Train and deploy ML models directly in the browser with our neural runtime.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🌐</div>
+              <h3>Global Distribution</h3>
+              <p class="text-sm text-muted">Deploy your tapes worldwide with our edge network and CDN integration.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPTIONS LIST -->
+        <div>
+          <div class="section-title">
+            <span>Quick Actions</span>
+            <span class="text-xs text-muted">Frequently used operations</span>
+          </div>
+          <div class="options-grid mt-md">
+            <div class="option-item" data-action="new-tape">
+              <div class="option-icon">📝</div>
+              <div class="option-text">
+                <strong>New Tape</strong>
+                <span>Create application</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="import-api">
+              <div class="option-icon">📥</div>
+              <div class="option-text">
+                <strong>Import API</strong>
+                <span>Connect external service</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="train-brain">
+              <div class="option-icon">🧠</div>
+              <div class="option-text">
+                <strong>Train Brain</strong>
+                <span>ML model training</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="deploy">
+              <div class="option-icon">🚀</div>
+              <div class="option-text">
+                <strong>Deploy</strong>
+                <span>Publish to network</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="monitor">
+              <div class="option-icon">📊</div>
+              <div class="option-text">
+                <strong>Monitor</strong>
+                <span>System analytics</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="settings">
+              <div class="option-icon">⚙️</div>
+              <div class="option-text">
+                <strong>Settings</strong>
+                <span>System configuration</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="backup">
+              <div class="option-icon">💾</div>
+              <div class="option-text">
+                <strong>Backup</strong>
+                <span>Export data</span>
+              </div>
+            </div>
+            <div class="option-item" data-action="help">
+              <div class="option-icon">❓</div>
+              <div class="option-text">
+                <strong>Help & Docs</strong>
+                <span>Documentation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAT INFERENCE FORM -->
+        <div class="chat-inference">
+          <div class="section-title">
+            <span>Chat Inference</span>
+            <div class="pill-tabs" id="model-tabs">
+              <button class="pill-tab active" data-model="prime">MX2LM PRIME</button>
+              <button class="pill-tab" data-model="qwen">QWEN-ASX</button>
+              <button class="pill-tab" data-model="local">Local Inference</button>
+            </div>
+          </div>
+          <div class="section-subtitle">
+            Ask the system questions, get help with coding, or request system operations.
+          </div>
+
+          <div class="chat-stream" id="chatStream">
+            <div class="chat-msg assistant">
+              <strong>MX2LM Assistant:</strong> Hello! I'm your MX2LM OS assistant. How can I help you today? You can ask me to create tapes, explain features, or help with coding.
+            </div>
+          </div>
+
+          <div class="chat-input-row">
+            <input type="text" 
+                   class="chat-input" 
+                   id="chatInput" 
+                   placeholder="Type your message here..." />
+            <button class="asx-btn asx-btn-primary" id="sendChatBtn">Send</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // =========================================================
+    // Initialize Glyph Rain
+    // =========================================================
+    (function initGlyphRain() {
+      const canvas = document.getElementById('glyph-rain');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const glyphs = '⟁ΩλπΣΞΦΨ✶✺✦✧＊01';
+      let width, height, columns, drops;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        columns = Math.floor(width / 16);
+        drops = Array.from({ length: columns }, () => Math.random() * height);
+      }
+
+      function draw() {
+        if (!ctx) return;
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.16)';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.75)';
+        ctx.font = '14px "JetBrains Mono", monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = glyphs[Math.floor(Math.random() * glyphs.length)];
+          const x = i * 16;
+          const y = drops[i] * 16;
+          ctx.fillText(text, x, y);
+
+          if (y > height && Math.random() > 0.975) {
+            drops[i] = 0;
+          } else {
+            drops[i] += 0.5 + Math.random() * 0.5;
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(draw);
+    })();
+
+    // =========================================================
+    // Editor Sidebar Toggle
+    // =========================================================
+    const toggleEditorBtn = document.getElementById('toggleEditorBtn');
+    const editorSidebar = document.getElementById('editorSidebar');
+    
+    toggleEditorBtn?.addEventListener('click', () => {
+      editorSidebar.style.display = editorSidebar.style.display === 'none' ? 'flex' : 'none';
+      toggleEditorBtn.textContent = editorSidebar.style.display === 'none' ? 'Show Editor' : 'Hide Editor';
+    });
+
+    // =========================================================
+    // Editor Tab Switching
+    // =========================================================
+    const editorTabs = document.querySelectorAll('.editor-sidebar-tab');
+    editorTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and containers
+        editorTabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.editor-canvas-container').forEach(c => {
+          c.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Show corresponding editor
+        const target = tab.getAttribute('data-target');
+        const editor = document.getElementById(`editor-${target}`);
+        if (editor) {
+          editor.classList.add('active');
+        }
+      });
+    });
+
+    // =========================================================
+    // Chat System
+    // =========================================================
+    const chatInput = document.getElementById('chatInput');
+    const sendChatBtn = document.getElementById('sendChatBtn');
+    const chatStream = document.getElementById('chatStream');
+    const modelTabs = document.querySelectorAll('#model-tabs .pill-tab');
+    
+    let activeModel = 'prime';
+
+    // Model switching
+    modelTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        modelTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeModel = tab.getAttribute('data-model');
+      });
+    });
+
+    // Add message to chat
+    function addChatMessage(role, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${role}`;
+      
+      const strong = document.createElement('strong');
+      strong.textContent = role === 'user' ? 'You:' : 'MX2LM Assistant:';
+      
+      msgDiv.appendChild(strong);
+      msgDiv.appendChild(document.createTextNode(' ' + text));
+      
+      chatStream.appendChild(msgDiv);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    // Send message
+    function sendChatMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      
+      addChatMessage('user', text);
+      chatInput.value = '';
+      
+      // Simulate AI response
+      setTimeout(() => {
+        const responses = [
+          "I understand you're asking about '" + text + "'. I can help you with that. Would you like me to create a new tape or explain how the system works?",
+          "Based on your query, I recommend checking the documentation or creating a new tape template to get started.",
+          "I can help you implement that. Would you like me to generate some code or explain the API integration process?",
+          "That's an interesting request. Let me analyze the best approach for your use case...",
+          "I'm processing your request. Would you like me to show you some examples or proceed with implementation?"
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        addChatMessage('assistant', randomResponse);
+      }, 1000);
+    }
+
+    sendChatBtn?.addEventListener('click', sendChatMessage);
+    chatInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+
+    // =========================================================
+    // Quick Actions
+    // =========================================================
+    const optionItems = document.querySelectorAll('.option-item');
+    optionItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.getAttribute('data-action');
+        addChatMessage('user', `Clicked on ${action.replace('-', ' ')}`);
+        
+        setTimeout(() => {
+          addChatMessage('assistant', `Opening ${action.replace('-', ' ')} interface...`);
+        }, 500);
+      });
+    });
+
+    // =========================================================
+    // URL Canvas System
+    // =========================================================
+    const urlInput = document.getElementById('urlInput');
+    const urlOpenBtn = document.getElementById('urlOpenBtn');
+    const tabCanvas = document.getElementById('tabCanvas');
+    const tabCanvasClose = document.getElementById('tabCanvasClose');
+    const tabCanvasTitle = document.getElementById('tabCanvasTitle');
+    const tabCanvasContent = document.getElementById('tabCanvasContent');
+
+    // Open URL in canvas
+    async function openUrlInCanvas() {
+      const url = urlInput.value.trim();
+      if (!url) return;
+      
+      // Show loading state
+      tabCanvasTitle.textContent = 'Loading...';
+      tabCanvasContent.textContent = 'Fetching data from API...';
+      tabCanvas.classList.add('active');
+      
+      try {
+        // Try to fetch from the URL
+        const response = await fetch(url);
+        const data = await response.text();
+        
+        // Update canvas with content
+        tabCanvasTitle.textContent = `Canvas: ${url}`;
+        tabCanvasContent.innerHTML = `
+          <h3>API Response from ${url}</h3>
+          <div style="margin-top: var(--sp-md); padding: var(--sp-md); background: rgba(15, 23, 42, 0.7); border-radius: var(--rad-md); font-family: var(--font-mono); font-size: var(--size-xs); overflow-x: auto;">
+            <pre>${escapeHtml(data)}</pre>
+          </div>
+          <div class="mt-md">
+            <p class="text-sm text-muted">API response loaded successfully. You can now interact with this data in the canvas.</p>
+          </div>
+        `;
+        
+        // Log to chat
+        addChatMessage('user', `Opened URL canvas: ${url}`);
+        setTimeout(() => {
+          addChatMessage('assistant', `Loaded API response from ${url}. The canvas now displays the raw data which can be processed by the system.`);
+        }, 500);
+        
+      } catch (error) {
+        // Show error state
+        tabCanvasTitle.textContent = 'Error Loading URL';
+        tabCanvasContent.innerHTML = `
+          <h3>Failed to load: ${url}</h3>
+          <p class="text-muted">Error: ${error.message}</p>
+          <div class="mt-md">
+            <p class="text-sm">This might be due to:</p>
+            <ul class="text-sm text-muted" style="margin-left: var(--sp-md); margin-top: var(--sp-sm);">
+              <li>CORS restrictions</li>
+              <li>Invalid URL format</li>
+              <li>Server not responding</li>
+              <li>Network issues</li>
+            </ul>
+          </div>
+        `;
+        
+        addChatMessage('user', `Failed to open URL: ${url}`);
+        setTimeout(() => {
+          addChatMessage('assistant', `Could not load the API response. Check the URL format and CORS permissions. Try a public API endpoint like https://jsonplaceholder.typicode.com/posts/1`);
+        }, 500);
+      }
+    }
+
+    // Helper to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Event listeners for URL system
+    urlOpenBtn?.addEventListener('click', openUrlInCanvas);
+    urlInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        openUrlInCanvas();
+      }
+    });
+    
+    tabCanvasClose?.addEventListener('click', () => {
+      tabCanvas.classList.remove('active');
+    });
+
+    // Close canvas with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && tabCanvas.classList.contains('active')) {
+        tabCanvas.classList.remove('active');
+      }
+    });
+
+    // =========================================================
+    // CTA Buttons
+    // =========================================================
+    document.getElementById('createNewBtn')?.addEventListener('click', () => {
+      addChatMessage('user', 'Clicked "Create New Tape"');
+      setTimeout(() => {
+        addChatMessage('assistant', 'Opening tape creation wizard. What type of tape would you like to create? (App, Game, Brain, or World)');
+      }, 500);
+    });
+
+    document.getElementById('exploreBtn')?.addEventListener('click', () => {
+      addChatMessage('user', 'Clicked "Explore Gallery"');
+      setTimeout(() => {
+        addChatMessage('assistant', 'Taking you to the tape gallery. You can browse community tapes, templates, and market listings.');
+      }, 500);
+    });
+
+    document.getElementById('docsBtn')?.addEventListener('click', () => {
+      addChatMessage('user', 'Clicked "View Documentation"');
+      setTimeout(() => {
+        addChatMessage('assistant', 'Opening documentation hub. You can find API references, tutorials, and system architecture docs.');
+      }, 500);
+    });
+
+    // =========================================================
+    // Example URLs for quick testing
+    // =========================================================
+    setTimeout(() => {
+      urlInput.value = 'https://jsonplaceholder.typicode.com/posts/1';
+      
+      // Add chat welcome message
+      setTimeout(() => {
+        addChatMessage('assistant', 'Try the URL form above with an API endpoint. Example URL already filled in.');
+      }, 1000);
+    }, 2000);
+  </script>
+</body>
+</html>
