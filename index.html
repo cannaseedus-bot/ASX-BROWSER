@@ -1,437 +1,523 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>BLACK CODE BROWSER — ATOMIC ⊗ KUHUL v1.2.3</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MX2LM OS — PWA BUILDER & AI INFERENCE</title>
+  <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#16f2aa">
+
+  <!-- =========================================================
+       BLOCK 1 — TOKENS & RESET
+       ========================================================= -->
   <style>
-    /* ═══════════════════════════════════════════════════════════
-       ATOMIC CSS CORE — Inline for instant render
-       ═══════════════════════════════════════════════════════════ */
     :root {
-      --bg-0:#020409;--bg-1:#050912;--bg-2:#071022;--bg-3:#0a1530;
-      --panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.06);
-      --border:rgba(255,255,255,.14);--border-soft:rgba(255,255,255,.09);--border-strong:rgba(255,255,255,.22);
-      --fg-0:#eafff8;--fg-1:rgba(234,255,248,.78);--fg-2:rgba(234,255,248,.56);--fg-3:rgba(234,255,248,.38);
-      --accent:#16f2aa;--accent2:#61e7ff;--accent-soft:rgba(22,242,170,.14);--accent-glow:rgba(22,242,170,.35);
-      --danger:#ff6b6b;--danger-soft:rgba(255,107,107,.14);
-      --success:#00d9a6;--warning:#ffb300;
-      --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-pill:999px;
-      --sp-xs:4px;--sp-sm:8px;--sp-md:16px;--sp-lg:24px;--sp-xl:32px;
-      --trans-fast:.15s ease;--trans-normal:.3s ease;
-      --shadow-md:0 8px 24px rgba(0,0,0,.4);--shadow-glow:0 0 40px var(--accent-glow);
-      --font-sans:system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono","Fira Code",monospace;
+      --bg-primary: #020617;
+      --bg-secondary: #050b1c;
+      --bg-tertiary: #0a0f14;
+      --bg-surface: #101820;
+      --text-primary: #e6fffa;
+      --text-secondary: #7dd3fc;
+      --text-muted: #5d8ba3;
+      --emerald: #16f2aa;
+      --emerald-soft: rgba(22, 242, 170, 0.13);
+      --emerald-strong: rgba(22, 242, 170, 0.22);
+      --cyan: #22d3ee;
+      --cyan-soft: rgba(34, 211, 238, 0.16);
+      --accent-warning: #ffd166;
+      --accent-danger: #ff3366;
+      --accent-success: #00d9a6;
+      --sp-xs: 4px;
+      --sp-sm: 8px;
+      --sp-md: 16px;
+      --sp-lg: 24px;
+      --sp-xl: 32px;
+      --sp-2xl: 48px;
+      --rad-sm: 8px;
+      --rad-md: 12px;
+      --rad-lg: 16px;
+      --rad-xl: 20px;
+      --rad-2xl: 24px;
+      --rad-pill: 999px;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", monospace;
+      --size-xs: 11px;
+      --size-sm: 13px;
+      --size-md: 14px;
+      --size-lg: 16px;
+      --size-xl: 20px;
+      --size-2xl: 24px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(22, 242, 170, 0.25);
+      --trans-fast: 0.15s ease;
+      --trans-normal: 0.3s ease;
+      --trans-slow: 0.5s ease;
+      --bg-panel: rgba(15, 23, 42, 0.98);
+      --border-ui: rgba(148, 163, 184, 0.45);
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    html,body{height:100%;background:var(--bg-0);color:var(--fg-0);font-family:var(--font-sans);overflow:hidden}
+    html,body{width:100%;height:100%}
+    body{font-family:var(--font-sans);color:var(--text-primary);background:radial-gradient(circle at 5% 0%,rgba(34,211,238,0.12) 0,transparent 55%),radial-gradient(circle at 95% 100%,rgba(16,185,129,0.12) 0,transparent 55%),radial-gradient(circle at 50% 50%,rgba(15,23,42,1) 0,#020617 60%);color-scheme:dark;overflow:hidden}
+  </style>
 
-    /* Layout */
-    #app{height:100%;display:flex;flex-direction:column}
-    .header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));border-bottom:1px solid var(--border);flex-shrink:0}
-    .header-left{display:flex;align-items:center;gap:12px}
-    .logo{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px}
-    .header-title{font-size:13px;line-height:1.3}
-    .header-title strong{font-size:14px;display:block}
-    .header-title span{color:var(--fg-2);font-size:11px}
-    .header-center{flex:1;max-width:600px;margin:0 24px}
-    .url-bar{display:flex;gap:8px}
-    .url-input{flex:1;padding:8px 16px;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--bg-1);color:var(--fg-0);font-size:13px}
-    .url-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft)}
-    .header-right{display:flex;align-items:center;gap:8px}
+  <!-- =========================================================
+       BLOCK 2 — BASE & ATOMIC COMPONENTS
+       ========================================================= -->
+  <style>
+    h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.2}
+    h1{font-size:var(--size-2xl)}h2{font-size:var(--size-xl)}h3{font-size:var(--size-lg)}
+    p{line-height:1.6;color:var(--text-secondary)}
+    a{color:var(--emerald);text-decoration:none;transition:color var(--trans-fast)}
+    a:hover{color:var(--cyan);text-decoration:underline}
+    input,textarea,select{font-family:inherit;font-size:inherit;color:var(--text-primary);background:rgba(15,23,42,0.95);border:1px solid rgba(148,163,184,0.45);border-radius:var(--rad-md);padding:var(--sp-sm) var(--sp-md);transition:border-color var(--trans-fast),box-shadow var(--trans-fast)}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--emerald);box-shadow:0 0 16px rgba(22,242,170,0.3);background:rgba(15,23,42,0.98)}
+    .asx-btn{border-radius:var(--rad-pill);padding:7px 14px;font-size:var(--size-sm);display:inline-flex;align-items:center;gap:6px;cursor:pointer;border:1px solid rgba(148,163,184,0.55);background:linear-gradient(145deg,rgba(15,23,42,0.96),rgba(15,23,42,0.88));color:var(--text-primary);transition:transform var(--trans-fast),box-shadow var(--trans-fast),background var(--trans-fast);outline:none;white-space:nowrap}
+    .asx-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.92))}
+    .asx-btn-primary{background:radial-gradient(circle at 0 0,rgba(45,212,191,0.24),transparent 55%),linear-gradient(140deg,rgba(15,23,42,0.98),rgba(16,185,129,0.25));border-color:rgba(45,212,191,0.9);box-shadow:var(--shadow-glow)}
+    .asx-btn-primary:hover{box-shadow:0 0 32px rgba(22,242,170,0.5)}
+    .asx-btn-danger{border-color:var(--accent-danger);color:var(--accent-danger)}
+    .asx-btn-danger:hover{background:rgba(255,51,102,0.15)}
+    .chip{border-radius:var(--rad-pill);padding:5px 10px;font-size:var(--size-xs);display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(148,163,184,0.45);background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(15,23,42,0.8));color:var(--text-primary)}
+    .chip-dot{width:8px;height:8px;border-radius:999px;background:var(--accent-success);box-shadow:0 0 12px rgba(0,217,166,0.7)}
+    .panel{border-radius:var(--rad-xl);padding:var(--sp-md);background:radial-gradient(circle at 0 0,rgba(34,211,238,0.22),transparent 55%),linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.88));border:1px solid rgba(148,163,184,0.6);box-shadow:var(--shadow-md);backdrop-filter:blur(22px);display:flex;flex-direction:column;min-height:0}
+    .card{border-radius:var(--rad-lg);padding:var(--sp-md);background:radial-gradient(circle at 0 0,rgba(34,211,238,0.18),transparent 55%),linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.9));border:1px solid rgba(148,163,184,0.6);box-shadow:var(--shadow-md);backdrop-filter:blur(22px);transition:transform var(--trans-normal),box-shadow var(--trans-normal)}
+    .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg),var(--shadow-glow)}
+    .section-title{font-size:var(--size-md);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:var(--sp-sm);margin-bottom:var(--sp-sm)}
+    .section-subtitle{font-size:var(--size-xs);color:var(--text-muted);margin-bottom:var(--sp-sm)}
+    .pill-tabs{display:inline-flex;padding:3px;border-radius:var(--rad-pill);border:1px solid rgba(148,163,184,0.5);background:rgba(15,23,42,0.9);gap:3px}
+    .pill-tab{border-radius:var(--rad-pill);border:none;background:transparent;color:var(--text-secondary);font-size:var(--size-xs);padding:4px 10px;cursor:pointer;transition:background var(--trans-fast),color var(--trans-fast)}
+    .pill-tab.active{background:rgba(15,23,42,0.98);color:var(--text-primary);box-shadow:0 0 0 1px rgba(148,163,184,0.6)}
+  </style>
 
-    /* Buttons */
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--panel);color:var(--fg-1);font-size:12px;cursor:pointer;transition:all var(--trans-fast);white-space:nowrap}
-    .btn:hover{background:var(--panel2);border-color:var(--border-strong);transform:translateY(-1px)}
-    .btn-primary{background:linear-gradient(135deg,var(--accent-soft),transparent);border-color:var(--accent);color:var(--accent)}
-    .btn-primary:hover{background:var(--accent);color:var(--bg-0)}
-    .btn-sm{padding:5px 10px;font-size:11px}
-    .btn-icon{width:28px;height:28px;padding:0;justify-content:center}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--r-pill);border:1px solid var(--border);font-size:11px;color:var(--fg-2)}
-    .chip-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success)}
+  <!-- =========================================================
+       BLOCK 3 — LAYOUTS
+       ========================================================= -->
+  <style>
+    #glyph-rain{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.6}
+    #ghost-root{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column}
+    .ghost-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:radial-gradient(circle at 0 0,rgba(34,211,238,0.28),transparent 55%),linear-gradient(120deg,rgba(15,23,42,0.96),rgba(15,23,42,0.86));border-bottom:1px solid rgba(148,163,184,0.55);box-shadow:0 8px 24px rgba(15,23,42,0.95),0 0 32px rgba(22,242,170,0.15);backdrop-filter:blur(20px);flex-shrink:0}
+    .ghost-header-left{display:flex;align-items:center;gap:var(--sp-sm)}
+    .ghost-logo{width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 0 0,rgba(45,212,191,0.28),transparent 55%),linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.9));border:1px solid rgba(45,212,191,0.8);font-size:18px}
+    .ghost-header-title{display:flex;flex-direction:column;font-size:var(--size-xs)}
+    .ghost-header-title strong{font-size:var(--size-sm)}
+    .ghost-header-right{display:flex;align-items:center;gap:var(--sp-sm);flex-wrap:wrap;justify-content:flex-end}
+    .url-form{display:flex;gap:var(--sp-sm);align-items:center;flex:1;max-width:600px;margin:0 var(--sp-md)}
+    .url-input{flex:1;border-radius:var(--rad-pill);padding:8px 16px;font-size:var(--size-sm);background:rgba(15,23,42,0.9);border:1px solid rgba(148,163,184,0.5);color:var(--text-primary)}
+    .url-input:focus{border-color:var(--emerald);box-shadow:0 0 16px rgba(22,242,170,0.3)}
+    .ghost-main{display:flex;flex:1;min-height:0;overflow:hidden}
+    .pwa-sidebar{width:320px;min-width:320px;display:flex;flex-direction:column;border-right:1px solid rgba(148,163,184,0.55);background:linear-gradient(145deg,#020617,#050b1c);overflow:hidden}
+    .pwa-sidebar-header{padding:var(--sp-md);border-bottom:1px solid rgba(148,163,184,0.4)}
+    .pwa-sidebar-tabs{display:flex;border-radius:var(--rad-md);border:1px solid rgba(148,163,184,0.5);padding:2px;gap:2px}
+    .pwa-sidebar-tab{flex:1;border-radius:var(--rad-sm);border:none;background:transparent;color:var(--text-secondary);font-size:var(--size-xs);padding:6px;cursor:pointer;text-align:center;transition:background var(--trans-fast),color var(--trans-fast)}
+    .pwa-sidebar-tab.active{background:rgba(15,23,42,0.98);color:var(--text-primary);box-shadow:0 0 0 1px rgba(148,163,184,0.6)}
+    .pwa-sidebar-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto}
+    .pwa-editor-container{flex:1;display:none;flex-direction:column;min-height:0}
+    .pwa-editor-container.active{display:flex}
+    .pwa-editor-header{padding:var(--sp-sm) var(--sp-md);border-bottom:1px solid rgba(51,65,85,0.9);display:flex;justify-content:space-between;align-items:center;font-size:var(--size-xs);color:var(--text-muted)}
+    .pwa-editor-body{flex:1;padding:var(--sp-md);overflow-y:auto;font-family:var(--font-mono);font-size:var(--size-sm);line-height:1.5;color:rgba(226,232,240,0.9);background:linear-gradient(145deg,#020617,#020617)}
+    .pwa-editor-footer{padding:var(--sp-sm) var(--sp-md);border-top:1px solid rgba(30,64,175,0.6);display:flex;justify-content:space-between;font-size:var(--size-xs);color:var(--text-muted)}
+    .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--sp-sm);padding:var(--sp-md)}
+    .project-card{padding:var(--sp-sm);border-radius:var(--rad-md);background:linear-gradient(145deg,rgba(15,23,42,0.9),rgba(15,23,42,0.8));border:1px solid rgba(148,163,184,0.4);cursor:pointer;transition:all var(--trans-fast)}
+    .project-card:hover{border-color:var(--emerald);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+    .project-card.active{border-color:var(--emerald);background:linear-gradient(145deg,rgba(22,242,170,0.15),rgba(15,23,42,0.9))}
+    .dashboard-main{flex:1;padding:var(--sp-md);overflow-y:auto;display:flex;flex-direction:column;gap:var(--sp-lg)}
+    .dashboard-hero{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)}
+    .hero-cta{padding:var(--sp-xl);border-radius:var(--rad-2xl);background:radial-gradient(circle at 0 0,rgba(34,211,238,0.22),transparent 55%),linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.88));border:1px solid rgba(148,163,184,0.6);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;justify-content:center}
+    .hero-cta h1{font-size:var(--size-2xl);margin-bottom:var(--sp-sm);background:linear-gradient(135deg,var(--text-primary),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-cta p{margin-bottom:var(--sp-lg);font-size:var(--size-md);max-width:80%}
+    .hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-md)}
+    .stat-card{padding:var(--sp-lg);border-radius:var(--rad-xl);background:linear-gradient(145deg,rgba(15,23,42,0.95),rgba(15,23,42,0.85));border:1px solid rgba(148,163,184,0.5);display:flex;flex-direction:column;align-items:center;text-align:center}
+    .stat-number{font-size:var(--size-2xl);font-weight:bold;background:linear-gradient(135deg,var(--emerald),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:var(--sp-xs)}
+    .stat-label{font-size:var(--size-xs);color:var(--text-muted)}
+    .dashboard-highlights{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sp-md)}
+    .highlight-card{padding:var(--sp-lg);border-radius:var(--rad-xl);background:linear-gradient(145deg,rgba(15,23,42,0.95),rgba(15,23,42,0.85));border:1px solid rgba(148,163,184,0.5);transition:transform var(--trans-normal),box-shadow var(--trans-normal)}
+    .highlight-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg),var(--shadow-glow)}
+    .highlight-icon{width:40px;height:40px;border-radius:var(--rad-md);background:linear-gradient(135deg,var(--emerald-soft),var(--cyan-soft));display:flex;align-items:center;justify-content:center;margin-bottom:var(--sp-md);font-size:var(--size-lg)}
+    .highlight-card h3{margin-bottom:var(--sp-sm)}
+    .pwa-settings-panel{padding:var(--sp-md)}
+    .pwa-setting-group{margin-bottom:var(--sp-md)}
+    .pwa-setting-label{display:block;font-size:var(--size-xs);font-weight:600;margin-bottom:var(--sp-xs);color:var(--text-secondary)}
+    .chat-inference{margin-top:var(--sp-lg)}
+    .chat-stream{height:300px;border-radius:var(--rad-lg);border:1px solid rgba(148,163,184,0.55);padding:var(--sp-md);overflow-y:auto;display:flex;flex-direction:column;gap:var(--sp-sm);font-size:var(--size-sm);background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.92));margin-bottom:var(--sp-md)}
+    .chat-msg{padding:var(--sp-sm);border-radius:var(--rad-md);border:1px solid rgba(148,163,184,0.45);max-width:80%}
+    .chat-msg.user{align-self:flex-end;background:rgba(16,185,129,0.09);border-color:rgba(16,185,129,0.8)}
+    .chat-msg.assistant{align-self:flex-start;background:rgba(15,23,42,0.95)}
+    .chat-input-row{display:flex;gap:var(--sp-sm)}
+    .chat-input{flex:1;border-radius:var(--rad-lg)}
+    .ai-thinking{display:flex;align-items:center;gap:6px;padding:var(--sp-sm);color:var(--emerald);font-size:var(--size-xs)}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 1.5s infinite}
+    .ai-dot:nth-child(2){animation-delay:0.2s}
+    .ai-dot:nth-child(3){animation-delay:0.4s}
+    @keyframes pulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+    .preview-panel{display:flex;flex-direction:column;height:100%}
+    .preview-frame{flex:1;border-radius:var(--rad-md);border:1px solid rgba(148,163,184,0.5);background:white;overflow:hidden;margin-top:var(--sp-sm)}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(2,6,23,0.9);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+    .modal-overlay.active{display:flex}
+    .modal-content{width:90%;max-width:500px;max-height:90vh;background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.92));border:1px solid rgba(148,163,184,0.6);border-radius:var(--rad-xl);box-shadow:var(--shadow-lg),var(--shadow-glow);display:flex;flex-direction:column;overflow:hidden}
+    .modal-header{padding:var(--sp-md);border-bottom:1px solid rgba(148,163,184,0.4);display:flex;justify-content:space-between;align-items:center}
+    .modal-body{padding:var(--sp-md);overflow-y:auto;flex:1}
+    .modal-footer{padding:var(--sp-md);border-top:1px solid rgba(148,163,184,0.4);display:flex;justify-content:flex-end;gap:var(--sp-sm)}
+    @media(max-width:1100px){.dashboard-hero{grid-template-columns:1fr}.hero-stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.ghost-main{flex-direction:column}.pwa-sidebar{width:100%;min-width:100%;height:300px}.dashboard-main{height:auto}}
+  </style>
 
-    /* Main Area */
-    .main{display:flex;flex:1;min-height:0}
-    .sidebar{width:280px;min-width:280px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--bg-1)}
-    .sidebar-header{padding:12px;border-bottom:1px solid var(--border-soft)}
-    .sidebar-tabs{display:flex;gap:2px;padding:3px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--border)}
-    .sidebar-tab{flex:1;padding:6px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--fg-2);font-size:11px;cursor:pointer;text-align:center}
-    .sidebar-tab.active{background:var(--bg-1);color:var(--fg-0);box-shadow:0 0 0 1px var(--border-strong)}
-    .sidebar-body{flex:1;overflow-y:auto;padding:12px}
-    .sidebar-section{margin-bottom:16px}
-    .sidebar-section-title{font-size:11px;color:var(--fg-2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-
-    /* Canvas Area */
-    .canvas-area{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg-0)}
-    .canvas-tabs{display:flex;gap:2px;padding:4px 8px;background:var(--bg-2);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
-    .canvas-tabs::-webkit-scrollbar{height:4px}
-    .canvas-tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-    .canvas-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-sm);background:var(--panel);border:1px solid transparent;font-size:11px;color:var(--fg-2);cursor:pointer;white-space:nowrap;max-width:160px;min-width:80px}
-    .canvas-tab.active{background:var(--bg-1);border-color:var(--border);color:var(--fg-0)}
-    .canvas-tab-title{flex:1;overflow:hidden;text-overflow:ellipsis}
-    .canvas-tab-close{width:14px;height:14px;border-radius:50%;border:none;background:transparent;color:var(--fg-3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:0;transition:all var(--trans-fast)}
-    .canvas-tab:hover .canvas-tab-close{opacity:1}
-    .canvas-tab-close:hover{background:var(--danger-soft);color:var(--danger)}
-    .canvas-new{padding:6px 10px;border:1px dashed var(--border);color:var(--fg-3)}
-    .canvas-new:hover{border-color:var(--accent);color:var(--accent)}
-    .canvas-viewport{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
-    .canvas-frame{flex:1;border:none;background:var(--bg-0)}
-    .canvas-content{flex:1;overflow:auto;padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.6}
-    .canvas-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg-0);color:var(--fg-2)}
-    .canvas-loading.hidden{display:none}
-
-    /* Tape List */
-    .tape-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-md);border:1px solid var(--border-soft);background:var(--panel);margin-bottom:6px;cursor:pointer;transition:all var(--trans-fast)}
-    .tape-item:hover{border-color:var(--border);background:var(--panel2)}
-    .tape-icon{width:28px;height:28px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--accent-soft),transparent);display:flex;align-items:center;justify-content:center;font-size:12px}
-    .tape-info{flex:1;min-width:0}
-    .tape-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tape-meta{font-size:10px;color:var(--fg-3)}
-    .tape-actions{display:flex;gap:4px;opacity:0;transition:opacity var(--trans-fast)}
-    .tape-item:hover .tape-actions{opacity:1}
-
-    /* Modal */
-    .modal{position:fixed;inset:0;background:rgba(2,4,9,.92);backdrop-filter:blur(20px);display:none;align-items:center;justify-content:center;z-index:9999}
-    .modal.active{display:flex}
-    .modal-content{background:linear-gradient(145deg,var(--bg-1),var(--bg-2));border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;width:90%;max-width:560px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-md),var(--shadow-glow)}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border-soft)}
-    .modal-title{font-size:16px;font-weight:600}
-    .modal-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--fg-2);cursor:pointer;display:flex;align-items:center;justify-content:center}
-    .modal-close:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
-    .modal-body{display:flex;flex-direction:column;gap:16px}
-    .form-group{display:flex;flex-direction:column;gap:6px}
-    .form-label{font-size:11px;color:var(--fg-2);text-transform:uppercase;letter-spacing:.5px}
-    .form-input{padding:10px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--bg-0);color:var(--fg-0);font-size:13px}
-    .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 12px var(--accent-soft)}
-    .form-textarea{min-height:120px;resize:vertical;font-family:var(--font-mono)}
-    .form-row{display:flex;gap:12px}
-    .form-row > *{flex:1}
-    .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-soft)}
-
-    /* Settings */
-    .setting-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:var(--r-md);border:1px solid var(--border-soft);background:var(--panel);margin-bottom:8px}
-    .setting-info{flex:1}
-    .setting-name{font-size:13px;font-weight:500}
-    .setting-desc{font-size:11px;color:var(--fg-3)}
-    .toggle{width:40px;height:22px;border-radius:11px;background:var(--bg-2);border:1px solid var(--border);cursor:pointer;position:relative;transition:all var(--trans-fast)}
-    .toggle.active{background:var(--accent);border-color:var(--accent)}
-    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--fg-0);transition:transform var(--trans-fast)}
-    .toggle.active::after{transform:translateX(18px)}
-
-    /* Status Bar */
-    .status-bar{padding:6px 16px;background:var(--bg-2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--fg-3);flex-shrink:0}
-    .status-left{display:flex;align-items:center;gap:16px}
-    .status-right{display:flex;align-items:center;gap:16px}
-
-    /* Drag handle for tabs */
-    .canvas-tab.dragging{opacity:.5}
-    .canvas-tab.drag-over{border-color:var(--accent)}
-
-    /* Responsive */
-    @media(max-width:768px){
-      .sidebar{display:none}
-      .header-center{margin:0 12px}
-    }
+  <!-- =========================================================
+       BLOCK 4 — UTILITIES
+       ========================================================= -->
+  <style>
+    .flex{display:flex}.flex-col{flex-direction:column}.flex-row{flex-direction:row}
+    .flex-center{justify-content:center;align-items:center}.flex-between{justify-content:space-between;align-items:center}
+    .flex-wrap{flex-wrap:wrap}.gap-xs{gap:var(--sp-xs)}.gap-sm{gap:var(--sp-sm)}.gap-md{gap:var(--sp-md)}.gap-lg{gap:var(--sp-lg)}
+    .mt-xs{margin-top:var(--sp-xs)}.mt-sm{margin-top:var(--sp-sm)}.mt-md{margin-top:var(--sp-md)}.mt-lg{margin-top:var(--sp-lg)}
+    .text-xs{font-size:var(--size-xs)}.text-sm{font-size:var(--size-sm)}.text-md{font-size:var(--size-md)}.text-lg{font-size:var(--size-lg)}
+    .text-muted{color:var(--text-muted)}.text-secondary{color:var(--text-secondary)}
+    .overflow-y-auto{overflow-y:auto}.hidden{display:none!important}.w-full{width:100%}
   </style>
 </head>
 <body>
-  <div id="app">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <div class="logo">⟁</div>
-        <div class="header-title">
-          <strong>BLACK CODE BROWSER</strong>
-          <span>ATOMIC ⊗ KUHUL v1.2.3</span>
+  <canvas id="glyph-rain"></canvas>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">Export PWA Files</div>
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('exportModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="text-sm text-muted">Download your PWA files:</div>
+        <div class="mt-md flex-col gap-sm" id="exportFilesList"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('exportModal')">Cancel</button>
+        <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.downloadAllFiles()">Download All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="newProjectModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">New PWA Project</div>
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('newProjectModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">Project Name</label>
+          <input type="text" class="url-input w-full" id="projectName" placeholder="My Awesome PWA">
+        </div>
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">Description</label>
+          <textarea class="url-input w-full" id="projectDescription" rows="3" placeholder="Describe your PWA..."></textarea>
+        </div>
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">Template</label>
+          <select class="url-input w-full" id="projectTemplate">
+            <option value="basic">Basic PWA</option>
+            <option value="dashboard">Dashboard App</option>
+            <option value="ecommerce">E-commerce</option>
+            <option value="blog">Blog/CMS</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('newProjectModal')">Cancel</button>
+        <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.createNewProject()">Create Project</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="aiResponseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">AI Suggestions</div>
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('aiResponseModal')">✕</button>
+      </div>
+      <div class="modal-body" id="aiResponseContent"></div>
+      <div class="modal-footer">
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('aiResponseModal')">Cancel</button>
+        <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.applyAiChanges()">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="section-title">AI Settings</div>
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('settingsModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">Ollama API Endpoint</label>
+          <input type="text" class="url-input w-full" id="ollamaEndpoint" value="http://localhost:11434/api/generate">
+        </div>
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">Model Name</label>
+          <input type="text" class="url-input w-full" id="ollamaModel" value="llama2">
+        </div>
+        <div class="pwa-setting-group">
+          <label class="pwa-setting-label">OpenAI API Key (optional)</label>
+          <input type="password" class="url-input w-full" id="openaiKey" placeholder="sk-...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="asx-btn" onclick="KUHUL.app.hideModal('settingsModal')">Cancel</button>
+        <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.saveAiSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ghost-root" data-os="mx2lm_pwa_builder">
+    <!-- HEADER -->
+    <header class="ghost-header">
+      <div class="ghost-header-left">
+        <div class="ghost-logo">⟁</div>
+        <div class="ghost-header-title">
+          <strong>MX2LM OS — PWA BUILDER</strong>
+          <span class="text-xs text-muted">AI-Powered PWA Development</span>
         </div>
       </div>
 
-      <div class="header-center">
-        <div class="url-bar">
-          <input type="text" class="url-input" id="urlInput" placeholder="Enter URL or API endpoint...">
-          <button class="btn btn-primary" id="urlGoBtn">Go</button>
-        </div>
+      <div class="url-form">
+        <input type="text" class="url-input" id="urlInput" placeholder="Enter API URL to test...">
+        <button class="asx-btn asx-btn-primary" id="urlOpenBtn">Test</button>
       </div>
 
-      <div class="header-right">
+      <div class="ghost-header-right">
         <div class="chip">
           <div class="chip-dot"></div>
-          <span id="statusChip">Ready</span>
+          <span id="currentProjectDisplay">default</span>
         </div>
-        <button class="btn" id="settingsBtn">Settings</button>
-        <button class="btn" id="exportBtn">Export</button>
+        <button class="asx-btn" id="aiSettingsBtn">AI Settings</button>
+        <button class="asx-btn asx-btn-primary" id="exportPwaBtn">Export</button>
       </div>
     </header>
 
-    <!-- Main -->
-    <main class="main">
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <div class="sidebar-tabs">
-            <button class="sidebar-tab active" data-view="tapes">Tapes</button>
-            <button class="sidebar-tab" data-view="api">API</button>
-            <button class="sidebar-tab" data-view="editor">Editor</button>
+    <!-- MAIN LAYOUT -->
+    <main class="ghost-main">
+      <!-- PWA BUILDER SIDEBAR -->
+      <aside class="pwa-sidebar" id="pwaSidebar">
+        <div class="pwa-sidebar-header">
+          <div class="section-title">
+            <span>PWA Projects</span>
+            <button class="asx-btn" style="font-size:var(--size-xs);padding:4px 8px" onclick="KUHUL.app.showModal('newProjectModal')">+ New</button>
+          </div>
+          <div class="pwa-sidebar-tabs mt-sm">
+            <button class="pwa-sidebar-tab active" data-target="projects">Projects</button>
+            <button class="pwa-sidebar-tab" data-target="files">Files</button>
+            <button class="pwa-sidebar-tab" data-target="settings">Settings</button>
+            <button class="pwa-sidebar-tab" data-target="preview">Preview</button>
           </div>
         </div>
-        <div class="sidebar-body" id="sidebarBody">
-          <!-- Tapes View -->
-          <div class="sidebar-view active" id="view-tapes">
-            <div class="sidebar-section">
-              <div class="sidebar-section-title">
-                <span>Tapes</span>
-                <button class="btn btn-sm" id="newTapeBtn">+ New</button>
-              </div>
-              <div id="tapesList"></div>
+
+        <div class="pwa-sidebar-body">
+          <!-- Projects Tab -->
+          <div class="pwa-editor-container active" id="pwa-projects">
+            <div class="projects-grid" id="projectsGrid"></div>
+            <div class="pwa-editor-footer">
+              <span id="projectsCount">0 projects</span>
+              <button class="asx-btn" style="padding:2px 8px;font-size:var(--size-xs)" onclick="KUHUL.app.importProject()">Import</button>
             </div>
           </div>
 
-          <!-- API View -->
-          <div class="sidebar-view" id="view-api" style="display:none">
-            <div class="sidebar-section">
-              <div class="sidebar-section-title"><span>Endpoints</span></div>
-              <div id="endpointsList"></div>
+          <!-- Files Tab -->
+          <div class="pwa-editor-container" id="pwa-files">
+            <div class="pwa-editor-header">
+              <span>PWA Files (3-File Rule)</span>
+            </div>
+            <div class="pwa-editor-body">
+              <div class="flex-col gap-sm">
+                <button class="asx-btn" onclick="KUHUL.app.switchFile('manifest')">📄 manifest.json</button>
+                <button class="asx-btn" onclick="KUHUL.app.switchFile('sw')">⚡ sw.js</button>
+                <button class="asx-btn" onclick="KUHUL.app.switchFile('index')">🌐 index.html</button>
+              </div>
+              <div class="mt-md">
+                <div class="section-title">Quick Actions</div>
+                <div class="flex-col gap-xs">
+                  <button class="asx-btn" onclick="KUHUL.app.saveAllFiles()">💾 Save All</button>
+                  <button class="asx-btn" onclick="KUHUL.app.updatePreview()">🔍 Update Preview</button>
+                  <button class="asx-btn" onclick="KUHUL.app.optimizeWithAI()">🤖 Optimize with AI</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Editor View -->
-          <div class="sidebar-view" id="view-editor" style="display:none">
-            <div class="sidebar-section">
-              <textarea id="editorArea" class="form-input form-textarea" style="height:300px" placeholder="Code editor..."></textarea>
-              <div style="margin-top:8px;display:flex;gap:8px">
-                <button class="btn btn-sm" id="editorSaveBtn">Save as Tape</button>
-                <button class="btn btn-sm" id="editorRunBtn">Run</button>
+          <!-- Settings Tab -->
+          <div class="pwa-editor-container" id="pwa-settings">
+            <div class="pwa-settings-panel">
+              <div class="pwa-setting-group">
+                <label class="pwa-setting-label">App Name</label>
+                <input type="text" class="url-input w-full" id="pwaName" value="My PWA App">
               </div>
+              <div class="pwa-setting-group">
+                <label class="pwa-setting-label">Short Name</label>
+                <input type="text" class="url-input w-full" id="pwaShortName" value="PWA App">
+              </div>
+              <div class="pwa-setting-group">
+                <label class="pwa-setting-label">Theme Color</label>
+                <input type="color" class="url-input w-full" id="pwaThemeColor" value="#16f2aa" style="height:40px;padding:4px">
+              </div>
+              <div class="pwa-setting-group">
+                <label class="pwa-setting-label">Background Color</label>
+                <input type="color" class="url-input w-full" id="pwaBgColor" value="#020409" style="height:40px;padding:4px">
+              </div>
+              <button class="asx-btn asx-btn-primary w-full mt-md" onclick="KUHUL.app.savePwaSettings()">Save Settings</button>
+            </div>
+          </div>
+
+          <!-- Preview Tab -->
+          <div class="pwa-editor-container" id="pwa-preview">
+            <div class="preview-panel">
+              <div class="section-title">Live Preview</div>
+              <div class="section-subtitle">Real-time PWA preview</div>
+              <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
             </div>
           </div>
         </div>
       </aside>
 
-      <!-- Canvas Area -->
-      <section class="canvas-area">
-        <!-- Canvas Tabs -->
-        <div class="canvas-tabs" id="canvasTabs">
-          <div class="canvas-tab active" data-tab="welcome">
-            <span class="canvas-tab-title">Welcome</span>
+      <!-- DASHBOARD MAIN AREA -->
+      <section class="dashboard-main">
+        <!-- HERO -->
+        <div class="dashboard-hero">
+          <div class="hero-cta">
+            <h1>PWA Builder with AI</h1>
+            <p>Build Progressive Web Apps with AI assistance using Ollama or OpenAI. The 3-file rule: manifest.json, sw.js, index.html.</p>
+            <div class="flex gap-md mt-md">
+              <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.showModal('newProjectModal')">Create New PWA</button>
+              <button class="asx-btn" onclick="KUHUL.app.importProject()">Import Project</button>
+              <button class="asx-btn" onclick="KUHUL.app.showModal('exportModal')">Export Files</button>
+            </div>
           </div>
-          <button class="canvas-tab canvas-new" id="newTabBtn">+</button>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="totalProjects">0</div>
+              <div class="stat-label">Projects</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Core Files</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="aiStatus">Ready</div>
+              <div class="stat-label">AI Status</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">100%</div>
+              <div class="stat-label">PWA Score</div>
+            </div>
+          </div>
         </div>
 
-        <!-- Canvas Viewport -->
-        <div class="canvas-viewport">
-          <div class="canvas-loading hidden" id="canvasLoading">
-            <span>Loading...</span>
-          </div>
-          <div class="canvas-content" id="canvasContent">
-            <h2 style="color:var(--accent);margin-bottom:16px">⟁ BLACK CODE BROWSER</h2>
-            <p style="color:var(--fg-2);margin-bottom:24px">Canvas-based DOM projection browser with KUHUL security runtime.</p>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
-              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
-                <div style="font-size:24px;margin-bottom:8px">📼</div>
-                <h4 style="margin-bottom:4px">Tape Storage</h4>
-                <p style="font-size:11px;color:var(--fg-3)">Store and manage data with SCXQ2 compression</p>
-              </div>
-              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
-                <div style="font-size:24px;margin-bottom:8px">🎬</div>
-                <h4 style="margin-bottom:4px">π Routing</h4>
-                <p style="font-size:11px;color:var(--fg-3)">Auto-route video/audio to canvas renderers</p>
-              </div>
-              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
-                <div style="font-size:24px;margin-bottom:8px">🖼️</div>
-                <h4 style="margin-bottom:4px">Canvas Projection</h4>
-                <p style="font-size:11px;color:var(--fg-3)">DOM→Canvas rendering bypasses CORS</p>
-              </div>
-              <div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--panel)">
-                <div style="font-size:24px;margin-bottom:8px">🔐</div>
-                <h4 style="margin-bottom:4px">KUHUL Security</h4>
-                <p style="font-size:11px;color:var(--fg-3)">Capability-based sandbox with IDB sessions</p>
-              </div>
+        <!-- EDITOR AREA -->
+        <div>
+          <div class="section-title">
+            <span>PWA File Editor</span>
+            <div class="pill-tabs" id="file-tabs">
+              <button class="pill-tab active" data-file="manifest">manifest.json</button>
+              <button class="pill-tab" data-file="sw">sw.js</button>
+              <button class="pill-tab" data-file="index">index.html</button>
             </div>
+          </div>
+          <div class="mt-md">
+            <textarea class="url-input w-full" id="editorContent" rows="15" style="font-family:var(--font-mono);font-size:var(--size-sm)"></textarea>
+          </div>
+          <div class="flex-between mt-sm">
+            <div class="text-xs text-muted" id="fileInfo">manifest.json • 0 characters</div>
+            <div class="flex gap-xs">
+              <button class="asx-btn" onclick="KUHUL.app.saveCurrentFile()">💾 Save</button>
+              <button class="asx-btn" onclick="KUHUL.app.formatCurrentFile()">✨ Format</button>
+              <button class="asx-btn asx-btn-primary" onclick="KUHUL.app.askAiForHelp()">🤖 AI Help</button>
+            </div>
+          </div>
+        </div>
 
-            <svg id="kuhul_svg_root" width="100%" height="120" style="margin-top:24px;border:1px solid var(--border);border-radius:12px;background:var(--bg-1)">
-              <defs>
-                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#16f2aa;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#61e7ff;stop-opacity:1" />
-                </linearGradient>
-              </defs>
-            </svg>
+        <!-- HIGHLIGHTS -->
+        <div>
+          <div class="section-title">
+            <span>AI-Powered Features</span>
+          </div>
+          <div class="dashboard-highlights mt-md">
+            <div class="highlight-card">
+              <div class="highlight-icon">🤖</div>
+              <h3>AI Code Assistance</h3>
+              <p class="text-sm text-muted">Use Ollama (local) or OpenAI for AI suggestions to improve your PWA code.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">⚡</div>
+              <h3>Real-time Preview</h3>
+              <p class="text-sm text-muted">See PWA updates live as you edit. Test install prompts and offline functionality.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">📦</div>
+              <h3>3-File Export</h3>
+              <p class="text-sm text-muted">Export manifest.json, sw.js, and index.html — everything you need for a PWA.</p>
+            </div>
+            <div class="highlight-card">
+              <div class="highlight-icon">🔒</div>
+              <h3>KUHUL Security</h3>
+              <p class="text-sm text-muted">Built with KUHUL JavaCrypt runtime for secure, capability-governed code execution.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI CHAT -->
+        <div class="chat-inference">
+          <div class="section-title">
+            <span>AI Chat Assistant</span>
+            <div class="pill-tabs" id="model-tabs">
+              <button class="pill-tab active" data-model="ollama">Ollama (Local)</button>
+              <button class="pill-tab" data-model="openai">OpenAI</button>
+            </div>
+          </div>
+          <div class="section-subtitle">Ask AI to modify your PWA files, fix issues, or add new features.</div>
+
+          <div class="chat-stream" id="chatStream">
+            <div class="chat-msg assistant">
+              <strong>PWA Assistant:</strong> Hello! I can help you build and optimize your Progressive Web App. Ask me to modify any of the three PWA files. Try: "Add offline page to service worker" or "Optimize manifest for iOS".
+            </div>
+          </div>
+
+          <div class="ai-thinking hidden" id="aiThinking">
+            <span>AI is thinking</span>
+            <div class="ai-dot"></div>
+            <div class="ai-dot"></div>
+            <div class="ai-dot"></div>
+          </div>
+
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask AI to modify PWA files...">
+            <button class="asx-btn asx-btn-primary" id="sendChatBtn">Send</button>
           </div>
         </div>
       </section>
     </main>
-
-    <!-- Status Bar -->
-    <footer class="status-bar">
-      <div class="status-left">
-        <span id="statusText">SW v1.2.3 Ready</span>
-        <span>|</span>
-        <span id="storageInfo">0 tapes • 0 MB</span>
-      </div>
-      <div class="status-right">
-        <span id="tabCount">1 tab</span>
-        <span>|</span>
-        <span>IDB Sessions</span>
-      </div>
-    </footer>
   </div>
 
-  <!-- Tape Modal -->
-  <div class="modal" id="tapeModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="tapeModalTitle">New Tape</h3>
-        <button class="modal-close" id="tapeModalClose">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Name</label>
-          <input type="text" class="form-input" id="tapeName" placeholder="my-file.json">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Type</label>
-            <select class="form-input" id="tapeType">
-              <option value="json">JSON</option>
-              <option value="html">HTML</option>
-              <option value="javascript">JavaScript</option>
-              <option value="css">CSS</option>
-              <option value="markdown">Markdown</option>
-              <option value="text">Text</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Compression</label>
-            <select class="form-input" id="tapeCompression">
-              <option value="none">None</option>
-              <option value="scxq2">SCXQ2</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tags (comma separated)</label>
-          <input type="text" class="form-input" id="tapeTags" placeholder="tag1, tag2">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Content</label>
-          <textarea class="form-input form-textarea" id="tapeContent" placeholder="Paste or type content..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" id="tapeModalCancel">Cancel</button>
-        <button class="btn btn-primary" id="tapeModalSave">Save Tape</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal" id="settingsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Settings</h3>
-        <button class="modal-close" id="settingsModalClose">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">Dark Mode</div>
-            <div class="setting-desc">Use dark theme (default)</div>
-          </div>
-          <div class="toggle active" data-setting="darkMode"></div>
-        </div>
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">Animations</div>
-            <div class="setting-desc">Enable UI animations</div>
-          </div>
-          <div class="toggle active" data-setting="animations"></div>
-        </div>
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">Auto Compression</div>
-            <div class="setting-desc">Compress tapes with SCXQ2</div>
-          </div>
-          <div class="toggle active" data-setting="autoCompression"></div>
-        </div>
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">Projection Cache</div>
-            <div class="setting-desc">Cache fetched content</div>
-          </div>
-          <div class="toggle active" data-setting="projectionCache"></div>
-        </div>
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">IDB Sessions</div>
-            <div class="setting-desc">Store sessions in IndexedDB</div>
-          </div>
-          <div class="toggle active" data-setting="idbSessions"></div>
-        </div>
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-name">π Auto-Routing</div>
-            <div class="setting-desc">Auto-route media to canvas</div>
-          </div>
-          <div class="toggle active" data-setting="piAutoRoute"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" id="importDataBtn">Import Data</button>
-        <button class="btn btn-primary" id="settingsSaveBtn">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Export Modal -->
-  <div class="modal" id="exportModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Export Data</h3>
-        <button class="modal-close" id="exportModalClose">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Format</label>
-          <select class="form-input" id="exportFormat">
-            <option value="scxq2">SCXQ2 (Compressed)</option>
-            <option value="json">JSON (Readable)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Export Data</label>
-          <textarea class="form-input form-textarea" id="exportData" readonly style="height:200px"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" id="copyExportBtn">Copy</button>
-        <button class="btn btn-primary" id="downloadExportBtn">Download</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- KUHUL Runtime + App Logic -->
+  <!-- =========================================================
+       KUHUL JAVACRYPT SECURITY RUNTIME + PWA BUILDER
+       ========================================================= -->
   <script>
-  (function KUHUL_APP() {
+  (function KUHUL_BOOT() {
     'use strict';
 
     /* ═══════════════════════════════════════════════════════════
-       KUHUL SECURITY RUNTIME (embedded for index security)
+       KUHUL SECURITY CORE
        ═══════════════════════════════════════════════════════════ */
-
     const KUHUL = {
       version: '1.2.3',
-      caps: {
+      caps: Object.freeze({
         dom_read: true,
         dom_write: true,
         net_fetch: true,
         storage: true,
         js_run: false,
         console: true
-      },
+      }),
 
-      // Deep freeze utility
       freeze: (obj, seen = new Set()) => {
         if (!obj || typeof obj !== 'object' || seen.has(obj)) return obj;
         seen.add(obj);
@@ -440,70 +526,45 @@
         return obj;
       },
 
-      // Safe JSON parse
-      parseJSON: (s, fallback = null) => {
-        try { return JSON.parse(s); } catch { return fallback; }
-      },
-
-      // UID generator
       uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2),
 
-      // Clamp string length
       clamp: (s, max = 4096) => {
         s = String(s ?? '');
         return s.length > max ? s.slice(0, max) : s;
       },
 
-      // Logger device
+      escapeHtml: (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      },
+
       log: {
         info: (...args) => console.info('[KUHUL]', ...args),
         warn: (...args) => console.warn('[KUHUL]', ...args),
         error: (...args) => console.error('[KUHUL]', ...args)
       },
 
-      // DOM device
       dom: {
         q: (sel) => document.querySelector(sel),
         qa: (sel) => Array.from(document.querySelectorAll(sel)),
         byId: (id) => document.getElementById(id),
         setText: (el, text) => { if (el) el.textContent = String(text ?? ''); },
-        setHTML: (el, html) => { if (el) el.innerHTML = String(html ?? ''); },
-        addClass: (el, cls) => el?.classList.add(cls),
-        removeClass: (el, cls) => el?.classList.remove(cls),
-        toggle: (el, cls) => el?.classList.toggle(cls),
-        show: (el) => { if (el) el.style.display = ''; },
-        hide: (el) => { if (el) el.style.display = 'none'; }
+        setHTML: (el, html) => { if (el) el.innerHTML = String(html ?? ''); }
       },
 
-      // Event binding
       on: (el, event, handler) => {
         if (typeof el === 'string') el = document.querySelector(el);
         el?.addEventListener(event, handler);
       },
 
-      // Safe fetch wrapper
-      fetch: async (url, opts = {}) => {
-        try {
-          const res = await fetch(url, {
-            ...opts,
-            credentials: 'omit',
-            referrerPolicy: 'no-referrer'
-          });
-          return res;
-        } catch (err) {
-          KUHUL.log.error('Fetch failed:', err);
-          return null;
-        }
-      }
+      app: null, // Will be set by PWABuilder
+      sw: null   // Will be set by SW bridge
     };
-
-    KUHUL.freeze(KUHUL.caps);
-    window.KUHUL = KUHUL;
 
     /* ═══════════════════════════════════════════════════════════
        SERVICE WORKER BRIDGE
        ═══════════════════════════════════════════════════════════ */
-
     const SW = {
       ready: false,
       controller: null,
@@ -520,7 +581,6 @@
 
           navigator.serviceWorker.addEventListener('message', SW.onMessage);
 
-          // Wait for controller
           if (navigator.serviceWorker.controller) {
             SW.controller = navigator.serviceWorker.controller;
             SW.ready = true;
@@ -538,569 +598,564 @@
       },
 
       send(msg) {
-        if (SW.controller) {
-          SW.controller.postMessage(msg);
-        }
+        if (SW.controller) SW.controller.postMessage(msg);
       },
 
       onMessage(event) {
         const msg = event.data;
-        if (!msg || !msg.t) return;
-
-        switch (msg.t) {
-          case 'STATUS':
-            App.setStatus(msg.text);
-            break;
-          case 'UI_SYNC':
-            App.sync(msg);
-            break;
-          case 'TAPE_OPENED':
-            App.openTapeContent(msg.tape);
-            break;
-          case 'API_RESPONSE':
-            App.showAPIResponse(msg.result);
-            break;
-          case 'CANVAS_PROJECTED':
-            App.renderProjection(msg.projection);
-            break;
-          case 'TAPE_EXPORT_RESULT':
-            App.showExportData(msg.data);
-            break;
-          case 'TAPE_IMPORT_RESULT':
-            App.handleImportResult(msg);
-            break;
-          case 'TAB_CREATED':
-            App.addTab(msg.tab, msg.session);
-            break;
-          case 'TAB_CLOSED':
-            App.removeTab(msg.id);
-            break;
-          case 'CANVAS_FRAME':
-            App.renderFrame(msg.state);
-            break;
-          case 'SCX_RESULT':
-            KUHUL.log.info('Compression result:', msg);
-            break;
-        }
+        if (!msg?.t) return;
+        KUHUL.log.info('SW message:', msg.t);
       }
     };
+
+    KUHUL.sw = SW;
 
     /* ═══════════════════════════════════════════════════════════
-       APPLICATION STATE & UI
+       PWA BUILDER APPLICATION
        ═══════════════════════════════════════════════════════════ */
+    class PWABuilder {
+      constructor() {
+        this.currentProject = 'default';
+        this.projects = new Map();
+        this.currentFile = 'manifest';
+        this.aiEndpoint = 'http://localhost:11434/api/generate';
+        this.aiModel = 'llama2';
+        this.openaiKey = '';
+        this.activeModel = 'ollama';
+        this.pendingAiResponse = null;
+        this.chatHistory = [];
+      }
 
-    const App = {
-      state: {
-        tapes: [],
-        endpoints: [],
-        tabs: [],
-        sessions: [],
-        settings: {},
-        activeTabId: 'welcome',
-        editingTapeId: null
-      },
-
-      // DOM refs
-      el: {},
-
-      init() {
-        // Cache DOM elements
-        App.el = {
-          urlInput: KUHUL.dom.byId('urlInput'),
-          urlGoBtn: KUHUL.dom.byId('urlGoBtn'),
-          statusChip: KUHUL.dom.byId('statusChip'),
-          statusText: KUHUL.dom.byId('statusText'),
-          storageInfo: KUHUL.dom.byId('storageInfo'),
-          tabCount: KUHUL.dom.byId('tabCount'),
-          tapesList: KUHUL.dom.byId('tapesList'),
-          endpointsList: KUHUL.dom.byId('endpointsList'),
-          canvasTabs: KUHUL.dom.byId('canvasTabs'),
-          canvasContent: KUHUL.dom.byId('canvasContent'),
-          canvasLoading: KUHUL.dom.byId('canvasLoading'),
-          editorArea: KUHUL.dom.byId('editorArea'),
-          // Modals
-          tapeModal: KUHUL.dom.byId('tapeModal'),
-          settingsModal: KUHUL.dom.byId('settingsModal'),
-          exportModal: KUHUL.dom.byId('exportModal')
-        };
-
-        App.bindEvents();
-        App.initSVGWave();
+      async init() {
+        this.loadProjects();
+        this.setupEventListeners();
+        this.updateProjectList();
+        this.switchFile('manifest');
         SW.init();
-      },
+        KUHUL.log.info('PWA Builder initialized');
+      }
 
-      bindEvents() {
-        // URL bar
-        KUHUL.on('#urlGoBtn', 'click', App.navigateURL);
-        KUHUL.on('#urlInput', 'keydown', (e) => { if (e.key === 'Enter') App.navigateURL(); });
+      loadProjects() {
+        const saved = localStorage.getItem('pwa-projects-v2');
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            this.projects = new Map(data.projects || []);
+            this.currentProject = data.currentProject || 'default';
+            if (!this.projects.has(this.currentProject)) this.createDefaultProject();
+          } catch (e) {
+            this.createDefaultProject();
+          }
+        } else {
+          this.createDefaultProject();
+        }
+        this.loadProject(this.currentProject);
+      }
 
+      createDefaultProject() {
+        const project = {
+          id: 'default',
+          name: 'Default PWA',
+          description: 'A Progressive Web App built with MX2LM OS',
+          created: Date.now(),
+          updated: Date.now(),
+          files: {
+            manifest: JSON.stringify({
+              name: "My PWA App",
+              short_name: "PWA App",
+              description: "Built with MX2LM OS PWA Builder",
+              start_url: "/",
+              display: "standalone",
+              background_color: "#020409",
+              theme_color: "#16f2aa",
+              orientation: "any",
+              icons: [
+                { src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
+              ]
+            }, null, 2),
+            sw: `// Service Worker v1.0.0
+const CACHE_NAME = 'pwa-cache-v1';
+const OFFLINE_URL = '/offline.html';
+const URLS_TO_CACHE = ['/', '/index.html', '/manifest.json', '/offline.html'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(URLS_TO_CACHE))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+  event.respondWith(
+    caches.match(event.request).then(r => r || fetch(event.request))
+  );
+});`,
+            index: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My PWA</title>
+  <meta name="theme-color" content="#16f2aa">
+  <meta name="description" content="A Progressive Web App">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #020409; color: #e6fffa; min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 1rem; background: rgba(5,9,18,0.9); border-bottom: 1px solid rgba(148,163,184,0.3); }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+    h1 { background: linear-gradient(135deg, #16f2aa, #22d3ee); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .install-btn { margin-top: 2rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #16f2aa, #22d3ee); color: #020409; border: none; border-radius: 999px; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>My PWA</header>
+  <main>
+    <div>
+      <h1>Welcome to My PWA</h1>
+      <p>A Progressive Web App with offline support.</p>
+      <button class="install-btn" id="installBtn">Install App</button>
+    </div>
+  </main>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+    document.getElementById('installBtn').onclick = () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } };
+  </script>
+</body>
+</html>`
+          },
+          settings: { name: 'My PWA App', shortName: 'PWA App', themeColor: '#16f2aa', bgColor: '#020409' }
+        };
+        this.projects.set('default', project);
+        this.saveProjects();
+      }
+
+      saveProjects() {
+        const data = { currentProject: this.currentProject, projects: Array.from(this.projects.entries()) };
+        localStorage.setItem('pwa-projects-v2', JSON.stringify(data));
+        this.updateProjectList();
+      }
+
+      loadProject(id) {
+        const project = this.projects.get(id);
+        if (!project) return;
+        this.currentProject = id;
+        KUHUL.dom.setText(KUHUL.dom.byId('currentProjectDisplay'), project.name);
+        KUHUL.dom.byId('pwaName').value = project.settings.name;
+        KUHUL.dom.byId('pwaShortName').value = project.settings.shortName;
+        KUHUL.dom.byId('pwaThemeColor').value = project.settings.themeColor;
+        KUHUL.dom.byId('pwaBgColor').value = project.settings.bgColor;
+        this.switchFile('manifest');
+        this.addChatMessage('assistant', `Loaded project: ${project.name}`);
+        this.updateStats();
+      }
+
+      updateProjectList() {
+        const grid = KUHUL.dom.byId('projectsGrid');
+        grid.innerHTML = '';
+        this.projects.forEach((project, id) => {
+          const card = document.createElement('div');
+          card.className = `project-card ${id === this.currentProject ? 'active' : ''}`;
+          card.innerHTML = `<div style="font-weight:600;font-size:var(--size-sm)">${KUHUL.escapeHtml(project.name)}</div><div style="font-size:var(--size-xs);color:var(--text-muted)">${new Date(project.updated).toLocaleDateString()}</div>`;
+          card.onclick = () => this.loadProject(id);
+          grid.appendChild(card);
+        });
+        KUHUL.dom.setText(KUHUL.dom.byId('projectsCount'), `${this.projects.size} projects`);
+        KUHUL.dom.setText(KUHUL.dom.byId('totalProjects'), this.projects.size);
+      }
+
+      setupEventListeners() {
         // Sidebar tabs
-        KUHUL.dom.qa('.sidebar-tab').forEach(tab => {
-          KUHUL.on(tab, 'click', () => App.switchSidebarView(tab.dataset.view));
+        KUHUL.dom.qa('.pwa-sidebar-tab').forEach(tab => {
+          KUHUL.on(tab, 'click', () => {
+            KUHUL.dom.qa('.pwa-sidebar-tab').forEach(t => t.classList.remove('active'));
+            KUHUL.dom.qa('.pwa-editor-container').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            KUHUL.dom.byId(`pwa-${tab.dataset.target}`).classList.add('active');
+          });
         });
 
-        // New tape
-        KUHUL.on('#newTapeBtn', 'click', () => App.openTapeModal());
-        KUHUL.on('#newTabBtn', 'click', () => App.promptNewTab());
-
-        // Tape modal
-        KUHUL.on('#tapeModalClose', 'click', () => App.closeModal('tapeModal'));
-        KUHUL.on('#tapeModalCancel', 'click', () => App.closeModal('tapeModal'));
-        KUHUL.on('#tapeModalSave', 'click', App.saveTape);
-
-        // Settings modal
-        KUHUL.on('#settingsBtn', 'click', () => App.openModal('settingsModal'));
-        KUHUL.on('#settingsModalClose', 'click', () => App.closeModal('settingsModal'));
-        KUHUL.on('#settingsSaveBtn', 'click', App.saveSettings);
-        KUHUL.on('#importDataBtn', 'click', App.promptImport);
-
-        // Export modal
-        KUHUL.on('#exportBtn', 'click', App.openExportModal);
-        KUHUL.on('#exportModalClose', 'click', () => App.closeModal('exportModal'));
-        KUHUL.on('#copyExportBtn', 'click', App.copyExport);
-        KUHUL.on('#downloadExportBtn', 'click', App.downloadExport);
-
-        // Settings toggles
-        KUHUL.dom.qa('.toggle').forEach(toggle => {
-          KUHUL.on(toggle, 'click', () => toggle.classList.toggle('active'));
+        // File tabs
+        KUHUL.dom.qa('#file-tabs .pill-tab').forEach(tab => {
+          KUHUL.on(tab, 'click', () => this.switchFile(tab.dataset.file));
         });
 
-        // Editor
-        KUHUL.on('#editorSaveBtn', 'click', App.saveEditorAsTape);
-        KUHUL.on('#editorRunBtn', 'click', App.runEditor);
+        // Model tabs
+        KUHUL.dom.qa('#model-tabs .pill-tab').forEach(tab => {
+          KUHUL.on(tab, 'click', () => {
+            KUHUL.dom.qa('#model-tabs .pill-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.activeModel = tab.dataset.model;
+          });
+        });
 
-        // Escape to close modals
+        // Buttons
+        KUHUL.on('#exportPwaBtn', 'click', () => this.showExportModal());
+        KUHUL.on('#aiSettingsBtn', 'click', () => this.showModal('settingsModal'));
+        KUHUL.on('#sendChatBtn', 'click', () => this.sendChatMessage());
+        KUHUL.on('#chatInput', 'keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendChatMessage(); } });
+        KUHUL.on('#urlOpenBtn', 'click', () => this.testApiUrl());
+        KUHUL.on('#urlInput', 'keydown', (e) => { if (e.key === 'Enter') this.testApiUrl(); });
+
+        // Editor content change
+        KUHUL.on('#editorContent', 'input', () => this.updateFileInfo());
+
+        // Escape key
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
-            App.closeModal('tapeModal');
-            App.closeModal('settingsModal');
-            App.closeModal('exportModal');
+            ['exportModal', 'newProjectModal', 'aiResponseModal', 'settingsModal'].forEach(id => this.hideModal(id));
           }
         });
-      },
+      }
 
-      // Status
-      setStatus(text) {
-        KUHUL.dom.setText(App.el.statusText, text);
-        KUHUL.dom.setText(App.el.statusChip, text.split(' ')[0]);
-      },
+      switchFile(file) {
+        this.currentFile = file;
+        KUHUL.dom.qa('#file-tabs .pill-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.file === file));
+        const project = this.projects.get(this.currentProject);
+        if (project?.files[file]) KUHUL.dom.byId('editorContent').value = project.files[file];
+        this.updateFileInfo();
+      }
 
-      // Sync from SW
-      sync(data) {
-        if (data.tapes) App.state.tapes = data.tapes;
-        if (data.endpoints) App.state.endpoints = data.endpoints;
-        if (data.tabs) App.state.tabs = data.tabs;
-        if (data.sessions) App.state.sessions = data.sessions;
-        if (data.settings) App.state.settings = data.settings;
+      updateFileInfo() {
+        const content = KUHUL.dom.byId('editorContent').value;
+        const names = { manifest: 'manifest.json', sw: 'sw.js', index: 'index.html' };
+        KUHUL.dom.setText(KUHUL.dom.byId('fileInfo'), `${names[this.currentFile]} • ${content.length} characters`);
+      }
 
-        App.renderTapes();
-        App.renderEndpoints();
+      saveCurrentFile() {
+        const project = this.projects.get(this.currentProject);
+        if (!project) return;
+        project.files[this.currentFile] = KUHUL.dom.byId('editorContent').value;
+        project.updated = Date.now();
+        this.projects.set(this.currentProject, project);
+        this.saveProjects();
+        this.addChatMessage('assistant', `Saved ${this.currentFile} file.`);
+      }
 
-        if (data.dashboard) {
-          const d = data.dashboard;
-          KUHUL.dom.setText(App.el.storageInfo, `${d.totalTapes} tapes • ${d.storage?.usedMB || 0} MB`);
-        }
-
-        KUHUL.dom.setText(App.el.tabCount, `${App.state.tabs.length || 1} tab${App.state.tabs.length !== 1 ? 's' : ''}`);
-      },
-
-      // Sidebar view switching
-      switchSidebarView(view) {
-        KUHUL.dom.qa('.sidebar-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
-        KUHUL.dom.qa('.sidebar-view').forEach(v => v.style.display = v.id === `view-${view}` ? '' : 'none');
-      },
-
-      // Render tapes list
-      renderTapes() {
-        const html = App.state.tapes.map(tape => `
-          <div class="tape-item" data-id="${tape.id}">
-            <div class="tape-icon">${tape.icon || '📄'}</div>
-            <div class="tape-info">
-              <div class="tape-name">${KUHUL.clamp(tape.name, 30)}</div>
-              <div class="tape-meta">${tape.sizeLabel} • ${tape.type}</div>
-            </div>
-            <div class="tape-actions">
-              <button class="btn btn-sm btn-icon tape-open" title="Open">📂</button>
-              <button class="btn btn-sm btn-icon tape-edit" title="Edit">✏️</button>
-              <button class="btn btn-sm btn-icon tape-delete" title="Delete">🗑️</button>
-            </div>
-          </div>
-        `).join('');
-
-        KUHUL.dom.setHTML(App.el.tapesList, html);
-
-        // Bind tape actions
-        KUHUL.dom.qa('.tape-item').forEach(item => {
-          const id = item.dataset.id;
-          KUHUL.on(item.querySelector('.tape-open'), 'click', (e) => { e.stopPropagation(); App.openTape(id); });
-          KUHUL.on(item.querySelector('.tape-edit'), 'click', (e) => { e.stopPropagation(); App.editTape(id); });
-          KUHUL.on(item.querySelector('.tape-delete'), 'click', (e) => { e.stopPropagation(); App.deleteTape(id); });
-          KUHUL.on(item, 'click', () => App.openTape(id));
-        });
-      },
-
-      // Render endpoints
-      renderEndpoints() {
-        const html = App.state.endpoints.map(ep => `
-          <div class="tape-item" data-url="${ep.url}">
-            <div class="tape-icon">🔗</div>
-            <div class="tape-info">
-              <div class="tape-name">${ep.name}</div>
-              <div class="tape-meta">${ep.url}</div>
-            </div>
-          </div>
-        `).join('');
-
-        KUHUL.dom.setHTML(App.el.endpointsList, html);
-
-        KUHUL.dom.qa('#endpointsList .tape-item').forEach(item => {
-          KUHUL.on(item, 'click', () => {
-            App.el.urlInput.value = item.dataset.url;
-            App.navigateURL();
-          });
-        });
-      },
-
-      // Navigate URL
-      navigateURL() {
-        const url = App.el.urlInput.value.trim();
-        if (!url) return;
-
-        App.el.canvasLoading.classList.remove('hidden');
-
-        if (url.startsWith('mx2db://')) {
-          SW.send({ t: 'API_SEND', url, method: 'GET' });
-        } else {
-          SW.send({ t: 'CANVAS_PROJECT', url });
-        }
-
-        SW.send({ t: 'TAB_CREATE', url, opts: { title: url } });
-      },
-
-      // Render projection in canvas
-      renderProjection(projection) {
-        App.el.canvasLoading.classList.add('hidden');
-
-        if (!projection.ok) {
-          KUHUL.dom.setHTML(App.el.canvasContent, `
-            <div style="color:var(--danger)">
-              <h3>Projection Failed</h3>
-              <p>${projection.error}</p>
-              <p style="color:var(--fg-3);font-size:11px;margin-top:8px">URL: ${projection.url}</p>
-            </div>
-          `);
-          return;
-        }
-
-        if (projection.renderer === 'json-view') {
-          const data = KUHUL.parseJSON(projection.html, projection.html);
-          KUHUL.dom.setHTML(App.el.canvasContent, `
-            <pre style="color:var(--accent);white-space:pre-wrap;word-break:break-all">${
-              typeof data === 'object' ? JSON.stringify(data, null, 2) : data
-            }</pre>
-          `);
-        } else {
-          // Render HTML safely (strip scripts)
-          const clean = projection.html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-          KUHUL.dom.setHTML(App.el.canvasContent, `
-            <div style="background:#fff;color:#000;padding:16px;border-radius:8px;overflow:auto;max-height:100%">
-              ${clean}
-            </div>
-          `);
-        }
-      },
-
-      // Show API response
-      showAPIResponse(result) {
-        App.el.canvasLoading.classList.add('hidden');
-
-        if (result.error) {
-          KUHUL.dom.setHTML(App.el.canvasContent, `
-            <div style="color:var(--danger)">
-              <h3>API Error</h3>
-              <p>${result.error}</p>
-            </div>
-          `);
-          return;
-        }
-
-        const data = typeof result.data === 'object' ? JSON.stringify(result.data, null, 2) : result.data;
-        KUHUL.dom.setHTML(App.el.canvasContent, `
-          <div style="color:var(--fg-2);margin-bottom:12px">
-            <span style="color:var(--success)">●</span> ${result.status} ${result.statusText || ''} • ${result.time}ms
-          </div>
-          <pre style="color:var(--accent);white-space:pre-wrap;word-break:break-all">${data}</pre>
-        `);
-      },
-
-      // Tab management
-      addTab(tab, session) {
-        const tabEl = document.createElement('div');
-        tabEl.className = 'canvas-tab';
-        tabEl.dataset.tab = tab.id;
-        tabEl.innerHTML = `
-          <span class="canvas-tab-title">${KUHUL.clamp(session?.title || session?.url || 'New Tab', 20)}</span>
-          <button class="canvas-tab-close">✕</button>
-        `;
-
-        // Insert before + button
-        App.el.canvasTabs.insertBefore(tabEl, KUHUL.dom.byId('newTabBtn'));
-
-        // Bind events
-        KUHUL.on(tabEl, 'click', () => App.activateTab(tab.id));
-        KUHUL.on(tabEl.querySelector('.canvas-tab-close'), 'click', (e) => {
-          e.stopPropagation();
-          App.closeTab(tab.id);
-        });
-
-        // Make draggable
-        tabEl.draggable = true;
-        KUHUL.on(tabEl, 'dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', tab.id);
-          tabEl.classList.add('dragging');
-        });
-        KUHUL.on(tabEl, 'dragend', () => tabEl.classList.remove('dragging'));
-        KUHUL.on(tabEl, 'dragover', (e) => {
-          e.preventDefault();
-          tabEl.classList.add('drag-over');
-        });
-        KUHUL.on(tabEl, 'dragleave', () => tabEl.classList.remove('drag-over'));
-        KUHUL.on(tabEl, 'drop', (e) => {
-          e.preventDefault();
-          tabEl.classList.remove('drag-over');
-          const draggedId = e.dataTransfer.getData('text/plain');
-          if (draggedId !== tab.id) {
-            const order = Array.from(App.el.canvasTabs.querySelectorAll('.canvas-tab:not(.canvas-new)')).indexOf(tabEl);
-            SW.send({ t: 'TAB_REORDER', id: draggedId, order });
-          }
-        });
-
-        App.activateTab(tab.id);
-      },
-
-      activateTab(id) {
-        KUHUL.dom.qa('.canvas-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
-        App.state.activeTabId = id;
-        SW.send({ t: 'TAB_ACTIVATE', id });
-      },
-
-      closeTab(id) {
-        SW.send({ t: 'TAB_CLOSE', id });
-      },
-
-      removeTab(id) {
-        const tab = KUHUL.dom.q(`.canvas-tab[data-tab="${id}"]`);
-        if (tab) tab.remove();
-      },
-
-      promptNewTab() {
-        const url = prompt('Enter URL:');
-        if (url) {
-          App.el.urlInput.value = url;
-          App.navigateURL();
-        }
-      },
-
-      // Tape CRUD
-      openTape(id) {
-        SW.send({ t: 'TAPE_OPEN', id });
-      },
-
-      openTapeContent(tape) {
-        App.el.editorArea.value = tape.content;
-        App.switchSidebarView('editor');
-
-        KUHUL.dom.setHTML(App.el.canvasContent, `
-          <h3 style="margin-bottom:12px">${tape.name}</h3>
-          <pre style="color:var(--fg-1);white-space:pre-wrap">${KUHUL.clamp(tape.content, 10000)}</pre>
-        `);
-      },
-
-      editTape(id) {
-        const tape = App.state.tapes.find(t => t.id === id);
-        if (!tape) return;
-
-        App.state.editingTapeId = id;
-        App.openTapeModal(tape);
-        SW.send({ t: 'TAPE_OPEN', id });
-      },
-
-      deleteTape(id) {
-        if (confirm('Delete this tape?')) {
-          SW.send({ t: 'TAPE_DELETE', id });
-        }
-      },
-
-      openTapeModal(tape = null) {
-        App.state.editingTapeId = tape?.id || null;
-        KUHUL.dom.setText(KUHUL.dom.byId('tapeModalTitle'), tape ? 'Edit Tape' : 'New Tape');
-
-        KUHUL.dom.byId('tapeName').value = tape?.name || '';
-        KUHUL.dom.byId('tapeType').value = tape?.type || 'json';
-        KUHUL.dom.byId('tapeCompression').value = tape?.compression || 'none';
-        KUHUL.dom.byId('tapeTags').value = (tape?.tags || []).join(', ');
-        KUHUL.dom.byId('tapeContent').value = tape?.content || '';
-
-        App.openModal('tapeModal');
-      },
-
-      saveTape() {
-        const name = KUHUL.dom.byId('tapeName').value.trim();
-        const type = KUHUL.dom.byId('tapeType').value;
-        const compression = KUHUL.dom.byId('tapeCompression').value;
-        const tags = KUHUL.dom.byId('tapeTags').value;
-        const content = KUHUL.dom.byId('tapeContent').value;
-
-        if (!name) {
-          alert('Name is required');
-          return;
-        }
-
-        if (App.state.editingTapeId) {
-          SW.send({
-            t: 'TAPE_UPDATE',
-            id: App.state.editingTapeId,
-            updates: { name, type, compression, tags, content }
-          });
-        } else {
-          SW.send({ t: 'TAPE_CREATE', name, type, compression, tags, content });
-        }
-
-        App.closeModal('tapeModal');
-      },
-
-      saveEditorAsTape() {
-        const content = App.el.editorArea.value;
-        const name = prompt('Save as:', `code-${Date.now()}.txt`);
-        if (name) {
-          SW.send({ t: 'EDITOR_SAVE_AS_TAPE', name, content, type: 'text' });
-        }
-      },
-
-      runEditor() {
-        const code = App.el.editorArea.value;
+      formatCurrentFile() {
+        const editor = KUHUL.dom.byId('editorContent');
         try {
-          // Safe eval in console only
-          KUHUL.log.info('Running code...');
-          const result = (new Function('KUHUL', code))(KUHUL);
-          KUHUL.log.info('Result:', result);
-        } catch (err) {
-          KUHUL.log.error('Run error:', err);
+          if (this.currentFile === 'manifest') {
+            editor.value = JSON.stringify(JSON.parse(editor.value), null, 2);
+            this.addChatMessage('assistant', 'Formatted JSON.');
+          }
+        } catch (e) {
+          this.addChatMessage('assistant', `Format error: ${e.message}`);
         }
-      },
+      }
 
-      // Settings
-      saveSettings() {
-        const updates = {};
-        KUHUL.dom.qa('.toggle[data-setting]').forEach(toggle => {
-          updates[toggle.dataset.setting] = toggle.classList.contains('active');
-        });
-        SW.send({ t: 'SETTINGS_UPDATE', updates });
-        App.closeModal('settingsModal');
-      },
+      saveAllFiles() {
+        const project = this.projects.get(this.currentProject);
+        if (!project) return;
+        project.files[this.currentFile] = KUHUL.dom.byId('editorContent').value;
+        project.settings = {
+          name: KUHUL.dom.byId('pwaName').value,
+          shortName: KUHUL.dom.byId('pwaShortName').value,
+          themeColor: KUHUL.dom.byId('pwaThemeColor').value,
+          bgColor: KUHUL.dom.byId('pwaBgColor').value
+        };
+        project.updated = Date.now();
+        this.projects.set(this.currentProject, project);
+        this.saveProjects();
+        this.addChatMessage('assistant', 'All files saved.');
+      }
 
-      // Export/Import
-      openExportModal() {
-        App.openModal('exportModal');
-        SW.send({ t: 'TAPE_EXPORT_ALL', compress: KUHUL.dom.byId('exportFormat').value === 'scxq2' });
-      },
+      savePwaSettings() {
+        this.saveAllFiles();
+        this.updatePreview();
+        this.addChatMessage('assistant', 'PWA settings saved.');
+      }
 
-      showExportData(data) {
-        KUHUL.dom.byId('exportData').value = data;
-      },
+      updatePreview() {
+        const project = this.projects.get(this.currentProject);
+        const frame = KUHUL.dom.byId('previewFrame');
+        if (project && frame) {
+          frame.srcdoc = project.files.index || '';
+        }
+      }
 
-      copyExport() {
-        const data = KUHUL.dom.byId('exportData').value;
-        navigator.clipboard.writeText(data).then(() => {
-          App.setStatus('Copied to clipboard');
-        });
-      },
+      updateStats() {
+        KUHUL.dom.setText(KUHUL.dom.byId('totalProjects'), this.projects.size);
+      }
 
-      downloadExport() {
-        const data = KUHUL.dom.byId('exportData').value;
-        const format = KUHUL.dom.byId('exportFormat').value;
-        const blob = new Blob([data], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `blackcode-export-${Date.now()}.${format === 'scxq2' ? 'scxq2' : 'json'}`;
-        a.click();
-        URL.revokeObjectURL(url);
-      },
+      // AI Methods
+      async sendChatMessage() {
+        const input = KUHUL.dom.byId('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
 
-      promptImport() {
+        this.addChatMessage('user', message);
+        input.value = '';
+        KUHUL.dom.byId('aiThinking').classList.remove('hidden');
+
+        try {
+          const response = await this.callAI(message);
+          KUHUL.dom.byId('aiThinking').classList.add('hidden');
+          this.addChatMessage('assistant', response);
+
+          if (response.includes('```') || (response.includes('{') && response.includes('}'))) {
+            this.showAiResponse(response);
+          }
+        } catch (err) {
+          KUHUL.dom.byId('aiThinking').classList.add('hidden');
+          this.addChatMessage('assistant', `AI Error: ${err.message}. Try checking your AI settings.`);
+        }
+      }
+
+      async callAI(prompt) {
+        const context = `Current PWA file: ${this.currentFile}\nContent preview:\n${KUHUL.dom.byId('editorContent').value.substring(0, 500)}...\n\nUser: ${prompt}`;
+
+        if (this.activeModel === 'ollama') {
+          try {
+            const res = await fetch(this.aiEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ model: this.aiModel, prompt: context, stream: false })
+            });
+            const data = await res.json();
+            return data.response || 'No response from Ollama.';
+          } catch (e) {
+            throw new Error(`Ollama not available. Start Ollama with: ollama serve`);
+          }
+        } else if (this.activeModel === 'openai' && this.openaiKey) {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.openaiKey}` },
+            body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: [{ role: 'user', content: context }] })
+          });
+          const data = await res.json();
+          return data.choices?.[0]?.message?.content || 'No response from OpenAI.';
+        }
+
+        // Fallback demo response
+        return this.getDemoResponse();
+      }
+
+      getDemoResponse() {
+        const responses = {
+          manifest: `Here's an improved manifest.json:\n\n\`\`\`json\n${JSON.stringify({
+            name: "Enhanced PWA", short_name: "PWA", description: "A Progressive Web App",
+            start_url: "/", display: "standalone", background_color: "#020409", theme_color: "#16f2aa",
+            icons: [{ src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" }]
+          }, null, 2)}\n\`\`\``,
+          sw: `Here's an improved service worker:\n\n\`\`\`javascript\nconst CACHE = 'v2';\nself.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])).then(() => self.skipWaiting())));\n\`\`\``,
+          index: `Add this meta tag for better PWA support:\n\n\`\`\`html\n<meta name="apple-mobile-web-app-capable" content="yes">\n\`\`\``
+        };
+        return responses[this.currentFile] || 'I can help you improve your PWA files. Try asking about manifest, service worker, or index.html.';
+      }
+
+      askAiForHelp() {
+        const prompt = `Help me improve this ${this.currentFile} file for better PWA practices.`;
+        KUHUL.dom.byId('chatInput').value = prompt;
+        this.sendChatMessage();
+      }
+
+      optimizeWithAI() {
+        const prompt = `Optimize this ${this.currentFile} file for better PWA performance and best practices.`;
+        KUHUL.dom.byId('chatInput').value = prompt;
+        this.sendChatMessage();
+      }
+
+      showAiResponse(response) {
+        KUHUL.dom.setHTML(KUHUL.dom.byId('aiResponseContent'), `
+          <div class="text-sm text-muted">AI suggestions for ${this.currentFile}:</div>
+          <div style="margin-top:var(--sp-sm);padding:var(--sp-sm);background:rgba(15,23,42,0.7);border-radius:var(--rad-md);font-family:var(--font-mono);font-size:var(--size-xs);overflow-x:auto;white-space:pre-wrap">${KUHUL.escapeHtml(response)}</div>
+        `);
+        this.pendingAiResponse = response;
+        this.showModal('aiResponseModal');
+      }
+
+      applyAiChanges() {
+        if (!this.pendingAiResponse) return;
+        const codeMatch = this.pendingAiResponse.match(/```(?:json|javascript|html)?\n([\s\S]*?)\n```/);
+        if (codeMatch) {
+          KUHUL.dom.byId('editorContent').value = codeMatch[1];
+          this.saveCurrentFile();
+        }
+        this.hideModal('aiResponseModal');
+        this.pendingAiResponse = null;
+      }
+
+      saveAiSettings() {
+        this.aiEndpoint = KUHUL.dom.byId('ollamaEndpoint').value;
+        this.aiModel = KUHUL.dom.byId('ollamaModel').value;
+        this.openaiKey = KUHUL.dom.byId('openaiKey').value;
+        localStorage.setItem('pwa-ai-settings', JSON.stringify({ endpoint: this.aiEndpoint, model: this.aiModel, openaiKey: this.openaiKey }));
+        this.hideModal('settingsModal');
+        this.addChatMessage('assistant', 'AI settings saved.');
+      }
+
+      addChatMessage(role, text) {
+        const stream = KUHUL.dom.byId('chatStream');
+        const msg = document.createElement('div');
+        msg.className = `chat-msg ${role}`;
+        msg.innerHTML = `<strong>${role === 'user' ? 'You' : 'PWA Assistant'}:</strong> ${KUHUL.escapeHtml(text)}`;
+        stream.appendChild(msg);
+        stream.scrollTop = stream.scrollHeight;
+      }
+
+      // Project Management
+      createNewProject() {
+        const name = KUHUL.dom.byId('projectName').value.trim();
+        if (!name) { this.addChatMessage('assistant', 'Please enter a project name.'); return; }
+
+        const id = name.toLowerCase().replace(/\s+/g, '-') + '-' + KUHUL.uid().slice(0, 4);
+        const defaultProj = this.projects.get('default');
+        const project = {
+          id, name,
+          description: KUHUL.dom.byId('projectDescription').value,
+          created: Date.now(), updated: Date.now(),
+          files: { ...defaultProj.files },
+          settings: { name, shortName: name.slice(0, 12), themeColor: '#16f2aa', bgColor: '#020409' }
+        };
+
+        this.projects.set(id, project);
+        this.saveProjects();
+        this.loadProject(id);
+        this.hideModal('newProjectModal');
+        this.addChatMessage('assistant', `Created project: ${name}`);
+      }
+
+      importProject() {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.json,.scxq2';
+        input.accept = '.json';
         input.onchange = async (e) => {
           const file = e.target.files[0];
-          if (!file) return;
-          const data = await file.text();
-          const merge = confirm('Merge with existing data? (Cancel to replace)');
-          SW.send({ t: 'TAPE_IMPORT', data, merge });
+          const content = await file.text();
+          try {
+            const project = JSON.parse(content);
+            if (!project.id || !project.files) throw new Error('Invalid format');
+            this.projects.set(project.id, project);
+            this.saveProjects();
+            this.loadProject(project.id);
+            this.addChatMessage('assistant', `Imported: ${project.name}`);
+          } catch (err) {
+            this.addChatMessage('assistant', `Import failed: ${err.message}`);
+          }
         };
         input.click();
-      },
-
-      handleImportResult(msg) {
-        if (msg.ok) {
-          App.setStatus(`Imported ${msg.imported} tapes`);
-          App.closeModal('settingsModal');
-        } else {
-          alert('Import failed: ' + msg.error);
-        }
-      },
-
-      // Modals
-      openModal(id) {
-        KUHUL.dom.byId(id).classList.add('active');
-      },
-
-      closeModal(id) {
-        KUHUL.dom.byId(id).classList.remove('active');
-      },
-
-      // SVG wave animation
-      initSVGWave() {
-        const svg = KUHUL.dom.byId('kuhul_svg_root');
-        if (!svg) return;
-
-        let frame = 0;
-        const animate = () => {
-          frame++;
-          const w = svg.clientWidth || 400;
-          const h = svg.clientHeight || 120;
-
-          let d = `M 0 ${h/2}`;
-          for (let x = 0; x <= w; x += 8) {
-            const y = (h/2) + Math.sin((x + frame * 2) / 30) * (h/3) * Math.sin(frame / 100);
-            d += ` L ${x} ${y}`;
-          }
-
-          svg.innerHTML = `
-            <defs>
-              <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#16f2aa" />
-                <stop offset="100%" style="stop-color:#61e7ff" />
-              </linearGradient>
-            </defs>
-            <path d="${d}" fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round"/>
-          `;
-
-          requestAnimationFrame(animate);
-        };
-
-        animate();
-      },
-
-      // Render canvas frame (from SW animation loop)
-      renderFrame(state) {
-        // Could update tick counter or other visualizations
       }
-    };
 
-    // Boot
-    document.addEventListener('DOMContentLoaded', () => App.init());
+      // Export
+      showExportModal() {
+        const project = this.projects.get(this.currentProject);
+        if (!project) return;
+        const files = [
+          { name: 'manifest.json', content: project.files.manifest },
+          { name: 'sw.js', content: project.files.sw },
+          { name: 'index.html', content: project.files.index }
+        ];
+        KUHUL.dom.setHTML(KUHUL.dom.byId('exportFilesList'), files.map(f => `
+          <div class="flex-between" style="padding:var(--sp-sm);border:1px solid var(--border-ui);border-radius:var(--rad-md);margin-bottom:var(--sp-xs)">
+            <div><div style="font-weight:600">${f.name}</div><div class="text-xs text-muted">${f.content.length} chars</div></div>
+            <button class="asx-btn" onclick="KUHUL.app.downloadFile('${f.name}')">Download</button>
+          </div>
+        `).join(''));
+        this.showModal('exportModal');
+      }
+
+      downloadFile(filename) {
+        const project = this.projects.get(this.currentProject);
+        const fileMap = { 'manifest.json': 'manifest', 'sw.js': 'sw', 'index.html': 'index' };
+        const content = project.files[fileMap[filename]];
+        const blob = new Blob([content], { type: 'application/octet-stream' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      downloadAllFiles() {
+        ['manifest.json', 'sw.js', 'index.html'].forEach((f, i) => setTimeout(() => this.downloadFile(f), i * 200));
+        this.hideModal('exportModal');
+        this.addChatMessage('assistant', 'Downloading all PWA files...');
+      }
+
+      // API Test
+      async testApiUrl() {
+        const url = KUHUL.dom.byId('urlInput').value.trim();
+        if (!url) return;
+        this.addChatMessage('user', `Testing API: ${url}`);
+        try {
+          const res = await fetch(url);
+          const data = await res.text();
+          this.addChatMessage('assistant', `API Response (${res.status}):\n${data.substring(0, 500)}...`);
+        } catch (e) {
+          this.addChatMessage('assistant', `API Error: ${e.message}`);
+        }
+      }
+
+      // Modal helpers
+      showModal(id) { KUHUL.dom.byId(id).classList.add('active'); }
+      hideModal(id) { KUHUL.dom.byId(id).classList.remove('active'); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       GLYPH RAIN ANIMATION
+       ═══════════════════════════════════════════════════════════ */
+    (function initGlyphRain() {
+      const canvas = document.getElementById('glyph-rain');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const glyphs = '⟁ΩλπΣΞΦΨ✶✺✦✧＊01';
+      let width, height, columns, drops;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        columns = Math.floor(width / 16);
+        drops = Array.from({ length: columns }, () => Math.random() * height);
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.16)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.75)';
+        ctx.font = '14px "JetBrains Mono", monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = glyphs[Math.floor(Math.random() * glyphs.length)];
+          ctx.fillText(text, i * 16, drops[i] * 16);
+          if (drops[i] * 16 > height && Math.random() > 0.975) drops[i] = 0;
+          else drops[i] += 0.5 + Math.random() * 0.5;
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ═══════════════════════════════════════════════════════════
+       BOOT
+       ═══════════════════════════════════════════════════════════ */
+    const app = new PWABuilder();
+    KUHUL.app = app;
+    window.KUHUL = KUHUL;
+    document.addEventListener('DOMContentLoaded', () => app.init());
 
   })();
   </script>
