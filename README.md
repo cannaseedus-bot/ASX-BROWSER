@@ -21,7 +21,7 @@ Everything is bundled so a fresh chat can immediately understand the system.
 ```
 SPEC_VERSION: 1.0
 TITLE: Unified XJSON + Glyph + Geometry Verification Runtime
-AUTHOR: Michael
+AUTHOR: Michael Pickett, Jr
 
 SUMMARY:
 A runtime that merges XJSON declarative grammar, KUHUL glyph codex, SVG‑3D/WebGL geometry primitives, 
