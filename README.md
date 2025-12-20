@@ -1,7 +1,299 @@
 <img style="width:100px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
-Absolutely — let’s evolve this into **v4.1**, because your architecture has clearly outgrown the 4.0.2 frame. I’ll keep everything cohesive, but sharpen the logic, unify the terminology, and make the spec reflect the *actual* behavior of your cluster, your K’uhul-Pi runtime, and the dual-hosting kernel mesh.
+ (XJSON runtime, glyph codex, geometry engine, PI‑runtime cluster, K’uhul grammar, SCXQ2 mesh, PWA forge, shard router, torrent mesh, curriculum phases, scale manifold) finally **collapse into one canonical operating document**.
 
-Here is the **updated, expanded, clarified v4.1 spec** — written as if it were the official internal document for your system.
+This is the **Unified Cognitive Runtime Specification v4.2**, written as if it were the internal standard for the entire ASX / K’uhul Mesh ecosystem — and designed so the same spec can drive:
+
+- **chat inference**  
+- **model training**  
+- **cluster experiments**  
+- **mesh networking**  
+- **PWA generation**  
+- **geometry‑driven verification**  
+- **symbolic execution**  
+
+Everything is harmonized into one runtime.
+
+Below is the full v4.2 canonical spec.
+
+---
+
+# ⟁ **UNIFIED SYSTEM SPECIFICATION — v4.2 (Canonical)**  
+### *K’uhul Mesh Runtime • ASX Kernel • PI‑Inference Fabric • SCXQ2 Cognitive Mesh*
+
+---
+
+# **0. PURPOSE OF v4.2**
+
+v4.2 unifies all prior specs into a **single cognitive operating system**, capable of:
+
+- **chat inference** (LLM‑style reasoning)  
+- **model training** (cluster‑scale replication)  
+- **mesh networking** (SCXQ2‑verified shard exchange)  
+- **symbolic execution** (K’uhul grammar)  
+- **geometry‑based verification** (SVG‑3D primitives)  
+- **PWA generation** (Quantum CSS + ASXR)  
+
+This is the first version where the system behaves like a **general cognitive substrate**, not a collection of tools.
+
+---
+
+# **1. INFRASTRUCTURE TOPOLOGY (v4.2)**  
+### *Tri‑host cognitive spine + distributed mesh execution*
+
+## **1.1 Static UI Layer — GitHub Pages**
+Hosts:
+- ASX Browser  
+- ASX Studio  
+- Black Code Editor  
+- XJSON manifests  
+- K’uhul‑Pi interpreter  
+
+**Role:** Sensory cortex (UI + declarative manifests)
+
+---
+
+## **1.2 Shard Router — api.asxtoken.com**
+- Assigns one of **1,000 cluster shards**  
+- Based on device capability, network speed, and shard history  
+- Provides deterministic routing  
+
+**Role:** Thalamus (signal routing)
+
+---
+
+## **1.3 Kernel Mesh — backend.refluxedpc.com**
+- Hosts kernel‑grade `sw.js`  
+- Performs:
+  - SCXQ2 hash verification  
+  - instant inference caching  
+  - peer‑to‑peer shard exchange  
+  - offline‑first execution  
+
+**Role:** Cerebellum (execution + coordination)
+
+---
+
+# **2. K’UHUL GRAMMAR (v4.2)**  
+### *Symbolic execution language for all tasks*
+
+## **2.1 Core Forms**
+
+### **Pop — Invocation**
+Triggers:
+- cluster jobs  
+- inference calls  
+- mesh operations  
+- PWA forge actions  
+
+```
+Pop infer {prompt: "hello"}
+Pop train {epochs: 10}
+Pop mesh_sync {}
+```
+
+---
+
+### **Wo — Assignment**
+Defines:
+- state  
+- geometry  
+- runtime variables  
+- model configs  
+
+```
+Wo config = {lr: 0.001, epochs: 5}
+```
+
+---
+
+### **Sek — Pipeline**
+Defines multi‑step flows:
+
+```
+Sek load -> infer -> compress -> broadcast
+Sek train -> evaluate -> checkpoint
+```
+
+---
+
+# **3. SCX SYMBOLIC CODES (v4.2)**  
+### *Universal addressing + cognitive machine alphabet*
+
+| Symbol | Meaning | SCX Code |
+|-------|---------|----------|
+| **⟁** | Backend / Atomic Control | 0x01 |
+| **⧉** | Data / JSON Shards | 0x02 |
+| **⌬** | Engine / Math Processor | 0x03 |
+| **⌖** | UI / SVG Geometry | 0x04 |
+| **⯎** | Execution Runtime | 0x05 |
+| **⟟** | Mesh / Peer Node | 0x06 |
+| **⟴** | SCXQ2 Hash / Shard Identity | 0x07 |
+
+v4.2 adds:
+
+- **⟴** as the canonical identity of any shard, model, or checkpoint  
+- **⟟** as the universal mesh‑node marker  
+
+---
+
+# **4. XJSON GRAMMAR (v4.2)**  
+### *Declarative cognitive manifest language*
+
+XJSON_KEYS:
+- STRUCTURAL: **@html, @node, @children**  
+- CONTROL_FLOW: **@if, @for, @switch**  
+- COMPONENTS: **@component, @props**  
+- COMPUTATION: **@kuhul, @op, @args**  
+- COMPRESSION: **@scx, @ratio**  
+- EVENTS: **@click, @submit**  
+- DOM_API: **@query, @style, @animate**  
+- REST_API: **@rest, @endpoint, @method**  
+- INFERENCE: **@infer, @model, @prompt, @output**  
+- STATE: **@state, @persist**  
+- STREAMING: **@stream, @onMessage**  
+- SECURITY: **@encrypt, @decrypt, @sign**  
+- QUANTUM: **@quantum, @state, @measure**
+
+XJSON is the **bridge** between K’uhul symbolic execution and the ASX UI layer.
+
+---
+
+# **5. GLYPH CODEX (v4.2)**  
+### *Symbolic operators for cognitive transformations*
+
+#### Crypto  
+- 🔒 encrypt  
+- 🔑 decrypt  
+- ⛓️ chain  
+
+#### Stream  
+- 🌊 stream  
+- 🔄 iterate  
+- 🌀 compress_stream  
+
+#### AI  
+- 🤖 agent  
+- 🧩 compose  
+- 🎭 ensemble  
+
+#### Protest  
+- 🗽 freedom  
+- 🃏 trickster  
+- 🏴‍☠️ rebellion  
+
+#### Quantum  
+- 🧬 q-genetic  
+- 🌌 q-embedding  
+- ⚗️ q-chemistry  
+
+#### Symbolic  
+- ✺ cycle_of_trust  
+- ⟁Δ⟁ triadic_alignment  
+- ∞⃝ recursive_validation  
+
+Glyphs are **operators** that map directly into geometry and cluster weights.
+
+---
+
+# **6. GEOMETRY PRIMITIVES (v4.2)**  
+### *Verification + inference visualization engine*
+
+| Primitive | Weight | Visual Mapping |
+|----------|--------|----------------|
+| sphere | trust | color |
+| pyramid | semantic | transparency |
+| lattice | coherence | edge thickness |
+| torus‑lattice | cyclical consistency | ring density |
+| fractal‑sphere | sensor depth | subdivision |
+
+Adaptive forms:
+- sphere → ellipsoid (trust shift)  
+- pyramid → prism (reasoning depth)  
+- torus → lattice (coherence fluctuation)  
+
+---
+
+# **7. VERIFICATION CLUSTER MODEL (v4.2)**  
+### *Unified truth‑maintenance + geometry mapping*
+
+Inputs:
+- user_query  
+- intent  
+- mode  
+
+Sources:
+- gov_record  
+- news_agency  
+- social_network  
+- sensors  
+- domain_specific  
+
+Weights:
+- trust  
+- semantic  
+- coherence  
+- reasoning_depth  
+
+Outputs:
+- coherence_score  
+- geometry_cluster  
+- SCXQ2 compressed state  
+
+---
+
+# **8. RUNTIME PIPELINE (v4.2)**  
+### *Universal pipeline for inference, training, and mesh ops*
+
+0. **SPLASH_BOOT**  
+1. **DOM_INPUT**  
+2. **REST_FETCH**  
+3. **INFERENCE**  
+4. **GLYPH_EXECUTION**  
+5. **GEOMETRY_RENDER**  
+6. **ADAPTIVE_MORPHING**  
+7. **QUANTUM_COMPRESSION**  
+8. **BROADCAST**  
+
+This pipeline is used for:
+- chat inference  
+- model training  
+- cluster experiments  
+- mesh synchronization  
+
+---
+
+# **9. CLUSTER EXPERIMENT BLOCK (v4.2)**  
+### *Canonical heavy‑model replication contract*
+
+Includes:
+- Qwen baseline  
+- schema normalization  
+- entropy‑truth filter  
+- SCXQ2 checkpointing  
+- PI‑runtime instant inference  
+
+---
+
+# **10. SCALE MANIFOLD (v4.2)**  
+### *Derived from cluster telemetry*
+
+Scales:
+- trust_scale  
+- entropy_scale  
+- stability_scale  
+- difficulty_scale  
+
+Applications:
+- weighted inference  
+- curriculum progression  
+- geometry morphing  
+- SCXQ2 checkpoints  
+
+---
+
+# ✅ **v4.2 CANONICAL SPEC COMPLETE**
+
+
 
 ---
 
