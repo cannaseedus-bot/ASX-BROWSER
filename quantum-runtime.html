@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>⍟ K'UHUL :: C@@L :: MX2LM QUANTUM FUSION</title>
+
+<style>
+/* ============================================================
+   K'UHUL QUANTUM UNIFIED PRIMITIVES - COMPLETE FUSION
+   ============================================================ */
+
+:root {
+  /* ⍟ K'UHUL DIMENSIONAL STATES */
+  --kuhul-version: "⍟.4.1.6";
+  --kuhul-dimension: "4D+1T";
+  --kuhul-encryption: "ASC_CIPHER_XL";
+  --kuhul-compression: "SCX_99.7%";
+  
+  /* ⍟ QUANTUM OPERATORS */
+  --operator-init: "⤍";      /* Quantum Pop */
+  --operator-bind: "⟿";      /* Quantum Wo */
+  --operator-execute: "⟲";    /* Quantum Sek */
+  --operator-transform: "↻";  /* Quantum Xul */
+  --operator-emit: "⤨";      /* Quantum Ch'en */
+  --operator-collapse: "⤓";   /* Wavefunction Collapse */
+  --operator-entangle: "⤒";   /* Quantum Entanglement */
+  
+  /* ⍟ C@@L ⇄ K'UHUL FUSION */
+  --fusion-state: "quantum_superposition";
+  --fusion-coherence: 0.94;
+  --fusion-entropy: 0.08;
+  
+  /* ⍟ MX2LM QUANTUM WEIGHTS */
+  --weight-superposition: "active";
+  --weight-entanglement: "multi_agent";
+  --weight-collapse: "gradient_descent";
+  
+  /* ⍟ QUANTUM COLOR SPECTRUM */
+  --quantum-1: #16F2AA;    /* Primary Quantum */
+  --quantum-2: #8A2BE2;    /* Vector Purple */
+  --quantum-3: #00D4FF;    /* Neural Blue */
+  --quantum-4: #FF6B8B;    /* Entropy Pink */
+  --quantum-5: #FFD166;    /* Compression Gold */
+  --quantum-6: #FF3366;    /* Hazard Red */
+  --quantum-7: #2BE2B2;    /* Stability Teal */
+  
+  /* ⍟ DIMENSIONAL TRANSFORMS */
+  --transform-x: perspective(1000px) rotateX(calc(var(--rx, 0) * 1deg));
+  --transform-y: rotateY(calc(var(--ry, 0) * 1deg));
+  --transform-z: rotateZ(calc(var(--rz, 0) * 1deg));
+  --transform-t: scale(calc(1 + var(--rt, 0) * 0.01));
+  
+  /* ⍟ QUANTUM ANIMATION STATES */
+  --animation-superposition: "running";
+  --animation-entanglement: "infinite";
+  --animation-collapse: "paused";
+}
+
+/* ============================================================
+   QUANTUM FUSION LAYOUT
+   ============================================================ */
+
+body {
+  margin: 0;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(22, 242, 170, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #020408 0%, #050a14 50%, #020614 100%);
+  color: #dfff;
+  font-family: 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, Consolas, monospace;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.quantum-shell {
+  display: grid;
+  grid-template-columns: 320px 1fr 320px;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  padding: 12px;
+  height: 100vh;
+  position: relative;
+}
+
+.quantum-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(22, 242, 170, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 100% 50%, rgba(138, 43, 226, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================================
+   PANEL STYLES - QUANTUM MATERIAL
+   ============================================================ */
+
+.quantum-panel {
+  background: linear-gradient(135deg, 
+    rgba(10, 15, 25, 0.95) 0%,
+    rgba(5, 10, 20, 0.95) 100%);
+  border: 1px solid;
+  border-image: linear-gradient(45deg, 
+    var(--quantum-1, #16F2AA), 
+    var(--quantum-2, #8A2BE2),
+    var(--quantum-3, #00D4FF)) 1;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.quantum-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(22, 242, 170, 0.02) 0%,
+    rgba(138, 43, 226, 0.02) 50%,
+    rgba(0, 212, 255, 0.02) 100%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   LEFT: K'UHUL QUANTUM KERNEL
+   ============================================================ */
+
+#quantum-kernel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.kernel-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(22, 242, 170, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kernel-badge {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 4px 20px rgba(22, 242, 170, 0.4);
+}
+
+.kernel-title {
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.kernel-state {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.quantum-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--quantum-1);
+  animation: quantum-pulse 2s infinite;
+}
+
+@keyframes quantum-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(22, 242, 170, 0.7); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 10px rgba(22, 242, 170, 0); }
+}
+
+/* QUANTUM EXECUTION PIPELINE */
+.quantum-pipeline {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pipeline-stage {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pipeline-stage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--quantum-1), var(--quantum-2));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pipeline-stage:hover::before {
+  opacity: 1;
+}
+
+.pipeline-stage:hover {
+  background: rgba(22, 242, 170, 0.05);
+  transform: translateX(4px);
+  border-color: rgba(22, 242, 170, 0.2);
+}
+
+.stage-operator {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-name {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.stage-desc {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* QUANTUM TAPE SURFACE */
+.quantum-tape {
+  flex: 1;
+  padding: 16px;
+  position: relative;
+  min-height: 300px;
+}
+
+.tape-surface {
+  position: absolute;
+  inset: 16px;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(22, 242, 170, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(138, 43, 226, 0.03) 0%, transparent 50%);
+  border: 2px dashed rgba(22, 242, 170, 0.1);
+  border-radius: 12px;
+  perspective: 1000px;
+}
+
+.quantum-node {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid;
+  border-image: linear-gradient(45deg, var(--quantum-1), var(--quantum-2)) 1;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  user-select: none;
+}
+
+.quantum-node:hover {
+  transform: translateZ(20px) scale(1.1);
+  box-shadow: 0 20px 60px rgba(22, 242, 170, 0.3);
+  z-index: 100;
+}
+
+.node-badge {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.node-label {
+  font-size: 10px;
+  opacity: 0.9;
+  text-align: center;
+}
+
+/* ============================================================
+   CENTER: C@@L ⇄ MX2LM FUSION ENGINE
+   ============================================================ */
+
+#fusion-engine {
+  display: flex;
+  flex-direction: column;
+}
+
+.fusion-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(22, 242, 170, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fusion-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fusion-symbol {
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-2), var(--quantum-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fusion-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* FUSION VISUALIZATION */
+.fusion-visual {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.fusion-canvas {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(22, 242, 170, 0.02) 0%, transparent 70%),
+    linear-gradient(135deg, rgba(5, 10, 20, 0.8) 0%, rgba(10, 15, 25, 0.8) 100%);
+}
+
+/* QUANTUM WEIGHT MATRIX */
+.weight-matrix {
+  position: absolute;
+  inset: 20px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.weight-cell {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.weight-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-3));
+  opacity: var(--weight-value, 0);
+  transition: opacity 0.3s ease;
+}
+
+.weight-cell:hover::before {
+  opacity: calc(var(--weight-value, 0) * 1.5);
+}
+
+.weight-cell:hover {
+  transform: scale(1.2);
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(22, 242, 170, 0.3);
+}
+
+/* QUANTUM PATH VISUALIZATION */
+.quantum-paths {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.quantum-path {
+  fill: none;
+  stroke: var(--quantum-1);
+  stroke-width: 1.5;
+  stroke-dasharray: 5, 5;
+  animation: path-flow 3s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes path-flow {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 100; }
+}
+
+/* FUSION CONTROLS */
+.fusion-controls {
+  padding: 16px;
+  border-top: 1px solid rgba(22, 242, 170, 0.2);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.fusion-btn {
+  padding: 10px;
+  background: linear-gradient(45deg, 
+    rgba(22, 242, 170, 0.1), 
+    rgba(138, 43, 226, 0.1));
+  border: 1px solid;
+  border-image: linear-gradient(45deg, var(--quantum-1), var(--quantum-2)) 1;
+  border-radius: 8px;
+  color: var(--quantum-1);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fusion-btn:hover {
+  background: linear-gradient(45deg, 
+    rgba(22, 242, 170, 0.2), 
+    rgba(138, 43, 226, 0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(22, 242, 170, 0.2);
+}
+
+.fusion-btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   RIGHT: QUANTUM MONITOR & METRICS
+   ============================================================ */
+
+#quantum-monitor {
+  display: flex;
+  flex-direction: column;
+}
+
+.monitor-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(22, 242, 170, 0.2);
+}
+
+.monitor-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.monitor-title::before {
+  content: '⍟';
+  color: var(--quantum-1);
+}
+
+/* QUANTUM METRICS */
+.quantum-metrics {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  background: rgba(22, 242, 170, 0.05);
+  border-color: rgba(22, 242, 170, 0.2);
+  transform: translateX(4px);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metric-value {
+  font-size: 14px;
+  font-weight: bold;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.metric-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--quantum-1), var(--quantum-2));
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* QUANTUM STATE VISUALIZATION */
+.quantum-states {
+  padding: 16px;
+  border-top: 1px solid rgba(22, 242, 170, 0.2);
+}
+
+.state-visual {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.state-cell {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 11px;
+  transition: all 0.3s ease;
+}
+
+.state-cell.active {
+  background: linear-gradient(45deg, 
+    rgba(22, 242, 170, 0.1), 
+    rgba(138, 43, 226, 0.1));
+  border-color: var(--quantum-1);
+  box-shadow: 0 4px 16px rgba(22, 242, 170, 0.2);
+}
+
+.state-cell .operator {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+/* ============================================================
+   QUANTUM INTERACTIONS
+   ============================================================ */
+
+.quantum-interaction {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.interaction-btn {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(45deg, var(--quantum-1), var(--quantum-2));
+  border-radius: 50%;
+  border: none;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(22, 242, 170, 0.4);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.interaction-btn:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 48px rgba(22, 242, 170, 0.6);
+}
+
+/* ============================================================
+   QUANTUM ANIMATIONS
+   ============================================================ */
+
+@keyframes quantum-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes quantum-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+}
+
+@keyframes quantum-glow {
+  0%, 100% { 
+    opacity: 0.3; 
+    filter: blur(0px);
+  }
+  50% { 
+    opacity: 0.8; 
+    filter: blur(2px);
+  }
+}
+
+.quantum-spin {
+  animation: quantum-spin 4s linear infinite;
+}
+
+.quantum-float {
+  animation: quantum-float 3s ease-in-out infinite;
+}
+
+.quantum-glow {
+  animation: quantum-glow 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+
+@media (max-width: 1200px) {
+  .quantum-shell {
+    grid-template-columns: 280px 1fr 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  .quantum-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 300px 1fr 300px;
+  }
+  
+  .fusion-controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .state-visual {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .fusion-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .state-visual {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+  <div class="quantum-shell">
+    
+    <!-- LEFT: K'UHUL QUANTUM KERNEL -->
+    <section id="quantum-kernel" class="quantum-panel">
+      <div class="kernel-header">
+        <div class="kernel-badge quantum-spin">⍟</div>
+        <div class="kernel-title">K'UHUL Quantum Kernel v⍟.4.1.6</div>
+        <div class="kernel-state">
+          <div class="quantum-dot"></div>
+          <span style="font-size: 12px; opacity: 0.8;">SUPERPOSITION</span>
+        </div>
+      </div>
+      
+      <div class="quantum-pipeline">
+        <div class="pipeline-stage" data-operator="⤍" data-active="true">
+          <div class="stage-operator">⤍</div>
+          <div class="stage-info">
+            <div class="stage-name">Quantum Init</div>
+            <div class="stage-desc">Wavefunction preparation</div>
+          </div>
+        </div>
+        
+        <div class="pipeline-stage" data-operator="⟿">
+          <div class="stage-operator">⟿</div>
+          <div class="stage-info">
+            <div class="stage-name">Quantum Bind</div>
+            <div class="stage-desc">State entanglement</div>
+          </div>
+        </div>
+        
+        <div class="pipeline-stage" data-operator="⟲">
+          <div class="stage-operator">⟲</div>
+          <div class="stage-info">
+            <div class="stage-name">Spherical Execute</div>
+            <div class="stage-desc">360° quantum loop</div>
+          </div>
+        </div>
+        
+        <div class="pipeline-stage" data-operator="↻">
+          <div class="stage-operator">↻</div>
+          <div class="stage-info">
+            <div class="stage-name">Quantum Transform</div>
+            <div class="stage-desc">State evolution</div>
+          </div>
+        </div>
+        
+        <div class="pipeline-stage" data-operator="⤨">
+          <div class="stage-operator">⤨</div>
+          <div class="stage-info">
+            <div class="stage-name">Quantum Emit</div>
+            <div class="stage-desc">Wavefunction collapse</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="quantum-tape">
+        <div class="tape-surface" id="quantum-tape-surface">
+          <!-- Quantum nodes will be dynamically positioned -->
+        </div>
+      </div>
+    </section>
+    
+    <!-- CENTER: C@@L ⇄ MX2LM FUSION ENGINE -->
+    <section id="fusion-engine" class="quantum-panel">
+      <div class="fusion-header">
+        <div class="fusion-badge">
+          <div class="fusion-symbol">C@@L ⇄ MX2LM</div>
+          <div class="fusion-title">Quantum Fusion Engine</div>
+        </div>
+        <div class="kernel-state">
+          <div class="quantum-dot" style="background: var(--quantum-2);"></div>
+          <span style="font-size: 12px; opacity: 0.8;">ENTANGLED</span>
+        </div>
+      </div>
+      
+      <div class="fusion-visual">
+        <div class="fusion-canvas">
+          <div class="weight-matrix" id="weight-matrix">
+            <!-- Weight cells will be dynamically generated -->
+          </div>
+          
+          <svg class="quantum-paths" id="quantum-paths">
+            <!-- Quantum paths will be dynamically drawn -->
+          </svg>
+        </div>
+      </div>
+      
+      <div class="fusion-controls">
+        <button class="fusion-btn" onclick="quantumEntangle()">
+          <span>⤒</span> Entangle
+        </button>
+        <button class="fusion-btn" onclick="quantumCollapse()">
+          <span>⤓</span> Collapse
+        </button>
+        <button class="fusion-btn" onclick="quantumSuperpose()">
+          <span>⤃</span> Superpose
+        </button>
+        <button class="fusion-btn" onclick="quantumMeasure()">
+          <span>⤍</span> Measure
+        </button>
+        <button class="fusion-btn" onclick="quantumDecohere()">
+          <span>⤦</span> Decohere
+        </button>
+        <button class="fusion-btn" onclick="quantumReset()">
+          <span>⤧</span> Reset
+        </button>
+      </div>
+    </section>
+    
+    <!-- RIGHT: QUANTUM MONITOR & METRICS -->
+    <section id="quantum-monitor" class="quantum-panel">
+      <div class="monitor-header">
+        <div class="monitor-title">Quantum State Monitor</div>
+        <div style="font-size: 11px; opacity: 0.7; line-height: 1.4;">
+          Real-time visualization of quantum superposition,<br>
+          entanglement, and wavefunction dynamics.
+        </div>
+      </div>
+      
+      <div class="quantum-metrics">
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-1);">⤃</span> Superposition
+            </div>
+            <div class="metric-value" id="superposition-value">94.7%</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="superposition-bar" style="width: 94.7%;"></div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-2);">⤒</span> Entanglement
+            </div>
+            <div class="metric-value" id="entanglement-value">88.3%</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="entanglement-bar" style="width: 88.3%;"></div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-3);">⟲</span> Coherence
+            </div>
+            <div class="metric-value" id="coherence-value">72.6%</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="coherence-bar" style="width: 72.6%;"></div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-4);">⤦</span> Entropy
+            </div>
+            <div class="metric-value" id="entropy-value">0.12</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="entropy-bar" style="width: 12%;"></div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-5);">↔</span> Compression
+            </div>
+            <div class="metric-value" id="compression-value">99.7%</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="compression-bar" style="width: 99.7%;"></div>
+          </div>
+        </div>
+        
+        <div class="metric-card">
+          <div class="metric-header">
+            <div class="metric-label">
+              <span style="color: var(--quantum-6);">⤏</span> Cipher Strength
+            </div>
+            <div class="metric-value" id="cipher-value">512-bit</div>
+          </div>
+          <div class="metric-bar">
+            <div class="metric-fill" id="cipher-bar" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="quantum-states">
+        <div class="state-visual">
+          <div class="state-cell active">
+            <span class="operator">⤍</span>
+            <div>Init</div>
+          </div>
+          <div class="state-cell">
+            <span class="operator">⟿</span>
+            <div>Bind</div>
+          </div>
+          <div class="state-cell">
+            <span class="operator">⟲</span>
+            <div>Execute</div>
+          </div>
+          <div class="state-cell">
+            <span class="operator">↻</span>
+            <div>Transform</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+  <!-- QUANTUM INTERACTION BUTTON -->
+  <div class="quantum-interaction">
+    <button class="interaction-btn" onclick="quantumToggle()">⍟</button>
+  </div>
+</body>
+
+<script>
+/* ============================================================
+   QUANTUM FUSION ENGINE - CORE LOGIC
+   ============================================================ */
+
+class QuantumFusionEngine {
+  constructor() {
+    this.states = {
+      superposition: 0.947,
+      entanglement: 0.883,
+      coherence: 0.726,
+      entropy: 0.12,
+      compression: 0.997,
+      cipher: 512
+    };
+    
+    this.operators = {
+      '⤍': { name: 'Init', state: 'active' },
+      '⟿': { name: 'Bind', state: 'inactive' },
+      '⟲': { name: 'Execute', state: 'inactive' },
+      '↻': { name: 'Transform', state: 'inactive' },
+      '⤨': { name: 'Emit', state: 'inactive' },
+      '⤓': { name: 'Collapse', state: 'inactive' },
+      '⤒': { name: 'Entangle', state: 'inactive' },
+      '⤃': { name: 'Superpose', state: 'inactive' },
+      '⤦': { name: 'Decohere', state: 'inactive' },
+      '⤧': { name: 'Reset', state: 'inactive' }
+    };
+    
+    this.quantumNodes = [];
+    this.weightMatrix = [];
+    this.quantumPaths = [];
+    
+    this.init();
+  }
+  
+  init() {
+    console.log('⍟ Quantum Fusion Engine Initializing...');
+    
+    // Initialize quantum nodes
+    this.initQuantumNodes();
+    
+    // Initialize weight matrix
+    this.initWeightMatrix();
+    
+    // Initialize quantum paths
+    this.initQuantumPaths();
+    
+    // Start quantum dynamics
+    this.startQuantumDynamics();
+    
+    console.log('⍟ Quantum Fusion Engine Ready');
+  }
+  
+  initQuantumNodes() {
+    const nodes = [
+      { id: 'neural', x: 30, y: 30, operator: '⤃', label: 'Neural', color: 'var(--quantum-1)' },
+      { id: 'cipher', x: 70, y: 30, operator: '⤏', label: 'Cipher', color: 'var(--quantum-2)' },
+      { id: 'compress', x: 30, y: 70, operator: '↔', label: 'Compress', color: 'var(--quantum-5)' },
+      { id: 'entangle', x: 70, y: 70, operator: '⤒', label: 'Entangle', color: 'var(--quantum-3)' },
+      { id: 'measure', x: 50, y: 50, operator: '⤍', label: 'Measure', color: 'var(--quantum-7)' }
+    ];
+    
+    const surface = document.getElementById('quantum-tape-surface');
+    
+    nodes.forEach(node => {
+      const div = document.createElement('div');
+      div.className = 'quantum-node quantum-float';
+      div.style.left = `${node.x}%`;
+      div.style.top = `${node.y}%`;
+      div.style.transform = `translate(-50%, -50%)`;
+      div.style.borderImage = `linear-gradient(45deg, ${node.color}, ${node.color}99) 1`;
+      div.innerHTML = `
+        <div class="node-badge">${node.operator}</div>
+        <div class="node-label">${node.label}</div>
+      `;
+      
+      // Make draggable
+      this.makeDraggable(div);
+      
+      surface.appendChild(div);
+      this.quantumNodes.push({
+        element: div,
+        ...node
+      });
+    });
+  }
+  
+  makeDraggable(element) {
+    let isDragging = false;
+    let offsetX, offsetY;
+    
+    element.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+    
+    function startDrag(e) {
+      isDragging = true;
+      const rect = element.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      element.style.zIndex = '1000';
+      element.classList.add('quantum-glow');
+    }
+    
+    function drag(e) {
+      if (!isDragging) return;
+      
+      const surface = document.getElementById('quantum-tape-surface');
+      const surfaceRect = surface.getBoundingClientRect();
+      
+      let x = e.clientX - surfaceRect.left - offsetX;
+      let y = e.clientY - surfaceRect.top - offsetY;
+      
+      // Constrain to surface
+      x = Math.max(0, Math.min(surfaceRect.width - element.offsetWidth, x));
+      y = Math.max(0, Math.min(surfaceRect.height - element.offsetHeight, y));
+      
+      element.style.left = `${(x / surfaceRect.width) * 100}%`;
+      element.style.top = `${(y / surfaceRect.height) * 100}%`;
+      element.style.transform = `translate(-50%, -50%) translateZ(30px)`;
+    }
+    
+    function stopDrag() {
+      isDragging = false;
+      element.style.zIndex = '';
+      element.classList.remove('quantum-glow');
+    }
+  }
+  
+  initWeightMatrix() {
+    const matrix = document.getElementById('weight-matrix');
+    matrix.innerHTML = '';
+    
+    for (let i = 0; i < 64; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'weight-cell';
+      
+      // Random weight value for demo
+      const weight = Math.random() * 0.8 + 0.1;
+      cell.style.setProperty('--weight-value', weight);
+      
+      // Store reference
+      this.weightMatrix.push({
+        element: cell,
+        weight: weight
+      });
+      
+      matrix.appendChild(cell);
+    }
+  }
+  
+  initQuantumPaths() {
+    const svg = document.getElementById('quantum-paths');
+    svg.innerHTML = '';
+    
+    // Create 5 random quantum paths
+    for (let i = 0; i < 5; i++) {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      
+      // Random Bézier curve
+      const x1 = Math.random() * 20 + 10;
+      const y1 = Math.random() * 100;
+      const cx1 = Math.random() * 100;
+      const cy1 = Math.random() * 100;
+      const cx2 = Math.random() * 100;
+      const cy2 = Math.random() * 100;
+      const x2 = Math.random() * 80 + 20;
+      const y2 = Math.random() * 100;
+      
+      const d = `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+      path.setAttribute('d', d);
+      path.setAttribute('class', 'quantum-path');
+      
+      // Random color
+      const colors = ['var(--quantum-1)', 'var(--quantum-2)', 'var(--quantum-3)'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      path.style.stroke = color;
+      
+      // Random animation delay
+      const delay = Math.random() * 2;
+      path.style.animationDelay = `${delay}s`;
+      
+      svg.appendChild(path);
+      this.quantumPaths.push(path);
+    }
+  }
+  
+  startQuantumDynamics() {
+    // Update weight matrix animation
+    setInterval(() => {
+      this.weightMatrix.forEach(cell => {
+        const change = (Math.random() - 0.5) * 0.05;
+        const newWeight = Math.max(0, Math.min(1, cell.weight + change));
+        cell.weight = newWeight;
+        cell.element.style.setProperty('--weight-value', newWeight);
+      });
+    }, 1000);
+    
+    // Update metrics animation
+    setInterval(() => {
+      this.updateMetrics();
+    }, 2000);
+  }
+  
+  updateMetrics() {
+    // Slightly randomize metrics for demo
+    Object.keys(this.states).forEach(key => {
+      if (key === 'cipher') return; // Keep cipher constant
+      
+      const change = (Math.random() - 0.5) * 0.02;
+      this.states[key] = Math.max(0, Math.min(1, this.states[key] + change));
+    });
+    
+    // Update UI
+    document.getElementById('superposition-value').textContent = 
+      `${(this.states.superposition * 100).toFixed(1)}%`;
+    document.getElementById('superposition-bar').style.width = 
+      `${this.states.superposition * 100}%`;
+    
+    document.getElementById('entanglement-value').textContent = 
+      `${(this.states.entanglement * 100).toFixed(1)}%`;
+    document.getElementById('entanglement-bar').style.width = 
+      `${this.states.entanglement * 100}%`;
+    
+    document.getElementById('coherence-value').textContent = 
+      `${(this.states.coherence * 100).toFixed(1)}%`;
+    document.getElementById('coherence-bar').style.width = 
+      `${this.states.coherence * 100}%`;
+    
+    document.getElementById('entropy-value').textContent = 
+      this.states.entropy.toFixed(3);
+    document.getElementById('entropy-bar').style.width = 
+      `${this.states.entropy * 100}%`;
+    
+    document.getElementById('compression-value').textContent = 
+      `${(this.states.compression * 100).toFixed(1)}%`;
+    document.getElementById('compression-bar').style.width = 
+      `${this.states.compression * 100}%`;
+  }
+  
+  // ========== QUANTUM OPERATIONS ==========
+  
+  quantumEntangle() {
+    console.log('⤒ Quantum Entanglement initiated');
+    this.animateOperator('⤒');
+    
+    // Increase entanglement
+    this.states.entanglement = Math.min(1, this.states.entanglement + 0.1);
+    this.updateMetrics();
+    
+    // Visual feedback
+    this.pulseQuantumNodes('var(--quantum-2)');
+  }
+  
+  quantumCollapse() {
+    console.log('⤓ Wavefunction Collapse');
+    this.animateOperator('⤓');
+    
+    // Reset superposition
+    this.states.superposition = 0.1;
+    this.updateMetrics();
+    
+    // Visual feedback
+    document.body.style.animation = 'none';
+    setTimeout(() => {
+      document.body.style.animation = 'quantum-glow 0.5s ease-out';
+    }, 10);
+  }
+  
+  quantumSuperpose() {
+    console.log('⤃ Quantum Superposition');
+    this.animateOperator('⤃');
+    
+    // Increase superposition
+    this.states.superposition = Math.min(1, this.states.superposition + 0.15);
+    this.updateMetrics();
+    
+    // Visual feedback
+    this.pulseQuantumNodes('var(--quantum-1)');
+  }
+  
+  quantumMeasure() {
+    console.log('⤍ Quantum Measurement');
+    this.animateOperator('⤍');
+    
+    // Collapse some superposition
+    this.states.superposition *= 0.7;
+    this.updateMetrics();
+    
+    // Visual feedback
+    this.weightMatrix.forEach(cell => {
+      cell.element.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        cell.element.style.transform = 'scale(1)';
+      }, 300);
+    });
+  }
+  
+  quantumDecohere() {
+    console.log('⤦ Quantum Decoherence');
+    this.animateOperator('⤦');
+    
+    // Increase entropy
+    this.states.entropy = Math.min(1, this.states.entropy + 0.05);
+    this.updateMetrics();
+    
+    // Visual feedback
+    document.documentElement.style.setProperty('--quantum-1', '#FF3366');
+    setTimeout(() => {
+      document.documentElement.style.setProperty('--quantum-1', '#16F2AA');
+    }, 1000);
+  }
+  
+  quantumReset() {
+    console.log('⤧ Quantum Reset');
+    this.animateOperator('⤧');
+    
+    // Reset all states
+    this.states = {
+      superposition: 0.947,
+      entanglement: 0.883,
+      coherence: 0.726,
+      entropy: 0.12,
+      compression: 0.997,
+      cipher: 512
+    };
+    
+    this.updateMetrics();
+    
+    // Reset visual state
+    this.weightMatrix.forEach(cell => {
+      cell.element.style.setProperty('--weight-value', 0.5);
+    });
+  }
+  
+  animateOperator(operator) {
+    const stages = document.querySelectorAll('.pipeline-stage');
+    stages.forEach(stage => {
+      if (stage.dataset.operator === operator) {
+        stage.dataset.active = 'true';
+        stage.style.background = 'linear-gradient(45deg, rgba(22, 242, 170, 0.2), rgba(138, 43, 226, 0.2))';
+        
+        setTimeout(() => {
+          stage.dataset.active = 'false';
+          stage.style.background = '';
+        }, 1000);
+      }
+    });
+    
+    // Update state cells
+    const stateCells = document.querySelectorAll('.state-cell');
+    stateCells.forEach(cell => {
+      if (cell.querySelector('.operator').textContent === operator) {
+        cell.classList.add('active');
+        setTimeout(() => {
+          cell.classList.remove('active');
+        }, 1000);
+      }
+    });
+  }
+  
+  pulseQuantumNodes(color) {
+    this.quantumNodes.forEach(node => {
+      node.element.style.boxShadow = `0 0 40px ${color}`;
+      setTimeout(() => {
+        node.element.style.boxShadow = '';
+      }, 500);
+    });
+  }
+}
+
+// ============================================================
+// INITIALIZATION & GLOBAL FUNCTIONS
+// ============================================================
+
+let quantumEngine = null;
+
+window.addEventListener('load', () => {
+  quantumEngine = new QuantumFusionEngine();
+  
+  // Initialize CSS variables
+  document.documentElement.style.setProperty('--kuhul-version', '"⍟.4.1.6"');
+  document.documentElement.style.setProperty('--kuhul-dimension', '"4D+1T"');
+  document.documentElement.style.setProperty('--fusion-state', '"quantum_superposition"');
+});
+
+// Global functions for button clicks
+function quantumEntangle() {
+  if (quantumEngine) quantumEngine.quantumEntangle();
+}
+
+function quantumCollapse() {
+  if (quantumEngine) quantumEngine.quantumCollapse();
+}
+
+function quantumSuperpose() {
+  if (quantumEngine) quantumEngine.quantumSuperpose();
+}
+
+function quantumMeasure() {
+  if (quantumEngine) quantumEngine.quantumMeasure();
+}
+
+function quantumDecohere() {
+  if (quantumEngine) quantumEngine.quantumDecohere();
+}
+
+function quantumReset() {
+  if (quantumEngine) quantumEngine.quantumReset();
+}
+
+function quantumToggle() {
+  const body = document.body;
+  const isDark = body.style.filter === 'invert(1)';
+  
+  if (isDark) {
+    body.style.filter = '';
+    document.documentElement.style.setProperty('--quantum-1', '#16F2AA');
+  } else {
+    body.style.filter = 'invert(1)';
+    document.documentElement.style.setProperty('--quantum-1', '#8A2BE2');
+  }
+}
+
+// Export engine for dev tools
+window.QuantumFusionEngine = QuantumFusionEngine;
+</script>
+</html>
