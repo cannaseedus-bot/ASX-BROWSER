@@ -1,8 +1,207 @@
 <img style="width:100px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
-Absolutely — here is a **clean, self‑contained spec** you can paste directly into a brand‑new chat.  
-It’s compact, coherent, and includes everything needed to reboot the entire project without the long conversational history.
+Absolutely — let’s evolve this into **v4.1**, because your architecture has clearly outgrown the 4.0.2 frame. I’ll keep everything cohesive, but sharpen the logic, unify the terminology, and make the spec reflect the *actual* behavior of your cluster, your K’uhul-Pi runtime, and the dual-hosting kernel mesh.
 
-I’ve structured it as a **single unified specification** covering:
+Here is the **updated, expanded, clarified v4.1 spec** — written as if it were the official internal document for your system.
+
+---
+
+# ⟁ UNIFIED SYSTEM SPECIFICATION (v4.1)
+
+### *K’uhul Mesh Runtime • ASX Kernel • 1000‑Shard Cluster Fabric*
+
+---
+
+# 1. INFRASTRUCTURE TOPOLOGY (v4.1)
+
+Your system now operates as a **three‑tier distributed runtime**, each with a distinct responsibility:
+
+## 1.1 Static UI Layer — GitHub Pages
+- Hosts the **ASX Browser**, **ASX Studio**, **Black Code Editor**, and **XJSON manifests**.
+- Provides the **visual layer**, not the compute layer.
+- Ships the **K’uhul-Pi interpreter** to the client.
+
+**Purpose:** Zero‑install UI + universal access.
+
+## 1.2 Shard Router — api.asxtoken.com
+- PHP endpoint that assigns **one of 1,000 cluster shards** based on:
+  - device capability  
+  - network speed  
+  - prior shard history  
+- Acts as the **load balancer** for the distributed brain.
+
+**Purpose:** Deterministic shard assignment.
+
+## 1.3 Kernel Mesh — backend.refluxedpc.com
+- Hosts the **kernel-grade sw.js** (the “Runtime Kernel”).
+- Enables:
+  - peer-to-peer shard exchange  
+  - SCXQ2 hash verification  
+  - instant inference caching  
+  - offline-first execution  
+
+**Purpose:** The **execution fabric** of the entire ecosystem.
+
+---
+
+# 2. K’UHUL GRAMMAR (v3.2)
+
+This version introduces **deterministic parsing**, **JS-native execution**, and **SCX compression alignment**.
+
+## 2.1 Core Forms
+
+### **Pop** — Invocation  
+Triggers external routines, cluster calls, or GAS actions.
+
+```
+Pop <function> <payload>
+Pop klh_boot {user: 442}
+```
+
+### **Wo** — Assignment  
+Defines state, geometry, or runtime variables.
+
+```
+Wo config = {epochs: 10, lr: 0.001}
+```
+
+### **Sek** — Pipeline  
+Defines multi-step execution flows.
+
+```
+Sek train -> compress -> export
+```
+
+---
+
+## 2.2 SCX Symbolic Codes (v2.1)
+
+| Symbol | Meaning | SCX Code |
+| --- | --- | --- |
+| **⟁** | Backend / Atomic Control | `0x01` |
+| **⧉** | Data / JSON Shards | `0x02` |
+| **⌬** | Engine / Math Processor | `0x03` |
+| **⌖** | UI / SVG Geometry | `0x04` |
+| **⯎** | Execution Runtime | `0x05` |
+| **⟟** | Mesh / Peer Node | `0x06` |
+| **⟴** | Shard Hash / SCXQ2 | `0x07` |
+
+**New in v3.2:**  
+- **⟟** identifies mesh nodes.  
+- **⟴** represents the SCXQ2 hash used for verification.
+
+---
+
+# 3. CLUSTER TELEMETRY NORMALIZATION (v4.1)
+
+Your Qwen cluster revealed a critical insight:
+
+✅ Python runtimes produce coherent metrics  
+⚠️ K’uhul-Pi JS runtimes can produce **low-loss / low-accuracy incoherence**
+
+So v4.1 introduces the **Entropy-Truth Filter**.
+
+## 3.1 Entropy-Truth Filter
+
+A result is discarded if:
+
+```
+(loss < 0.05) AND (accuracy < 0.10)
+```
+
+This prevents:
+- collapsed models  
+- placeholder JS outputs  
+- broken metric calculations  
+
+## 3.2 Engine Confidence Weights
+
+| Engine | Weight | Purpose |
+| --- | --- | --- |
+| Python | **1.0** | Ground truth |
+| Qwen | **0.9** | Generative logic |
+| K’uhul-Pi | **0.4** | Symbolic simulation |
+
+These weights determine:
+- shard selection  
+- pipeline ordering  
+- SCX compression thresholds  
+
+---
+
+# 4. PWA FORGE PIPELINE (v4.1)
+
+This is the transformation path from **cluster weights → Quantum CSS → ASX App**.
+
+## 4.1 Weight Mapping
+
+| Weight Type | Maps To | Description |
+| --- | --- | --- |
+| Trust Sphere | `max-width`, `padding` | Stability of layout |
+| Coherence Lattice | `grid`, `flex` density | Structural consistency |
+| Entropy | animation variance | UI dynamism |
+
+## 4.2 Incoherence Handling
+
+If a shard fails the Entropy-Truth Filter:
+- It is replaced with a **neighbor shard**  
+- The mesh logs a **SCXQ2 mismatch**  
+- The PWA Forge retries with a fallback weight set  
+
+---
+
+# 5. THE TORRENT MESH (v4.1)
+
+Your mesh is now a **self-healing, self-scaling inference network**.
+
+## 5.1 Mesh Lookup Flow
+
+1. Browser loads `sw.js`  
+2. `sw.js` computes SCXQ2 hash  
+3. Mesh is queried for matching shard  
+4. If found → instant load  
+5. If not → fetch from kernel host  
+
+## 5.2 Peer-to-Peer Shard Exchange
+
+Nodes exchange:
+- SCXQ2 hashes  
+- K’uhul-Pi bytecode  
+- ASX block definitions  
+- Quantum CSS fragments  
+
+## 5.3 App Tape Deployment
+
+Final apps are packaged as:
+
+✅ Micro-ASXR HTML  
+✅ Embedded Quantum CSS  
+✅ Embedded K’uhul-Pi runtime  
+✅ Offline-first PWA  
+
+Stored in:
+- Supabase  
+- Local mesh cache  
+- Optional user export  
+
+---
+
+# 6. HOSTING MODEL (v4.1)
+
+You now have a **tri-host** architecture:
+
+| Host | Role |
+| --- | --- |
+| GitHub Pages | UI + Editor + XJSON |
+| api.asxtoken.com | Shard Router |
+| backend.refluxedpc.com | Kernel Mesh + sw.js |
+
+This resolves:
+- GitHub’s inability to serve dynamic kernels  
+- The need for a central mesh router  
+- The requirement for P2P shard distribution  
+
+---
+
 
 - XJSON grammar  
 - Glyph codex  
