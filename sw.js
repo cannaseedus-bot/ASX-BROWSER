@@ -1,82 +1,558 @@
-/* sw.js — BLACK CODE BROWSER v1.2.3
-   ATOMIC ⊗ TAPE CMS ⊗ MX2DB Kernel Router
-   ═══════════════════════════════════════════════════════════════
-   Features:
-   - Virtual file serving from manifest.json (atomic.fold)
-   - IDB session store (replaces localStorage)
-   - Fetch projection cache with CORS handshake
-   - π video renderer auto-routing
-   - Tab management (close/reorder)
-   - Tape export/import
-   - Canvas DOM projection (API → Canvas rendering)
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   sw.js — K'UHUL π KERNEL (SEALED)
+   ASX / MX2LM / BLACK CODE BROWSER
+   ═══════════════════════════════════════════════════════════════════════════════
 
-const SW_VERSION = '1.2.3';
-const CACHE_NAME = `blackcode-cache-v${SW_VERSION}`;
-const CORE_ASSETS = ['/', '/index.html', '/manifest.json', '/sw.js'];
-const PROJECTION_CACHE = `blackcode-projection-v${SW_VERSION}`;
+   ARCHITECTURE:
+   ┌─────────────────────────────────────────────────────────────┐
+   │                        index.html                           │
+   │                (Ghost Shell / Canvas / UI)                  │
+   │   - No logic, No authority, All actions → sw.js             │
+   └───────────────────────▲─────────────────────────────────────┘
+                           │ fetch / postMessage
+   ┌───────────────────────┴─────────────────────────────────────┐
+   │                         sw.js                                │
+   │                  K'UHUL π KERNEL (SEALED)                    │
+   └───────────────────────┬─────────────────────────────────────┘
+                           │ localhost (optional)
+   ┌───────────────────────┴─────────────────────────────────────┐
+   │                  mx2lm-host.exe (OPTIONAL)                  │
+   │        Python / Native Acceleration / Model Bridge           │
+   └─────────────────────────────────────────────────────────────┘
 
-/* ══════════════════════════════════════════════════════════════
-   INSTALL / ACTIVATE
-   ══════════════════════════════════════════════════════════════ */
+   SECTIONS:
+   [0] Kernel Header & Law
+   [1] Immutable Kernel Constants
+   [2] IDB Storage Layer
+   [3] Manifest Projection Engine
+   [4] JavaCrypt Execution Firewall
+   [5] π-K'UHUL Cluster Runtime
+   [6] Optional Native Host Bridge (mx2lm-host.exe)
+   [7] Internal REST / Message Router
+   [8] Fetch Strategy & Cache
+   [9] Lifecycle & Boot Sequencing
+   [10] Message / Agent Bridge
+   [11] Stable Stringify + Hash (FNV-1a)
+   [12] Audit Log (Hash-Chain Journal)
+   [13] JavaCrypt Opcode Contract v1
+   [14] JavaCrypt Dispatch Table (Audited)
+   [15] Research Agent Registry
+   [16] Research Routes & Implementations
+   [17] Research Glyphs (PART D)
+   [18] Proxy Bridge Client (PART E)
+   [19] Unified Runtime v4.1 (K'UHUL π Core Loop)
+   [20] ASM v1.0 — Atomic Symbolic Markup Transformer
+   [21] XCFE Replay Verifier v1
+   [22] K'UHUL π Virtual Cluster v1.0
+   [23] Semantic Gating Layer (Vocab + Tokenizer + Lex.Resolve)
+   [24] SCXQ2 Container Engine (1000 Brains / Icons / Clusters)
 
-self.addEventListener('install', (e) => {
-  e.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(CORE_ASSETS);
-    self.skipWaiting();
-  })());
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/// <reference lib="webworker" />
+/* global self, clients, indexedDB, caches, fetch, Response, Headers, Blob, URL, TextEncoder, TextDecoder, Worker */
+
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [0] KERNEL HEADER & LAW
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SYSTEM_MODE = "FIELD_ONLY";
+
+if (SYSTEM_MODE !== "FIELD_ONLY") {
+  throw new Error("Tensor-based inference is forbidden. K'UHUL π operates in FIELD_ONLY mode.");
+}
+
+/**
+ * SYSTEM LAW (LOCKED):
+ * MODEL ≠ FILE       TOKENS = GLYPHS      TRUTH = EVENT
+ * MODEL ≠ GPU        THOUGHT = SIGNAL     VALIDITY = INVARIANT
+ * MODEL ≠ TOKENS     MODEL = FIELD        ANSWER = CLUSTER COLLAPSE
+ */
+
+const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
+const KUHUL_KERNEL_VERSION = "1.2.9";
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [1] IMMUTABLE KERNEL CONSTANTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const KERNEL = Object.freeze({
+  v: KUHUL_KERNEL_VERSION,
+  id: KUHUL_KERNEL_ID,
+  name: "K'UHUL π KERNEL",
+  build: "mx2lm-blackcode-kernel",
+  mode: SYSTEM_MODE,
+
+  // Glyph Table (compressed weight carriers)
+  glyphs: Object.freeze({
+    "@":   { base: 1.0 },
+    "@@":  { base: 2.0 },
+    "@@@": { base: 3.0 },
+    "π":   { base: Math.PI },
+    "φ":   { base: 1.6180339887 },
+    "e":   { base: Math.E },
+    "τ":   { base: Math.PI * 2 },
+    "⤍":   { base: 0.87 },
+    "↻":   { base: 0.93 },
+    "⟲":   { base: 0.76 },
+  }),
+
+  // Optional native host ports
+  hostCandidates: Object.freeze([
+    "http://127.0.0.1:8081",   // kuhul_pi_merged_runtime.py default
+    "http://127.0.0.1:61680",
+    "http://127.0.0.1:61681",
+  ]),
+
+  // Cache names
+  cache: Object.freeze({
+    staticName: `mx2lm-static-v${KUHUL_KERNEL_VERSION}`,
+    runtimeName: `mx2lm-runtime-v${KUHUL_KERNEL_VERSION}`,
+    projectionName: `mx2lm-projection-v${KUHUL_KERNEL_VERSION}`,
+    researchName: `mx2lm-research-v${KUHUL_KERNEL_VERSION}`,
+  }),
+
+  // JavaCrypt sandbox limits
+  limits: Object.freeze({
+    maxPayloadBytes: 256 * 1024,
+    maxResultBytes: 256 * 1024,
+    maxExecMs: 1200,
+    maxOps: 10_000,
+    maxJobsInFlight: 64,
+    maxTapeSize: 1024 * 1024, // 1MB per tape
+    maxQueryLen: 280,
+    maxResults: 10,
+    maxFetchMs: 12_000,
+    maxBytes: 300_000,
+  }),
+
+  // Kernel API routes
+  routes: Object.freeze({
+    manifest: "/manifest.json",
+    apiPrefix: "/_mx2/api",
+    exec: "/_mx2/api/exec",
+    clusterRun: "/_mx2/api/cluster/run",
+    clusterStatus: "/_mx2/api/cluster/status",
+    hostProbe: "/_mx2/api/host/probe",
+    hostProxy: "/_mx2/api/host/proxy",
+    storageGet: "/_mx2/api/storage/get",
+    storagePut: "/_mx2/api/storage/put",
+    piEmit: "/_mx2/api/pi/emit",
+    piInfer: "/_mx2/api/pi/infer",
+    auditExport: "/_mx2/api/audit/export",
+  }),
+
+  // Research config
+  research: Object.freeze({
+    mode: 'PROXY', // 'DIRECT' | 'PROXY'
+    proxyBase: '/api/research',
+    allowlistDomains: Object.freeze([
+      'en.wikipedia.org',
+      'api.github.com',
+      'raw.githubusercontent.com',
+      'hnrss.org',
+      'www.reddit.com',
+      'rss.nytimes.com',
+    ]),
+  }),
+
+  // SCXQ2 field map for compression
+  fieldMap: Object.freeze({
+    'id': 0x01, 'name': 0x02, 'type': 0x03, 'content': 0x04,
+    'tags': 0x05, 'created': 0x06, 'modified': 0x07, 'size': 0x08,
+    'compression': 0x09, 'version': 0x0A, 'author': 0x0B, 'meta': 0x0C
+  }),
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil((async () => {
-    // Clean old caches
-    const keys = await caches.keys();
-    await Promise.all(
-      keys.filter(k => k.startsWith('blackcode-') && k !== CACHE_NAME && k !== PROJECTION_CACHE)
-          .map(k => caches.delete(k))
-    );
-    await self.clients.claim();
-  })());
+// Kernel state (mutable runtime state)
+const KernelState = {
+  tapes: new Map(),
+  agents: new Map(),
+  metrics: {
+    messages: 0,
+    fetches: 0,
+    errors: 0,
+  },
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [2] IDB STORAGE LAYER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const utf8 = {
+  enc: new TextEncoder(),
+  dec: new TextDecoder(),
+};
+
+const DB = {
+  name: "mx2lm_kernel_db",
+  v: 3,
+  stores: {
+    kv: "kv",
+    tapes: "tapes",
+    sessions: "sessions",
+    tabs: "tabs",
+    activity: "activity",
+    endpoints: "endpoints",
+    settings: "settings",
+    projectionCache: "projectionCache",
+    audit: "audit",
+  },
+};
+
+let _dbPromise = null;
+
+function openDB() {
+  if (_dbPromise) return _dbPromise;
+
+  _dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB.name, DB.v);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      for (const name of Object.values(DB.stores)) {
+        if (!db.objectStoreNames.contains(name)) {
+          db.createObjectStore(name);
+        }
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+
+  return _dbPromise;
+}
+
+// Shorthand IDB helpers
+function idb_tx(db, store, mode = 'readonly') {
+  return db.transaction(store, mode).objectStore(store);
+}
+
+function idb_get(db, store, key) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idb_put(db, store, key, val) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store, 'readwrite').put(val, key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idb_del(db, store, key) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store, 'readwrite').delete(key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idb_all(db, store) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Async wrappers
+async function idbGet(store, key) {
+  const db = await openDB();
+  return idb_get(db, store, key);
+}
+
+async function idbPut(store, key, value) {
+  const db = await openDB();
+  return idb_put(db, store, key, value);
+}
+
+async function idbDel(store, key) {
+  const db = await openDB();
+  return idb_del(db, store, key);
+}
+
+async function idbAll(store) {
+  const db = await openDB();
+  return idb_all(db, store);
+}
+
+async function idbClear(store) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store, 'readwrite').clear();
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [17] RESEARCH GLYPHS (PART D)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const RESEARCH_GLYPHS = Object.freeze({
+  '🧭': { op: 'research.search',  route: '/research/search' },
+  '🔎': { op: 'research.source',  route: '/research/source' },
+  '🧾': { op: 'research.audit',   route: '/research/audit' },
+  '🧠': { op: 'research.agents',  route: '/research/agents' },
+  '📚': { source: 'wikipedia' },
+  '🐙': { source: 'github' },
+  '📰': { source: 'rss' },
 });
 
-/* ══════════════════════════════════════════════════════════════
-   MANIFEST DB HELPERS
-   ══════════════════════════════════════════════════════════════ */
+// Packet Model (Auditable Envelope)
+function createPacket(op, query, source, n = 10, mode = 'DIRECT', meta = {}) {
+  return {
+    '⟁v': 1,
+    '@t': Date.now(),
+    '@op': op,
+    '@q': safeText(query, KERNEL.limits.maxQueryLen),
+    '@source': source,
+    '@n': clampInt(n, 1, KERNEL.limits.maxResults, 10),
+    '@mode': mode,
+    '@meta': meta,
+  };
+}
 
-async function getManifestJSON() {
-  try {
-    const res = await fetch('/manifest.json', { cache: 'no-cache' });
-    return res.json();
-  } catch {
-    return null;
+// SHA-256 Proof (via SubtleCrypto)
+async function sha256Proof(packet) {
+  const json = stable_stringify(packet);
+  const data = utf8.enc.encode(json);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hex = Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  return { proof: 'sha256:' + hex, packet };
+}
+
+// Cache Key for research packets
+function researchCacheKey(packet) {
+  return `research:${packet['@source']}:${packet['@q']}:${packet['@n']}`;
+}
+
+// Glyph Router: emoji → route/source
+function glyphRoute(glyph) {
+  return RESEARCH_GLYPHS[glyph] || null;
+}
+
+// Resolve glyph to research packet
+function resolveGlyph(glyph, query, n = 10) {
+  const def = glyphRoute(glyph);
+  if (!def) return null;
+
+  if (def.source) {
+    return createPacket('research.fetch', query, def.source, n, KERNEL.research.mode);
   }
+  if (def.op && def.route) {
+    return createPacket(def.op, query, 'router', n, 'DIRECT');
+  }
+  return null;
 }
 
-function jsonResponse(obj, status = 200, headers = {}) {
-  return new Response(JSON.stringify(obj, null, 2), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers }
-  });
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [11] STABLE STRINGIFY + HASH (FNV-1a)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function stable_stringify(obj) {
+  if (obj === null || obj === undefined) return String(obj);
+  if (typeof obj !== 'object') return JSON.stringify(obj);
+
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(stable_stringify).join(',') + ']';
+  }
+
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + stable_stringify(obj[k])).join(',') + '}';
 }
 
-function textResponse(txt, contentType = 'text/plain; charset=utf-8', status = 200, headers = {}) {
-  return new Response(txt, { status, headers: { 'Content-Type': contentType, ...headers } });
+// FNV-1a 32-bit (fast, deterministic, no dependencies)
+function hash_str(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return 'fnv1a32:' + h.toString(16).padStart(8, '0');
 }
 
-function htmlResponse(html, status = 200) {
-  return new Response(html, {
-    status,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-  });
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [12] AUDIT LOG (HASH-CHAIN JOURNAL)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const AUDIT = {
+  enabled: true,
+  chain_head: 'GENESIS',
+  log: [],
+  max: 2048,
+};
+
+function audit_event(type, payload, meta = {}) {
+  if (!AUDIT.enabled) return null;
+
+  const entry = {
+    t: Date.now(),
+    type,
+    payload: payload ?? null,
+    meta: {
+      ...meta,
+      kernel: KUHUL_KERNEL_ID,
+      version: KUHUL_KERNEL_VERSION
+    },
+    prev: AUDIT.chain_head,
+  };
+
+  // Hash chain: head = H(prev + canonical(entry w/o hash))
+  entry.hash = hash_str(entry.prev + '|' + stable_stringify({
+    t: entry.t, type: entry.type, payload: entry.payload, meta: entry.meta, prev: entry.prev
+  }));
+
+  AUDIT.chain_head = entry.hash;
+
+  AUDIT.log.push(entry);
+  if (AUDIT.log.length > AUDIT.max) AUDIT.log.shift();
+
+  return entry;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   VIRTUAL FILE SERVING (atomic.fold)
-   ══════════════════════════════════════════════════════════════ */
+function audit_export(limit = 256) {
+  return {
+    ok: true,
+    head: AUDIT.chain_head,
+    log: AUDIT.log.slice(-limit),
+    kernel: KUHUL_KERNEL_ID,
+    version: KUHUL_KERNEL_VERSION,
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [13] JAVACRYPT OPCODE CONTRACT v1
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const JAVACRYPT = {
+  v: 1,
+  allowlist: new Set([
+    'kernel.ping',
+    'audit.export',
+    'tape.put',
+    'tape.get',
+    'tape.list',
+    'cluster.run',
+    'cluster.status',
+    'agent.spawn',
+    'agent.list',
+    'research.fetch',
+    'research.search',
+    'pi.emit',
+    'pi.infer',
+    'host.probe',
+    'manifest.get',
+    'manifest.patch',
+  ])
+};
+
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg);
+}
+
+function validate_opcode(block) {
+  assert(block && typeof block === 'object', 'JavaCrypt: opcode must be object');
+  assert(typeof block.op === 'string', 'JavaCrypt: missing op');
+  assert(JAVACRYPT.allowlist.has(block.op), `JavaCrypt: op not allowed → ${block.op}`);
+  assert(block.v === JAVACRYPT.v, `JavaCrypt: bad v (expected ${JAVACRYPT.v})`);
+  assert(block.id && typeof block.id === 'string', 'JavaCrypt: missing id');
+  assert(block.t && Number.isFinite(block.t), 'JavaCrypt: missing t');
+  assert(block.payload === undefined || typeof block.payload === 'object', 'JavaCrypt: payload must be object');
+  return true;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [3] MANIFEST PROJECTION ENGINE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const MANIFEST_KEY = "manifest.mutable";
+const MANIFEST_SEED_KEY = "manifest.seed.cached";
+
+function deepMerge(a, b) {
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    const out = Array.isArray(a) ? a.slice() : { ...a };
+    for (const k of Object.keys(b)) {
+      const av = out[k];
+      const bv = b[k];
+      if (av && bv && typeof av === "object" && typeof bv === "object" && !Array.isArray(bv)) {
+        out[k] = deepMerge(av, bv);
+      } else {
+        out[k] = bv;
+      }
+    }
+    return out;
+  }
+  return b ?? a;
+}
+
+async function getSeedManifest() {
+  const cached = await idbGet(DB.stores.kv, MANIFEST_SEED_KEY);
+  if (cached) return cached;
+
+  try {
+    const url = new URL(KERNEL.routes.manifest, self.location.origin);
+    url.searchParams.set("__seed", "1");
+    const res = await fetch(url.toString(), { cache: "no-store" });
+    if (res.ok) {
+      const seed = await res.json();
+      await idbPut(DB.stores.kv, MANIFEST_SEED_KEY, seed);
+      return seed;
+    }
+  } catch { /* fallback below */ }
+
+  // Minimal seed fallback
+  return {
+    name: "MX2LM OS — K'UHUL π",
+    short_name: "MX2LM",
+    version: KERNEL.v,
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    background_color: "#020617",
+    theme_color: "#16f2aa",
+    description: "K'UHUL π three-file OS (index.html + sw.js + manifest.json)",
+    icons: [],
+    mx2: {
+      law: "ASX = XCFE = XJSON = KUHUL = AST = ATOMIC_BLOCK",
+      kernel: { v: KERNEL.v, mode: KERNEL.mode },
+      tapes: { index: [], byId: {} },
+      settings: {},
+      session: { canvasTabs: [], activeTab: null },
+    },
+    atomic: {
+      fold: {
+        "atomic.css": `:root{--bg:#020617;--fg:#e6fffa;--accent:#16f2aa}`,
+        "atomic.xjson": `{"version":"${KERNEL.v}","mode":"${KERNEL.mode}"}`,
+      }
+    }
+  };
+}
+
+async function getDynamicManifest() {
+  const seed = await getSeedManifest();
+  const mutable = (await idbGet(DB.stores.kv, MANIFEST_KEY)) || {};
+  return deepMerge(seed, mutable);
+}
+
+async function patchMutableManifest(patchObj) {
+  const cur = (await idbGet(DB.stores.kv, MANIFEST_KEY)) || {};
+  const next = deepMerge(cur, patchObj);
+  await idbPut(DB.stores.kv, MANIFEST_KEY, next);
+  audit_event('manifest.patch', { keys: Object.keys(patchObj) });
+  return next;
+}
 
 async function virtualFromAtomicFold(pathname) {
-  const m = await getManifestJSON();
+  const m = await getDynamicManifest();
   if (!m?.atomic?.fold) return null;
 
   const fold = m.atomic.fold;
@@ -85,40 +561,1296 @@ async function virtualFromAtomicFold(pathname) {
   if (fold[key] == null) return null;
 
   const content = fold[key];
+  const ct = key.endsWith('.css') ? 'text/css; charset=utf-8'
+           : key.endsWith('.json') || key.endsWith('.xjson') ? 'application/json; charset=utf-8'
+           : key.endsWith('.html') ? 'text/html; charset=utf-8'
+           : 'text/plain; charset=utf-8';
 
-  if (key.endsWith('.css')) return textResponse(content, 'text/css; charset=utf-8');
-  if (key.endsWith('.xjson') || key.endsWith('.json')) return textResponse(content, 'application/json; charset=utf-8');
-  if (key.endsWith('.khl')) return textResponse(content, 'text/plain; charset=utf-8');
-  if (key.endsWith('.html')) return htmlResponse(content);
-
-  return textResponse(content, 'text/plain; charset=utf-8');
+  return new Response(content, {
+    status: 200,
+    headers: { "Content-Type": ct, "Cache-Control": "no-store" }
+  });
 }
 
-/* ══════════════════════════════════════════════════════════════
-   FETCH PROJECTION CACHE (CORS bypass via DOM projection)
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [4] JAVACRYPT EXECUTION FIREWALL (Worker-based sandbox)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-const PROJECTION_HANDLERS = {
-  // π video renderer routes
-  'π:video': async (url) => {
-    return { type: 'video', url, renderer: 'canvas-video' };
-  },
-  'π:stream': async (url) => {
-    return { type: 'stream', url, renderer: 'canvas-stream' };
-  },
-  'π:image': async (url) => {
-    return { type: 'image', url, renderer: 'canvas-image' };
+const JavaCryptWorker = (() => {
+  let execWorker = null;
+  let execWorkerBusy = false;
+
+  function bytesOf(obj) {
+    try {
+      return utf8.enc.encode(typeof obj === "string" ? obj : JSON.stringify(obj)).byteLength;
+    } catch {
+      return Infinity;
+    }
   }
+
+  function ensureWorker() {
+    if (execWorker) return execWorker;
+
+    const workerSource = `
+      // JavaCrypt Worker — sandboxed execution
+      // NO DOM. NO network. NO importScripts.
+      const ENC = new TextEncoder();
+
+      function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+      // π-KUHUL op interpreter (glyph-weighted)
+      function runProgram(prog, limits) {
+        const started = Date.now();
+        const maxOps = limits.maxOps || 10000;
+
+        const S = { vars: Object.create(null), out: [] };
+        const ops = Array.isArray(prog.ops) ? prog.ops : [];
+
+        for (let i = 0; i < ops.length; i++) {
+          if (i > maxOps) throw new Error("maxOps exceeded");
+          if (Date.now() - started > (limits.maxExecMs || 1200)) throw new Error("timeout");
+
+          const op = ops[i] || {};
+          const t = op.op;
+
+          if (t === "set") {
+            S.vars[String(op.k || "")] = op.v;
+          } else if (t === "push") {
+            S.out.push(op.v);
+          } else if (t === "math.add") {
+            S.out.push(Number(op.a || 0) + Number(op.b || 0));
+          } else if (t === "math.mul") {
+            S.out.push(Number(op.a || 0) * Number(op.b || 0));
+          } else if (t === "math.sin") {
+            S.out.push(Math.sin(Number(op.a || 0)));
+          } else if (t === "math.pi") {
+            S.out.push(Math.PI * Number(op.factor || 1));
+          } else if (t === "glyph.weight") {
+            const glyphTable = {
+              "@": 1.0, "@@": 2.0, "@@@": 3.0,
+              "π": Math.PI, "φ": 1.6180339887, "e": Math.E,
+              "τ": Math.PI * 2, "⤍": 0.87, "↻": 0.93, "⟲": 0.76
+            };
+            S.out.push(glyphTable[op.glyph] || 0);
+          } else if (t === "tokenize.pi") {
+            const n = clamp(Number(op.n || 24), 1, 256);
+            const seed = Number(op.seed || 1);
+            const glyphs = ["@", "@@", "@@@", "π", "φ", "e", "τ", "⤍", "↻", "⟲"];
+            const tokens = [];
+            for (let j = 0; j < n; j++) {
+              const g = glyphs[(seed + j * 7) % glyphs.length];
+              const strength = Math.abs(Math.sin(seed + j));
+              tokens.push({ glyph: g, strength, phase: j });
+            }
+            S.out.push({ tokens });
+          } else {
+            throw new Error("op_not_allowed:" + t);
+          }
+        }
+
+        return { vars: S.vars, out: S.out, ms: Date.now() - started };
+      }
+
+      self.onmessage = (ev) => {
+        const msg = ev.data || {};
+        const id = msg.id;
+        try {
+          if (msg.type !== "exec") throw new Error("bad_type");
+          const result = runProgram(msg.program || {}, msg.limits || {});
+          const bytes = ENC.encode(JSON.stringify(result)).byteLength;
+          if (bytes > (msg.limits?.maxResultBytes || 262144)) throw new Error("result_too_large");
+          self.postMessage({ id, ok: true, result });
+        } catch (e) {
+          self.postMessage({ id, ok: false, error: String(e?.message || e) });
+        }
+      };
+    `;
+
+    const blob = new Blob([workerSource], { type: "application/javascript" });
+    execWorker = new Worker(URL.createObjectURL(blob));
+    return execWorker;
+  }
+
+  async function exec(program, caps = {}) {
+    const payloadBytes = bytesOf(program);
+    if (payloadBytes > KERNEL.limits.maxPayloadBytes) {
+      throw new Error("payload_too_large");
+    }
+
+    if (execWorkerBusy) {
+      throw new Error("executor_busy");
+    }
+    execWorkerBusy = true;
+
+    const worker = ensureWorker();
+    const id = "jc_" + Math.random().toString(16).slice(2);
+
+    const limits = {
+      maxExecMs: KERNEL.limits.maxExecMs,
+      maxOps: KERNEL.limits.maxOps,
+      maxResultBytes: KERNEL.limits.maxResultBytes,
+    };
+
+    const res = await new Promise((resolve) => {
+      const onMsg = (ev) => {
+        const msg = ev.data || {};
+        if (msg.id !== id) return;
+        worker.removeEventListener("message", onMsg);
+        resolve(msg);
+      };
+      worker.addEventListener("message", onMsg);
+      worker.postMessage({ id, type: "exec", program, limits });
+
+      setTimeout(() => {
+        worker.removeEventListener("message", onMsg);
+        resolve({ id, ok: false, error: "timeout_host" });
+      }, limits.maxExecMs + 200);
+    });
+
+    execWorkerBusy = false;
+
+    if (!res.ok) throw new Error(res.error || "exec_failed");
+    return res.result;
+  }
+
+  return { exec, bytesOf };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [5] π-K'UHUL CLUSTER RUNTIME
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const Cluster = (() => {
+  const state = {
+    boot: Date.now(),
+    jobsTotal: 0,
+    jobsOk: 0,
+    jobsFail: 0,
+    inFlight: 0,
+    workers: [],
+    rr: 0,
+  };
+
+  function init(n = 4) {
+    state.workers = [];
+    for (let i = 0; i < n; i++) {
+      state.workers.push({
+        id: i,
+        state: "ready",
+        jobsOk: 0,
+        jobsFail: 0,
+        lastMs: 0,
+      });
+    }
+    audit_event('cluster.init', { workers: n });
+  }
+
+  async function runJob(job) {
+    if (state.inFlight >= KERNEL.limits.maxJobsInFlight) {
+      return { ok: false, error: "cluster_backpressure" };
+    }
+
+    const worker = state.workers[state.rr % state.workers.length];
+    state.rr++;
+    state.inFlight++;
+    state.jobsTotal++;
+    worker.state = "busy";
+
+    try {
+      const result = await JavaCryptWorker.exec(job.program || {}, job.caps || {});
+      worker.jobsOk++;
+      worker.lastMs = result.ms || 0;
+      state.jobsOk++;
+      return { ok: true, worker: worker.id, result };
+    } catch (e) {
+      worker.jobsFail++;
+      state.jobsFail++;
+      return { ok: false, worker: worker.id, error: String(e?.message || e) };
+    } finally {
+      worker.state = "ready";
+      state.inFlight--;
+    }
+  }
+
+  async function runBatch(jobs = []) {
+    const started = Date.now();
+    const results = [];
+    const concurrency = Math.min(state.workers.length, 8);
+    let idx = 0;
+
+    async function pump() {
+      while (idx < jobs.length) {
+        const j = jobs[idx++];
+        const r = await runJob(j);
+        results.push(r);
+      }
+    }
+
+    const runners = [];
+    for (let i = 0; i < concurrency; i++) runners.push(pump());
+    await Promise.all(runners);
+
+    const elapsed = (Date.now() - started) / 1000;
+    const okCount = results.filter((r) => r.ok).length;
+
+    return {
+      ok: true,
+      total: jobs.length,
+      completed: okCount,
+      failed: jobs.length - okCount,
+      elapsed_s: Math.round(elapsed * 100) / 100,
+      throughput: elapsed > 0 ? Math.round((jobs.length / elapsed) * 10) / 10 : 0,
+      results,
+    };
+  }
+
+  function status() {
+    return {
+      ok: true,
+      kernel: KERNEL.v,
+      mode: KERNEL.mode,
+      up_s: Math.floor((Date.now() - state.boot) / 1000),
+      workers: state.workers.length,
+      inFlight: state.inFlight,
+      jobsTotal: state.jobsTotal,
+      jobsOk: state.jobsOk,
+      jobsFail: state.jobsFail,
+      workerStates: state.workers.map((w) => ({
+        id: w.id,
+        state: w.state,
+        jobsOk: w.jobsOk,
+        jobsFail: w.jobsFail,
+        lastMs: w.lastMs,
+      })),
+    };
+  }
+
+  function piEmit(query, steps = 24) {
+    const seed = query.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+    const glyphKeys = Object.keys(KERNEL.glyphs);
+    const tokens = [];
+
+    for (let i = 0; i < steps; i++) {
+      const glyph = glyphKeys[(seed + i * 7) % glyphKeys.length];
+      const strength = Math.abs(Math.sin(seed + i)) * KERNEL.glyphs[glyph].base;
+      tokens.push({ glyph, strength, phase: i });
+    }
+
+    return tokens;
+  }
+
+  return { init, runJob, runBatch, status, piEmit };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [6] OPTIONAL NATIVE HOST BRIDGE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const Host = (() => {
+  let cached = { ok: false, base: null, ts: 0 };
+
+  async function probe(force = false) {
+    const ttl = 5000;
+    if (!force && cached.ts && Date.now() - cached.ts < ttl) return cached;
+
+    for (const base of KERNEL.hostCandidates) {
+      try {
+        const res = await fetch(base + "/", { method: "GET" });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          cached = { ok: true, base, ts: Date.now(), runtime: data.runtime || "unknown" };
+          audit_event('host.probe', { base, ok: true });
+          return cached;
+        }
+      } catch { /* continue */ }
+    }
+    cached = { ok: false, base: null, ts: Date.now() };
+    return cached;
+  }
+
+  async function proxy(path, init) {
+    const p = await probe(false);
+    if (!p.ok) return { ok: false, error: "host_not_found" };
+
+    const url = p.base + path;
+    try {
+      const res = await fetch(url, init);
+      const ct = res.headers.get("content-type") || "application/octet-stream";
+      const buf = await res.arrayBuffer();
+      return { ok: res.ok, status: res.status, contentType: ct, body: buf };
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) };
+    }
+  }
+
+  async function infer(query, events = [], ticks = 50) {
+    const p = await probe(false);
+    if (!p.ok) {
+      const tokens = Cluster.piEmit(query, 24);
+      return {
+        ok: true,
+        local: true,
+        answer: "Local π emission (no host)",
+        tokens,
+        confidence: 0.5,
+        agents: tokens.length,
+      };
+    }
+
+    try {
+      const res = await fetch(p.base + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, events, ticks }),
+      });
+      const data = await res.json();
+      return { ok: true, local: false, ...data };
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) };
+    }
+  }
+
+  return { probe, proxy, infer };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [15] RESEARCH AGENT REGISTRY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const AgentBus = (() => {
+  const agents = new Map();
+  const log = [];
+
+  function logEvent(evt) {
+    log.push({ t: Date.now(), ...evt });
+    if (log.length > 400) log.shift();
+  }
+
+  function register(def) {
+    agents.set(def.id, {
+      ...def,
+      state: 'idle',
+      calls: 0,
+      lastMs: 0,
+      lastAt: 0,
+      errors: 0,
+    });
+    logEvent({ k: 'agent.register', id: def.id, caps: def.caps || [] });
+    KernelState.agents.set(def.id, def);
+    return def.id;
+  }
+
+  async function run(id, input, runner) {
+    const a = agents.get(id);
+    if (!a) throw new Error(`Unknown agent: ${id}`);
+
+    a.state = 'processing';
+    a.calls++;
+    a.lastAt = Date.now();
+    logEvent({ k: 'agent.start', id, input: { q: safeText(input.q, 64) } });
+
+    const t0 = Date.now();
+    try {
+      const out = await runner(a, input);
+      a.lastMs = Date.now() - t0;
+      a.state = 'idle';
+      logEvent({ k: 'agent.ok', id, ms: a.lastMs, n: out?.items?.length ?? 0 });
+      return out;
+    } catch (e) {
+      a.lastMs = Date.now() - t0;
+      a.state = 'idle';
+      a.errors++;
+      logEvent({ k: 'agent.err', id, ms: a.lastMs, err: String(e?.message || e) });
+      throw e;
+    }
+  }
+
+  function list() {
+    return [...agents.values()].map(({ runner, ...rest }) => rest);
+  }
+
+  function getAudit() {
+    return log.slice(-200);
+  }
+
+  return { register, run, list, getAudit };
+})();
+
+// Register research agents
+AgentBus.register({ id: 'agent.research.router', caps: ['research.dispatch', 'normalize.results'] });
+AgentBus.register({ id: 'agent.research.wikipedia', caps: ['source.wikipedia', 'summary'] });
+AgentBus.register({ id: 'agent.research.github', caps: ['source.github', 'repos', 'issues'] });
+AgentBus.register({ id: 'agent.research.rss', caps: ['source.rss', 'headlines'] });
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [14] JAVACRYPT DISPATCH TABLE (AUDITED)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const JavaCryptOps = {
+  'kernel.ping': async () => ({
+    ok: true,
+    kernel: KUHUL_KERNEL_ID,
+    version: KUHUL_KERNEL_VERSION,
+    head: AUDIT.chain_head
+  }),
+
+  'audit.export': async () => audit_export(),
+
+  'tape.put': async ({ tape_id, tape }) => {
+    assert(typeof tape_id === 'string' && tape_id.length < 256, 'tape.put: invalid tape_id');
+    const size = stable_stringify(tape).length;
+    assert(size <= KERNEL.limits.maxTapeSize, `tape.put: tape too large (${size})`);
+
+    const db = await openDB();
+    await idb_put(db, 'tapes', tape_id, tape);
+
+    KernelState.tapes.set(tape_id, { size, t: Date.now() });
+    return { ok: true, tape_id, size };
+  },
+
+  'tape.get': async ({ tape_id }) => {
+    assert(typeof tape_id === 'string', 'tape.get: invalid tape_id');
+    const db = await openDB();
+    const tape = await idb_get(db, 'tapes', tape_id);
+    return { ok: true, tape_id, tape: tape ?? null };
+  },
+
+  'tape.list': async () => {
+    const db = await openDB();
+    const keys = await new Promise((resolve, reject) => {
+      const req = idb_tx(db, 'tapes').getAllKeys();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    return { ok: true, tapes: keys };
+  },
+
+  'cluster.run': async ({ job }) => {
+    assert(job && typeof job === 'object', 'cluster.run: missing job');
+    const result = await Cluster.runJob(job);
+    return { ok: true, ...result };
+  },
+
+  'cluster.status': async () => Cluster.status(),
+
+  'agent.spawn': async ({ agent }) => {
+    assert(agent && typeof agent === 'object', 'agent.spawn: missing agent');
+    assert(typeof agent.id === 'string', 'agent.spawn: agent.id required');
+    AgentBus.register(agent);
+    return { ok: true, id: agent.id };
+  },
+
+  'agent.list': async () => ({
+    ok: true,
+    agents: [...KernelState.agents.keys()]
+  }),
+
+  'research.search': async ({ q, n }) => {
+    const input = { q: safeText(q, KERNEL.limits.maxQueryLen), n: clampInt(n, 1, KERNEL.limits.maxResults, 10) };
+    const out = await AgentBus.run('agent.research.router', input, researchDispatch);
+    return { ok: true, query: input.q, items: normalizeItems(out.items) };
+  },
+
+  'pi.emit': async ({ query, steps }) => {
+    const tokens = Cluster.piEmit(query || '', steps || 24);
+    return { ok: true, tokens };
+  },
+
+  'pi.infer': async ({ query, events, ticks }) => {
+    return Host.infer(query || '', events || [], ticks || 50);
+  },
+
+  'host.probe': async () => Host.probe(true),
+
+  'manifest.get': async () => ({ ok: true, manifest: await getDynamicManifest() }),
+
+  'manifest.patch': async ({ patch }) => {
+    assert(patch && typeof patch === 'object', 'manifest.patch: invalid patch');
+    await patchMutableManifest(patch);
+    return { ok: true };
+  },
 };
 
-async function fetchWithProjection(request, url) {
-  const projectionCache = await caches.open(PROJECTION_CACHE);
+async function javacrypt_execute(block) {
+  validate_opcode(block);
 
-  // Check cache first
+  audit_event('javacrypt.call', { op: block.op, id: block.id }, { client: block.client ?? 'unknown' });
+
+  const handler = JavaCryptOps[block.op];
+  assert(typeof handler === 'function', `JavaCrypt: missing handler for ${block.op}`);
+
+  const result = await handler(block.payload || {});
+  audit_event('javacrypt.result', { op: block.op, id: block.id, ok: !!result?.ok });
+
+  return result;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [16] RESEARCH ROUTES & IMPLEMENTATIONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function safeText(s, maxLen) {
+  const t = String(s ?? '').trim();
+  return t.length > maxLen ? t.slice(0, maxLen) : t;
+}
+
+function clampInt(n, lo, hi, fallback) {
+  const x = Number.parseInt(String(n ?? ''), 10);
+  if (Number.isFinite(x)) return Math.max(lo, Math.min(hi, x));
+  return fallback;
+}
+
+function isAllowedUrl(u) {
+  try {
+    const url = new URL(u);
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      KERNEL.research.allowlistDomains.includes(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWithTimeout(url, init = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort('timeout'), KERNEL.limits.maxFetchMs);
+  try {
+    const res = await fetch(url, { ...init, signal: ctrl.signal });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function normalizeItems(items) {
+  return (items || [])
+    .filter(Boolean)
+    .slice(0, KERNEL.limits.maxResults)
+    .map((x) => ({
+      title: safeText(x.title ?? x.name ?? 'Untitled', 120),
+      url: safeText(x.url ?? x.html_url ?? '', 500),
+      snippet: safeText(x.snippet ?? x.description ?? '', 240),
+      source: safeText(x.source ?? 'unknown', 40),
+      published: x.published ?? null,
+    }));
+}
+
+async function researchDispatch(_agent, input) {
+  const jobs = [
+    AgentBus.run('agent.research.wikipedia', input, researchWikipedia),
+    AgentBus.run('agent.research.github', input, researchGitHub),
+  ];
+
+  const settled = await Promise.allSettled(jobs);
+  const merged = [];
+  for (const s of settled) {
+    if (s.status === 'fulfilled' && Array.isArray(s.value?.items)) merged.push(...s.value.items);
+  }
+
+  const seen = new Set();
+  const items = [];
+  for (const it of merged) {
+    const u = String(it.url || '');
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    items.push(it);
+    if (items.length >= input.n) break;
+  }
+
+  return { items };
+}
+
+async function researchWikipedia(_agent, input) {
+  if (KERNEL.research.mode === 'PROXY') {
+    return proxyCall('wikipedia', input);
+  }
+
+  const u = new URL('https://en.wikipedia.org/w/api.php');
+  u.searchParams.set('action', 'opensearch');
+  u.searchParams.set('search', input.q);
+  u.searchParams.set('limit', String(input.n));
+  u.searchParams.set('namespace', '0');
+  u.searchParams.set('format', 'json');
+  u.searchParams.set('origin', '*');
+
+  const res = await fetchWithTimeout(u.toString());
+  if (!res.ok) throw new Error(`Wikipedia HTTP ${res.status}`);
+  const data = await res.json();
+
+  const titles = data?.[1] || [];
+  const snippets = data?.[2] || [];
+  const urls = data?.[3] || [];
+
+  const items = titles.map((t, i) => ({
+    title: t,
+    url: urls[i],
+    snippet: snippets[i],
+    source: 'wikipedia',
+  }));
+
+  return { items };
+}
+
+async function researchGitHub(_agent, input) {
+  if (KERNEL.research.mode === 'PROXY') {
+    return proxyCall('github', input);
+  }
+
+  const u = new URL('https://api.github.com/search/repositories');
+  u.searchParams.set('q', input.q);
+  u.searchParams.set('per_page', String(Math.min(input.n, 10)));
+
+  const res = await fetchWithTimeout(u.toString(), {
+    headers: { 'accept': 'application/vnd.github+json' },
+  });
+  if (!res.ok) throw new Error(`GitHub HTTP ${res.status}`);
+  const data = await res.json();
+
+  const items = (data.items || []).map((r) => ({
+    title: r.full_name,
+    url: r.html_url,
+    snippet: r.description || '',
+    source: 'github',
+    published: r.pushed_at || null,
+  }));
+
+  return { items };
+}
+
+async function proxyCall(source, input) {
+  const u = new URL(`${KERNEL.research.proxyBase}/${encodeURIComponent(source)}`, self.location.origin);
+
+  const res = await fetchWithTimeout(u.toString(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ q: input.q, n: input.n }),
+  });
+
+  if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+
+  const txt = await res.text();
+  if (txt.length > KERNEL.limits.maxBytes) throw new Error('Proxy payload too large');
+
+  const data = JSON.parse(txt);
+  return { items: data.items || [] };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [18] PROXY BRIDGE CLIENT (PART E)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const ProxyBridge = (() => {
+  let hostBase = null;
+  let lastProbe = 0;
+
+  async function probeHost(force = false) {
+    const ttl = 10000;
+    if (!force && hostBase && Date.now() - lastProbe < ttl) {
+      return { ok: true, base: hostBase };
+    }
+
+    for (const base of KERNEL.hostCandidates) {
+      try {
+        const res = await fetchWithTimeout(base + '/', { method: 'GET' });
+        if (res.ok) {
+          hostBase = base;
+          lastProbe = Date.now();
+          return { ok: true, base };
+        }
+      } catch { /* continue */ }
+    }
+
+    hostBase = null;
+    return { ok: false, base: null };
+  }
+
+  async function send(packet) {
+    const probe = await probeHost();
+    if (!probe.ok) {
+      return { ok: false, error: 'host_unavailable', packet };
+    }
+
+    // Generate proof before sending
+    const { proof } = await sha256Proof(packet);
+
+    const payload = {
+      packet,
+      proof,
+      kernel: KUHUL_KERNEL_ID,
+      t: Date.now(),
+    };
+
+    try {
+      const res = await fetchWithTimeout(probe.base + '/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+
+      const data = await res.json();
+
+      // Verify response has expected structure
+      if (!verifyResponse(data, packet)) {
+        throw new Error('Response verification failed');
+      }
+
+      audit_event('proxy.success', { op: packet['@op'], source: packet['@source'] });
+      return { ok: true, ...data };
+    } catch (e) {
+      audit_event('proxy.error', { op: packet['@op'], error: String(e?.message || e) });
+      return { ok: false, error: String(e?.message || e), packet };
+    }
+  }
+
+  function verifyResponse(data, packet) {
+    // Basic structural verification
+    if (!data || typeof data !== 'object') return false;
+    if (data.error) return true; // Error responses are valid
+    if (!Array.isArray(data.items)) return false;
+
+    // Verify items don't exceed requested count
+    if (data.items.length > packet['@n'] + 2) return false;
+
+    return true;
+  }
+
+  async function execGlyph(glyph, query, n = 10) {
+    const packet = resolveGlyph(glyph, query, n);
+    if (!packet) {
+      return { ok: false, error: 'invalid_glyph', glyph };
+    }
+
+    // Check cache first
+    const cacheKey = researchCacheKey(packet);
+    const cache = await caches.open(KERNEL.cache.researchName);
+    const cached = await cache.match(cacheKey);
+
+    if (cached) {
+      const age = Date.now() - parseInt(cached.headers.get('x-cached-at') || '0');
+      if (age < 300000) { // 5 min cache
+        const data = await cached.json();
+        return { ok: true, cached: true, ...data };
+      }
+    }
+
+    // Execute via proxy or direct
+    let result;
+    if (packet['@mode'] === 'PROXY') {
+      result = await send(packet);
+    } else {
+      // Direct mode: use AgentBus
+      const input = { q: packet['@q'], n: packet['@n'] };
+      const source = packet['@source'];
+
+      if (source === 'wikipedia') {
+        result = await AgentBus.run('agent.research.wikipedia', input, researchWikipedia);
+      } else if (source === 'github') {
+        result = await AgentBus.run('agent.research.github', input, researchGitHub);
+      } else {
+        result = await AgentBus.run('agent.research.router', input, researchDispatch);
+      }
+      result = { ok: true, items: result.items || [] };
+    }
+
+    // Cache successful results
+    if (result.ok && result.items) {
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+        'x-cached-at': Date.now().toString(),
+      });
+      const body = JSON.stringify({ items: result.items, packet });
+      await cache.put(cacheKey, new Response(body, { headers }));
+    }
+
+    return result;
+  }
+
+  return { probeHost, send, execGlyph, verifyResponse };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [19] UNIFIED RUNTIME v4.1 (K'UHUL π CORE LOOP)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const UnifiedRuntime = (() => {
+  // Glyph weight table (flat lookup)
+  const GLYPH = Object.freeze({
+    '@': 1.0, '@@': 2.0, '@@@': 3.0,
+    'π': Math.PI, 'φ': 1.618, 'e': Math.E,
+    'τ': Math.PI * 2, '⤍': 0.87, '↻': 0.93, '⟲': 0.76,
+  });
+
+  // Agent state container
+  const agents = new Map();
+  const eventQueue = [];
+  const clusters = [];
+  let tickCount = 0;
+
+  // Create agent (atomic block)
+  function createAgent(id, glyphs = ['@'], meta = {}) {
+    const agent = {
+      id,
+      glyphs,
+      state: {
+        activation: 0,
+        energy: 1.0,
+        phase: 0,
+      },
+      meta,
+      events: [],
+      created: Date.now(),
+    };
+    agents.set(id, agent);
+    return agent;
+  }
+
+  // Pop: invoke agent from queue
+  function pop() {
+    return eventQueue.shift() || null;
+  }
+
+  // Wo: mutate agent state
+  function wo(agent, mutation) {
+    if (!agent) return;
+    Object.assign(agent.state, mutation);
+    agent.state.phase++;
+  }
+
+  // Sek: sequence event
+  function sek(event) {
+    eventQueue.push({
+      t: Date.now(),
+      tick: tickCount,
+      ...event,
+    });
+  }
+
+  // Emit: propagate signal from agent
+  function emit(agent) {
+    if (!agent) return;
+    const signal = {
+      from: agent.id,
+      activation: agent.state.activation,
+      energy: agent.state.energy,
+      glyphs: agent.glyphs,
+      t: Date.now(),
+    };
+    agent.events.push(signal);
+    sek({ type: 'emit', agent: agent.id, signal });
+    audit_event('runtime.emit', { agent: agent.id, activation: agent.state.activation });
+  }
+
+  // Tick agent: update activation based on glyph weights
+  function tickAgent(agent) {
+    if (!agent) return;
+
+    // Sum glyph weights
+    const weight = agent.glyphs.reduce((sum, g) => sum + (GLYPH[g] || 0), 0);
+
+    // Update activation (accumulate)
+    agent.state.activation += weight * 0.01;
+
+    // Decay energy
+    agent.state.energy *= 0.99;
+
+    // Emit if activation threshold crossed
+    if (agent.state.activation > 1) {
+      emit(agent);
+      agent.state.activation *= 0.5; // Reset after emit
+    }
+  }
+
+  // Detect clusters: find agents with similar activation patterns
+  function detectClusters() {
+    const active = [...agents.values()].filter(a => a.state.activation > 0.3);
+    if (active.length < 2) return [];
+
+    const detected = [];
+    const used = new Set();
+
+    for (const a of active) {
+      if (used.has(a.id)) continue;
+
+      const cluster = [a];
+      used.add(a.id);
+
+      for (const b of active) {
+        if (used.has(b.id)) continue;
+
+        // Cluster if activation difference < 0.2
+        const diff = Math.abs(a.state.activation - b.state.activation);
+        if (diff < 0.2) {
+          cluster.push(b);
+          used.add(b.id);
+        }
+      }
+
+      if (cluster.length >= 2) {
+        detected.push({
+          id: 'cluster-' + Date.now().toString(36),
+          agents: cluster.map(x => x.id),
+          avgActivation: cluster.reduce((s, x) => s + x.state.activation, 0) / cluster.length,
+          t: Date.now(),
+        });
+      }
+    }
+
+    clusters.push(...detected);
+    return detected;
+  }
+
+  // Collapse: produce answer from cluster
+  function collapse(cluster) {
+    if (!cluster || !cluster.agents?.length) return null;
+
+    const members = cluster.agents.map(id => agents.get(id)).filter(Boolean);
+    if (!members.length) return null;
+
+    // Compute weighted answer
+    const totalWeight = members.reduce((s, a) => {
+      return s + a.glyphs.reduce((gs, g) => gs + (GLYPH[g] || 0), 0);
+    }, 0);
+
+    const answer = {
+      cluster: cluster.id,
+      agents: cluster.agents,
+      weight: totalWeight,
+      activation: cluster.avgActivation,
+      collapsed: true,
+      t: Date.now(),
+    };
+
+    audit_event('runtime.collapse', { cluster: cluster.id, weight: totalWeight });
+    return answer;
+  }
+
+  // Main clock: tick all agents
+  function tick() {
+    tickCount++;
+
+    // Process event queue
+    let event = pop();
+    while (event) {
+      // Handle event based on type
+      if (event.type === 'spawn') {
+        createAgent(event.id, event.glyphs, event.meta);
+      }
+      event = pop();
+    }
+
+    // Tick all agents
+    for (const agent of agents.values()) {
+      tickAgent(agent);
+    }
+
+    // Detect and process clusters
+    const newClusters = detectClusters();
+    const answers = newClusters.map(collapse).filter(Boolean);
+
+    return {
+      tick: tickCount,
+      agents: agents.size,
+      clusters: newClusters.length,
+      answers,
+    };
+  }
+
+  // Run N ticks
+  function run(n = 1) {
+    const results = [];
+    for (let i = 0; i < n; i++) {
+      results.push(tick());
+    }
+    return {
+      ticks: n,
+      final: results[results.length - 1],
+      answers: results.flatMap(r => r.answers),
+    };
+  }
+
+  // Status
+  function status() {
+    return {
+      tickCount,
+      agents: agents.size,
+      clusters: clusters.length,
+      queueLength: eventQueue.length,
+      agentList: [...agents.keys()],
+    };
+  }
+
+  // Spawn agent via event
+  function spawn(id, glyphs = ['@'], meta = {}) {
+    sek({ type: 'spawn', id, glyphs, meta });
+    return id;
+  }
+
+  return {
+    GLYPH,
+    createAgent,
+    spawn,
+    tick,
+    run,
+    status,
+    detectClusters,
+    collapse,
+    pop,
+    wo,
+    sek,
+    emit,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [7] INTERNAL REST / MESSAGE ROUTER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function jsonResponse(obj, status = 200, headers = {}) {
+  const body = utf8.enc.encode(JSON.stringify(obj, null, 2));
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Access-Control-Allow-Origin": "*",
+      ...headers,
+    },
+  });
+}
+
+function badRequest(message) {
+  return jsonResponse({ ok: false, error: message }, 400);
+}
+
+function notFound(message = "Not found") {
+  return jsonResponse({ ok: false, error: message }, 404);
+}
+
+async function handleResearch(req, url) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
+  }
+
+  if (url.pathname === '/research/agents') {
+    return jsonResponse({ ok: true, mode: KERNEL.research.mode, agents: AgentBus.list() });
+  }
+
+  if (url.pathname === '/research/audit') {
+    return jsonResponse({ ok: true, audit: AgentBus.getAudit() });
+  }
+
+  if (url.pathname === '/research/search') {
+    let q = url.searchParams.get('q');
+    let n = url.searchParams.get('n');
+
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        q = q ?? body?.q;
+        n = n ?? body?.n;
+      } catch { /* ignore */ }
+    }
+
+    q = safeText(q, KERNEL.limits.maxQueryLen);
+    if (!q) return badRequest('Missing q');
+
+    const maxResults = clampInt(n, 1, KERNEL.limits.maxResults, KERNEL.limits.maxResults);
+    const input = { q, n: maxResults };
+
+    const out = await AgentBus.run('agent.research.router', input, researchDispatch);
+    return jsonResponse({ ok: true, query: input.q, items: normalizeItems(out.items) });
+  }
+
+  return notFound('Unknown research route');
+}
+
+async function handleApi(req) {
+  const url = new URL(req.url);
+  const path = url.pathname;
+
+  async function readJson() {
+    const ct = req.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return null;
+    const txt = await req.text();
+    if (!txt) return null;
+    return JSON.parse(txt);
+  }
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
+
+  // Audit export
+  if (path === KERNEL.routes.auditExport && req.method === "GET") {
+    return jsonResponse(audit_export());
+  }
+
+  // Storage
+  if (path === KERNEL.routes.storageGet && req.method === "GET") {
+    const key = url.searchParams.get("key") || "";
+    const v = await idbGet(DB.stores.kv, key);
+    return jsonResponse({ ok: true, key, value: v ?? null });
+  }
+  if (path === KERNEL.routes.storagePut && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (!body.key) return badRequest("missing_key");
+    await idbPut(DB.stores.kv, String(body.key), body.value);
+    audit_event('storage.put', { key: body.key });
+    return jsonResponse({ ok: true });
+  }
+
+  // JavaCrypt Exec
+  if (path === KERNEL.routes.exec && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (!body.program) return badRequest("missing_program");
+    try {
+      const result = await JavaCryptWorker.exec(body.program, body.caps || {});
+      return jsonResponse({ ok: true, result });
+    } catch (e) {
+      return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+    }
+  }
+
+  // Cluster
+  if (path === KERNEL.routes.clusterRun && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (Array.isArray(body.batch)) {
+      const out = await Cluster.runBatch(body.batch);
+      return jsonResponse(out);
+    }
+    const out = await Cluster.runJob(body);
+    return jsonResponse(out);
+  }
+  if (path === KERNEL.routes.clusterStatus && req.method === "GET") {
+    return jsonResponse(Cluster.status());
+  }
+
+  // π Emit
+  if (path === KERNEL.routes.piEmit && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const tokens = Cluster.piEmit(body.query || "", body.steps || 24);
+    return jsonResponse({ ok: true, tokens });
+  }
+
+  // π Infer
+  if (path === KERNEL.routes.piInfer && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const result = await Host.infer(body.query || "", body.events || [], body.ticks || 50);
+    return jsonResponse(result);
+  }
+
+  // Host
+  if (path === KERNEL.routes.hostProbe && req.method === "GET") {
+    const out = await Host.probe(true);
+    return jsonResponse(out);
+  }
+  if (path === KERNEL.routes.hostProxy && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const proxyPath = String(body.path || "");
+    if (!proxyPath.startsWith("/")) return badRequest("path_must_start_with_slash");
+    const init = {
+      method: body.method || "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body.body ? JSON.stringify(body.body) : undefined,
+    };
+    const prox = await Host.proxy(proxyPath, init);
+    if (!prox.ok) return jsonResponse(prox, 502);
+
+    return new Response(prox.body, {
+      status: prox.status || 200,
+      headers: {
+        "Content-Type": prox.contentType || "application/octet-stream",
+        "Cache-Control": "no-store",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  }
+
+  return notFound("unknown_api_route");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [8] FETCH STRATEGY & CACHE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+async function handleFetch(event) {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  KernelState.metrics.fetches++;
+
+  // Health check
+  if (url.pathname === '/health') {
+    return jsonResponse({ ok: true, kernel: KERNEL.v, t: Date.now(), head: AUDIT.chain_head });
+  }
+
+  // Research routes
+  if (url.pathname.startsWith('/research/')) {
+    return handleResearch(req, url);
+  }
+
+  // Only same-origin routing
+  if (url.origin !== self.location.origin) {
+    return fetchWithProjection(req, url);
+  }
+
+  // Kernel API
+  if (url.pathname.startsWith(KERNEL.routes.apiPrefix)) {
+    return handleApi(req);
+  }
+
+  // Dynamic manifest
+  if (url.pathname === KERNEL.routes.manifest && !url.searchParams.has("__seed")) {
+    const dyn = await getDynamicManifest();
+    return jsonResponse(dyn, 200, { "Content-Type": "application/manifest+json; charset=utf-8" });
+  }
+
+  // Virtual atomic endpoints
+  const virtualPaths = ['/atomic.css', '/atomic.xjson', '/atomic.khl', '/atomic.html'];
+  if (virtualPaths.includes(url.pathname)) {
+    const v = await virtualFromAtomicFold(url.pathname);
+    return v || new Response('Not found', { status: 404 });
+  }
+
+  // π projection routes
+  if (url.pathname.startsWith('/π/') || url.searchParams.has('π')) {
+    const piType = url.pathname.split('/')[2] || url.searchParams.get('π');
+    const targetUrl = url.searchParams.get('url') || url.pathname.split('/').slice(3).join('/');
+    return jsonResponse({
+      ok: true,
+      projection: { type: piType, url: targetUrl, renderer: `canvas-${piType}` }
+    });
+  }
+
+  // Cache-first for same-origin
+  const cache = await caches.open(KERNEL.cache.staticName);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+
+  const res = await fetch(req);
+  if (req.method === "GET" && res.ok) {
+    cache.put(req, res.clone()).catch(() => {});
+  }
+  return res;
+}
+
+async function fetchWithProjection(request, url) {
+  const projectionCache = await caches.open(KERNEL.cache.projectionName);
+
   const cached = await projectionCache.match(request);
   if (cached) {
     const age = Date.now() - parseInt(cached.headers.get('x-cached-at') || '0');
-    if (age < 300000) return cached; // 5 min cache
+    if (age < 300000) return cached;
   }
 
   try {
@@ -128,7 +1860,7 @@ async function fetchWithProjection(request, url) {
       const clone = res.clone();
       const headers = new Headers(clone.headers);
       headers.set('x-cached-at', Date.now().toString());
-      headers.set('x-projection-version', SW_VERSION);
+      headers.set('x-kernel-version', KERNEL.v);
 
       const body = await clone.arrayBuffer();
       const cachedRes = new Response(body, {
@@ -142,1048 +1874,2536 @@ async function fetchWithProjection(request, url) {
 
     return res;
   } catch (err) {
-    // Return cached even if stale on network failure
     if (cached) return cached;
     throw err;
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   SW FETCH ROUTER
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [9] LIFECYCLE & BOOT SEQUENCING
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+self.addEventListener("install", (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(KERNEL.cache.staticName);
+    await cache.addAll([
+      "/",
+      KERNEL.routes.manifest + "?__seed=1",
+      "/sw.js",
+    ]);
 
-  // Virtual atomic endpoints
-  if (url.origin === location.origin) {
-    const virtualPaths = ['/atomic.css', '/atomic.xjson', '/atomic.khl', '/atomic.html'];
-    if (virtualPaths.includes(url.pathname)) {
-      event.respondWith((async () => {
-        const v = await virtualFromAtomicFold(url.pathname);
-        return v || new Response('Not found', { status: 404 });
-      })());
-      return;
+    Cluster.init(4);
+    audit_event('kernel.install', { v: KERNEL.v });
+
+    const existing = await idbGet(DB.stores.kv, MANIFEST_KEY);
+    if (!existing) {
+      await patchMutableManifest({
+        mx2: {
+          kernel: { v: KERNEL.v, mode: KERNEL.mode, installed_at: Date.now() },
+          session: { canvasTabs: [], activeTab: null },
+          host: { enabled: true },
+        },
+      });
     }
-  }
 
-  // π projection routes (video/stream/image)
-  if (url.pathname.startsWith('/π/') || url.searchParams.has('π')) {
-    event.respondWith((async () => {
-      const piType = url.pathname.split('/')[2] || url.searchParams.get('π');
-      const targetUrl = url.searchParams.get('url') || url.pathname.split('/').slice(3).join('/');
-
-      if (PROJECTION_HANDLERS[`π:${piType}`]) {
-        const meta = await PROJECTION_HANDLERS[`π:${piType}`](targetUrl);
-        return jsonResponse({ ok: true, projection: meta });
-      }
-
-      return jsonResponse({ ok: false, error: 'Unknown π route' }, 400);
-    })());
-    return;
-  }
-
-  // Cache-first for same-origin core assets
-  if (url.origin === location.origin) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(event.request);
-      if (cached) return cached;
-
-      const res = await fetch(event.request);
-      if (event.request.method === 'GET' && res.ok) {
-        cache.put(event.request, res.clone());
-      }
-      return res;
-    })());
-    return;
-  }
-
-  // Cross-origin with projection cache
-  event.respondWith(fetchWithProjection(event.request, url));
+    self.skipWaiting();
+  })());
 });
 
-/* ══════════════════════════════════════════════════════════════
-   INDEXEDDB — IDB SESSION STORE
-   ══════════════════════════════════════════════════════════════ */
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
 
-const IDB = {
-  dbp: null,
-  DB_NAME: 'mx2db_blackcode',
-  DB_VERSION: 2,
-
-  STORES: {
-    tapes: { keyPath: 'id', indexes: ['name', 'type', 'modified'] },
-    settings: { keyPath: 'k' },
-    endpoints: { keyPath: 'id' },
-    activity: { keyPath: 'ts' },
-    sessions: { keyPath: 'id', indexes: ['url', 'updatedAt'] },
-    tabs: { keyPath: 'id', indexes: ['order', 'active'] },
-    projectionCache: { keyPath: 'url', indexes: ['cachedAt', 'type'] }
-  },
-
-  open() {
-    if (this.dbp) return this.dbp;
-
-    this.dbp = new Promise((resolve, reject) => {
-      const req = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-
-      req.onupgradeneeded = (e) => {
-        const db = req.result;
-
-        for (const [name, config] of Object.entries(this.STORES)) {
-          if (!db.objectStoreNames.contains(name)) {
-            const store = db.createObjectStore(name, { keyPath: config.keyPath });
-            if (config.indexes) {
-              for (const idx of config.indexes) {
-                store.createIndex(idx, idx, { unique: false });
-              }
-            }
-          }
-        }
-      };
-
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-
-    return this.dbp;
-  },
-
-  async tx(store, mode, fn) {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const t = db.transaction(store, mode);
-      const s = t.objectStore(store);
-      const out = fn(s);
-      t.oncomplete = () => resolve(out);
-      t.onerror = () => reject(t.error);
-    });
-  },
-
-  async get(store, key) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.get(key);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async all(store) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.getAll();
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async put(store, val) {
-    return this.tx(store, 'readwrite', (s) => s.put(val));
-  },
-
-  async del(store, key) {
-    return this.tx(store, 'readwrite', (s) => s.delete(key));
-  },
-
-  async clear(store) {
-    return this.tx(store, 'readwrite', (s) => s.clear());
-  },
-
-  async count(store) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.count();
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async query(store, indexName, range) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const idx = s.index(indexName);
-      const r = idx.getAll(range);
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => rej(r.error);
-    }));
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   SESSION MANAGEMENT (IDB-based)
-   ══════════════════════════════════════════════════════════════ */
-
-const SessionStore = {
-  async create(url, opts = {}) {
-    const session = {
-      id: uid(),
-      url: String(url || '').trim(),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      open: true,
-      token: uid(),
-      caps: {
-        dom_read: opts.dom_read ?? false,
-        dom_write: opts.dom_write ?? false,
-        net_fetch: opts.net_fetch ?? true,
-        storage: opts.storage ?? true,
-        js_run: opts.js_run ?? false,
-        console: opts.console ?? true
-      },
-      title: opts.title || url,
-      favicon: opts.favicon || null
-    };
-
-    await IDB.put('sessions', session);
-    await IDB.put('activity', { ts: Date.now(), op: 'session_create', id: session.id, url });
-    return session;
-  },
-
-  async get(id) {
-    return IDB.get('sessions', id);
-  },
-
-  async update(id, updates) {
-    const session = await this.get(id);
-    if (!session) return null;
-
-    Object.assign(session, updates, { updatedAt: Date.now() });
-    await IDB.put('sessions', session);
-    return session;
-  },
-
-  async close(id) {
-    return this.update(id, { open: false });
-  },
-
-  async delete(id) {
-    await IDB.del('sessions', id);
-    await IDB.put('activity', { ts: Date.now(), op: 'session_delete', id });
-  },
-
-  async listOpen() {
-    const all = await IDB.all('sessions');
-    return all.filter(s => s.open).sort((a, b) => b.updatedAt - a.updatedAt);
-  },
-
-  async listAll() {
-    return IDB.all('sessions');
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   TAB MANAGEMENT (with reorder support)
-   ══════════════════════════════════════════════════════════════ */
-
-const TabManager = {
-  async create(sessionId, opts = {}) {
-    const tabs = await IDB.all('tabs');
-    const maxOrder = tabs.reduce((max, t) => Math.max(max, t.order || 0), 0);
-
-    const tab = {
-      id: uid(),
-      sessionId,
-      order: maxOrder + 1,
-      active: opts.active ?? true,
-      pinned: opts.pinned ?? false,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-
-    // Deactivate other tabs if this one is active
-    if (tab.active) {
-      for (const t of tabs) {
-        if (t.active) {
-          t.active = false;
-          await IDB.put('tabs', t);
-        }
-      }
-    }
-
-    await IDB.put('tabs', tab);
-    return tab;
-  },
-
-  async get(id) {
-    return IDB.get('tabs', id);
-  },
-
-  async close(id) {
-    const tab = await this.get(id);
-    if (!tab) return false;
-
-    await IDB.del('tabs', id);
-
-    // Close associated session
-    if (tab.sessionId) {
-      await SessionStore.close(tab.sessionId);
-    }
-
-    // Activate next tab if this was active
-    if (tab.active) {
-      const remaining = await this.list();
-      if (remaining.length > 0) {
-        remaining[0].active = true;
-        await IDB.put('tabs', remaining[0]);
-      }
-    }
-
-    await IDB.put('activity', { ts: Date.now(), op: 'tab_close', id });
-    return true;
-  },
-
-  async activate(id) {
-    const tabs = await IDB.all('tabs');
-    for (const t of tabs) {
-      const wasActive = t.active;
-      t.active = t.id === id;
-      if (wasActive !== t.active) {
-        t.updatedAt = Date.now();
-        await IDB.put('tabs', t);
-      }
-    }
-  },
-
-  async reorder(tabId, newOrder) {
-    const tabs = await IDB.all('tabs');
-    const tab = tabs.find(t => t.id === tabId);
-    if (!tab) return false;
-
-    const oldOrder = tab.order;
-
-    for (const t of tabs) {
-      if (t.id === tabId) {
-        t.order = newOrder;
-      } else if (newOrder < oldOrder) {
-        if (t.order >= newOrder && t.order < oldOrder) t.order++;
-      } else {
-        if (t.order > oldOrder && t.order <= newOrder) t.order--;
-      }
-      await IDB.put('tabs', t);
-    }
-
-    return true;
-  },
-
-  async list() {
-    const tabs = await IDB.all('tabs');
-    return tabs.sort((a, b) => a.order - b.order);
-  },
-
-  async getActive() {
-    const tabs = await IDB.all('tabs');
-    return tabs.find(t => t.active) || null;
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   SCXQ2 COMPRESSION ENGINE
-   ══════════════════════════════════════════════════════════════ */
-
-const SCXQ2 = {
-  // Micro-agent field definitions for compression
-  FIELD_MAP: {
-    'id': 0x01, 'name': 0x02, 'type': 0x03, 'content': 0x04,
-    'tags': 0x05, 'created': 0x06, 'modified': 0x07, 'size': 0x08,
-    'compression': 0x09, 'version': 0x0A, 'author': 0x0B, 'meta': 0x0C
-  },
-
-  FIELD_MAP_REV: null,
-
-  init() {
-    this.FIELD_MAP_REV = Object.fromEntries(
-      Object.entries(this.FIELD_MAP).map(([k, v]) => [v, k])
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter(k => k.startsWith('mx2lm-') && !Object.values(KERNEL.cache).includes(k))
+          .map(k => caches.delete(k))
     );
-  },
 
-  compressUTF8(str) {
-    const enc = new TextEncoder().encode(str);
-    let bin = '';
-    for (let i = 0; i < enc.length; i++) bin += String.fromCharCode(enc[i]);
-    return btoa(bin);
-  },
+    Host.probe(false).catch(() => {});
+    audit_event('kernel.activate', { v: KERNEL.v });
 
-  decompressUTF8(b64) {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  },
-
-  // Field-aware compression for tapes
-  compressTape(tape) {
-    if (!this.FIELD_MAP_REV) this.init();
-
-    const compressed = {};
-    for (const [key, val] of Object.entries(tape)) {
-      const fieldId = this.FIELD_MAP[key];
-      if (fieldId && val !== undefined) {
-        if (key === 'content' && typeof val === 'string' && val.length > 100) {
-          compressed[fieldId] = this.compressUTF8(val);
-          compressed[0xFF] = true; // content compressed flag
-        } else {
-          compressed[fieldId] = val;
-        }
-      }
-    }
-    return compressed;
-  },
-
-  decompressTape(compressed) {
-    if (!this.FIELD_MAP_REV) this.init();
-
-    const tape = {};
-    const contentCompressed = compressed[0xFF];
-
-    for (const [fieldId, val] of Object.entries(compressed)) {
-      const numId = parseInt(fieldId);
-      if (numId === 0xFF) continue;
-
-      const key = this.FIELD_MAP_REV[numId];
-      if (key) {
-        if (key === 'content' && contentCompressed) {
-          tape[key] = this.decompressUTF8(val);
-        } else {
-          tape[key] = val;
-        }
-      }
-    }
-    return tape;
-  }
-};
-
-SCXQ2.init();
-
-/* ══════════════════════════════════════════════════════════════
-   TAPE EXPORT / IMPORT
-   ══════════════════════════════════════════════════════════════ */
-
-const TapeIO = {
-  async exportAll(compress = true) {
-    const tapes = await IDB.all('tapes');
-    const settings = await IDB.all('settings');
-    const endpoints = await IDB.all('endpoints');
-
-    const bundle = {
-      version: SW_VERSION,
-      exportedAt: Date.now(),
-      format: compress ? 'scxq2' : 'json',
-      tapes: compress ? tapes.map(t => SCXQ2.compressTape(t)) : tapes,
-      settings,
-      endpoints
-    };
-
-    return compress ? SCXQ2.compressUTF8(JSON.stringify(bundle)) : JSON.stringify(bundle, null, 2);
-  },
-
-  async importBundle(data, merge = false) {
-    let bundle;
-
-    try {
-      // Try to decompress first
-      const decompressed = SCXQ2.decompressUTF8(data);
-      bundle = JSON.parse(decompressed);
-    } catch {
-      // Try parsing as plain JSON
-      bundle = JSON.parse(data);
-    }
-
-    if (!bundle.version || !bundle.tapes) {
-      throw new Error('Invalid bundle format');
-    }
-
-    // Clear existing data if not merging
-    if (!merge) {
-      await IDB.clear('tapes');
-      await IDB.clear('settings');
-      await IDB.clear('endpoints');
-    }
-
-    // Import tapes
-    const tapes = bundle.format === 'scxq2'
-      ? bundle.tapes.map(t => SCXQ2.decompressTape(t))
-      : bundle.tapes;
-
-    for (const tape of tapes) {
-      if (merge) {
-        tape.id = uid(); // New ID to avoid conflicts
-      }
-      await IDB.put('tapes', tape);
-    }
-
-    // Import settings and endpoints
-    for (const s of (bundle.settings || [])) {
-      await IDB.put('settings', s);
-    }
-
-    for (const e of (bundle.endpoints || [])) {
-      await IDB.put('endpoints', e);
-    }
-
-    await IDB.put('activity', {
-      ts: Date.now(),
-      op: 'import',
-      note: `Imported ${tapes.length} tapes`,
-      merge
-    });
-
-    return { imported: tapes.length, version: bundle.version };
-  },
-
-  async exportSingleTape(id, compress = true) {
-    const tape = await IDB.get('tapes', id);
-    if (!tape) throw new Error('Tape not found');
-
-    const data = compress ? SCXQ2.compressTape(tape) : tape;
-    return compress ? SCXQ2.compressUTF8(JSON.stringify(data)) : JSON.stringify(data, null, 2);
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   CANVAS DOM PROJECTION
-   ══════════════════════════════════════════════════════════════ */
-
-const CanvasProjection = {
-  // Convert fetched HTML to canvas-renderable structure
-  async projectDOM(url) {
-    try {
-      const res = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit',
-        headers: { 'Accept': 'text/html,application/xhtml+xml,*/*' }
+    const list = await self.clients.matchAll({ includeUncontrolled: true });
+    for (const c of list) {
+      c.postMessage({
+        type: "mx2.kernel.ready",
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode, id: KUHUL_KERNEL_ID }
       });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const html = await res.text();
-      const contentType = res.headers.get('content-type') || '';
-
-      return {
-        ok: true,
-        url: res.url,
-        status: res.status,
-        contentType,
-        html,
-        projectedAt: Date.now(),
-        renderer: contentType.includes('json') ? 'json-view' : 'html-canvas'
-      };
-    } catch (err) {
-      return {
-        ok: false,
-        url,
-        error: err.message,
-        projectedAt: Date.now()
-      };
     }
-  },
+  })());
+});
 
-  // π video/media routing
-  routePiContent(url, type) {
-    const routes = {
-      'video': { renderer: 'canvas-video', controls: true },
-      'stream': { renderer: 'canvas-stream', live: true },
-      'image': { renderer: 'canvas-image', zoomable: true },
-      'audio': { renderer: 'canvas-audio', waveform: true }
-    };
-
-    return routes[type] || routes.video;
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   UTILITY FUNCTIONS
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [10] MESSAGE / AGENT BRIDGE (SEALED OPCODE ONLY)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
-
-function clamp(n, a, b) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function guessType(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  const typeMap = {
-    'js': 'javascript', 'htm': 'html', 'html': 'html',
-    'md': 'markdown', 'json': 'json', 'xml': 'xml',
-    'css': 'css', 'txt': 'text', 'svg': 'svg',
-    'mp4': 'video', 'webm': 'video', 'mp3': 'audio',
-    'wav': 'audio', 'png': 'image', 'jpg': 'image',
-    'jpeg': 'image', 'gif': 'image', 'webp': 'image'
-  };
-  return typeMap[ext] || 'binary';
-}
-
-function typeIcon(type) {
-  const icons = {
-    json: '{}', xml: '</>', html: '🌐', css: '🎨',
-    javascript: '⚡', markdown: '📝', binary: '📦',
-    video: '🎬', audio: '🎵', image: '🖼️', svg: '◇', text: '📄'
-  };
-  return icons[type] || '📄';
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + 'B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CLIENT BRIDGE
-   ══════════════════════════════════════════════════════════════ */
 
 function postAll(msg) {
   return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(list => list.forEach(c => c.postMessage(msg)));
 }
 
-function postOne(clientId, msg) {
-  return self.clients.get(clientId).then(c => c && c.postMessage(msg));
-}
+self.addEventListener("message", (event) => {
+  KernelState.metrics.messages++;
 
-/* ══════════════════════════════════════════════════════════════
-   UI BOOT & SYNC
-   ══════════════════════════════════════════════════════════════ */
+  const source = event.source;
+  const data = event.data;
 
-async function uiBoot() {
-  const m = await getManifestJSON();
-  const settings = await IDB.all('settings');
-  const endpoints = await IDB.all('endpoints');
+  Promise.resolve().then(async () => {
+    if (!data || typeof data !== 'object') throw new Error('Invalid message');
 
-  // Seed settings from manifest
-  if (settings.length === 0 && m?.mx2db?.settings) {
-    await IDB.put('settings', { k: 'settings', v: m.mx2db.settings });
-  }
-
-  // Seed endpoints from manifest
-  if (endpoints.length === 0 && Array.isArray(m?.mx2db?.api_endpoints)) {
-    for (const ep of m.mx2db.api_endpoints) {
-      await IDB.put('endpoints', ep);
+    // JavaCrypt opcode blocks (sealed interface)
+    if (data.__javacrypt__ === true) {
+      const block = { ...data, client: source?.id || 'client' };
+      const result = await javacrypt_execute(block);
+      source?.postMessage({ ok: true, id: block.id, result });
+      return;
     }
-  }
 
-  // Seed sample tapes if empty
-  const tapes = await IDB.all('tapes');
-  if (tapes.length === 0) {
-    const samples = [
-      {
-        id: uid(),
-        name: 'welcome.json',
-        type: 'json',
-        tags: ['sample', 'config'],
-        compression: 'none',
-        content: JSON.stringify({
-          app: 'Black Code Browser',
-          version: SW_VERSION,
-          features: ['IDB Sessions', 'Tab Management', 'Canvas Projection', 'Tape I/O', 'π Routing'],
-          author: 'ATOMIC ⊗ KUHUL'
-        }, null, 2),
-        created: Date.now(),
-        modified: Date.now()
-      },
-      {
-        id: uid(),
-        name: 'canvas-demo.html',
-        type: 'html',
-        tags: ['sample', 'demo'],
-        compression: 'none',
-        content: `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Canvas Demo</title></head>
-<body style="background:#020409;color:#16f2aa;font-family:monospace;padding:40px">
-<h1>⟁ BLACK CODE BROWSER</h1>
-<p>Canvas-based DOM projection active. CORS bypassed via fetch projection.</p>
-<svg id="kuhul_svg_root" width="400" height="100" style="border:1px solid #16f2aa33">
-  <path d="M0 50 Q100 0 200 50 T400 50" stroke="#16f2aa" fill="none" stroke-width="2"/>
-</svg>
-</body></html>`,
-        created: Date.now(),
-        modified: Date.now()
+    // Legacy message interface (for compatibility)
+    const msg = data;
+
+    if (msg.type === "mx2.ping") {
+      source?.postMessage({ type: "mx2.pong", kernel: { v: KERNEL.v, mode: KERNEL.mode, id: KUHUL_KERNEL_ID } });
+      return;
+    }
+
+    if (msg.type === "mx2.manifest.patch") {
+      await patchMutableManifest(msg.patch || {});
+      source?.postMessage({ type: "mx2.manifest.patched", ok: true });
+      return;
+    }
+
+    if (msg.type === "mx2.session.setCanvasTabs") {
+      await patchMutableManifest({
+        mx2: { session: { canvasTabs: msg.tabs || [], activeTab: msg.activeTab ?? null } },
+      });
+      source?.postMessage({ type: "mx2.session.saved", ok: true });
+      return;
+    }
+
+    if (msg.type === "mx2.exec") {
+      try {
+        const result = await JavaCryptWorker.exec(msg.program || {}, msg.caps || {});
+        source?.postMessage({ type: "mx2.exec.result", ok: true, result, rid: msg.rid });
+      } catch (e) {
+        source?.postMessage({ type: "mx2.exec.result", ok: false, error: String(e), rid: msg.rid });
       }
-    ];
-
-    for (const tape of samples) {
-      tape.size = new Blob([tape.content]).size;
-      await IDB.put('tapes', tape);
+      return;
     }
 
-    await IDB.put('activity', { ts: Date.now(), op: 'seed_samples', note: 'Created sample tapes' });
-  }
+    if (msg.type === "mx2.pi.infer") {
+      const result = await Host.infer(msg.query || "", msg.events || [], msg.ticks || 50);
+      source?.postMessage({ type: "mx2.pi.result", ...result, rid: msg.rid });
+      return;
+    }
 
-  await uiRefreshAll();
-}
+    if (msg.type === "mx2.pi.emit") {
+      const tokens = Cluster.piEmit(msg.query || "", msg.steps || 24);
+      source?.postMessage({ type: "mx2.pi.tokens", ok: true, tokens, rid: msg.rid });
+      return;
+    }
 
-async function uiRefreshAll() {
-  const tapes = await IDB.all('tapes');
-  tapes.sort((a, b) => (b.modified || 0) - (a.modified || 0));
+    if (msg.type === "mx2.host.probe") {
+      const out = await Host.probe(true);
+      source?.postMessage({ type: "mx2.host.status", ...out });
+      return;
+    }
 
-  const endpoints = await IDB.all('endpoints');
-  const settingsObj = (await IDB.all('settings')).find(x => x.k === 'settings')?.v || {};
-  const tabs = await TabManager.list();
-  const sessions = await SessionStore.listOpen();
-  const activity = await IDB.all('activity');
+    if (msg.type === "mx2.cluster.status") {
+      source?.postMessage({ type: "mx2.cluster.info", ...Cluster.status() });
+      return;
+    }
 
-  // Calculate storage stats
-  let totalSize = tapes.reduce((s, t) => s + (t.size || 0), 0);
-  const m = await getManifestJSON();
-  const limit = m?.mx2db?.storage_limit_bytes || (100 * 1024 * 1024);
-  const usedMB = Math.round((totalSize / 1024 / 1024) * 100) / 100;
-  const totalMB = Math.round((limit / 1024 / 1024) * 100) / 100;
-  const pct = limit ? clamp((totalSize / limit) * 100, 0, 100) : 0;
+    if (msg.type === "mx2.audit.export") {
+      source?.postMessage({ type: "mx2.audit.data", ...audit_export() });
+      return;
+    }
 
-  postAll({
-    t: 'UI_SYNC',
-    version: SW_VERSION,
-    settings: settingsObj,
-    dashboard: {
-      totalTapes: tapes.length,
-      apiConnections: endpoints.length,
-      compressionRatio: 'SCXQ2',
-      recentActivity: activity.filter(a => Date.now() - a.ts < 86400000).length,
-      systemStatus: 'OK',
-      storage: { usedMB, totalMB, pct }
-    },
-    tapes: tapes.map(t => ({
-      id: t.id, name: t.name, type: t.type, tags: t.tags || [],
-      size: t.size || 0, modified: t.modified || 0,
-      icon: typeIcon(t.type), sizeLabel: formatSize(t.size || 0)
-    })),
-    endpoints,
-    tabs: tabs.map(t => ({ id: t.id, sessionId: t.sessionId, order: t.order, active: t.active, pinned: t.pinned })),
-    sessions: sessions.map(s => ({ id: s.id, url: s.url, title: s.title, open: s.open }))
+    if (msg.type === "BOOT" || msg.type === "mx2.boot") {
+      source?.postMessage({
+        type: "mx2.kernel.ready",
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode, id: KUHUL_KERNEL_ID },
+        glyphs: Object.keys(KERNEL.glyphs),
+      });
+      postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} ready` });
+      return;
+    }
+
+    // Legacy UI compat
+    if (msg.t === 'NAV') {
+      postAll({ t: 'STATUS', text: `Switched to ${msg.view || 'view'}` });
+      return;
+    }
+    if (msg.t === 'SEARCH') {
+      postAll({ t: 'STATUS', text: `Search: ${msg.q || ''}` });
+      return;
+    }
+
+    // Unknown
+    if (msg.type || msg.t) {
+      source?.postMessage({ type: "mx2.kernel.error", ok: false, error: "unknown_message", got: msg.type || msg.t });
+    }
+  }).catch((err) => {
+    KernelState.metrics.errors++;
+    source?.postMessage({ ok: false, error: err.message || String(err) });
   });
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CANVAS STATE (for animation/rendering loop)
-   ══════════════════════════════════════════════════════════════ */
-
-const CANVAS = {
-  grid: true,
-  playing: false,
-  tick: 0,
-  fps: 20
-};
-
-function canvasFrame() {
-  CANVAS.tick++;
-  postAll({ t: 'CANVAS_FRAME', state: { ...CANVAS } });
-}
-
-let canvasTimer = null;
-function canvasPlay(on) {
-  CANVAS.playing = !!on;
-  if (CANVAS.playing) {
-    if (canvasTimer) clearInterval(canvasTimer);
-    canvasTimer = setInterval(canvasFrame, 1000 / CANVAS.fps);
-  } else {
-    if (canvasTimer) clearInterval(canvasTimer);
-    canvasTimer = null;
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   MESSAGE HANDLING (UI ↔ SW)
-   ══════════════════════════════════════════════════════════════ */
-
-self.addEventListener('message', (e) => {
-  const msg = e.data || {};
-  const clientId = e.source?.id;
-
-  (async () => {
-    switch (msg.t) {
-      /* ─────── BOOT ─────── */
-      case 'BOOT':
-        await uiBoot();
-        postAll({ t: 'STATUS', text: `Ready (v${SW_VERSION})` });
-        break;
-
-      /* ─────── NAVIGATION ─────── */
-      case 'NAV':
-        postAll({ t: 'STATUS', text: `Switched to ${msg.view || 'view'}` });
-        break;
-
-      /* ─────── SEARCH ─────── */
-      case 'SEARCH':
-        postAll({ t: 'STATUS', text: `Search: ${msg.q || ''}` });
-        break;
-
-      /* ─────── TAPE CRUD ─────── */
-      case 'TAPE_CREATE': {
-        const name = String(msg.name || '').trim();
-        if (!name) return postAll({ t: 'STATUS', text: 'Tape create failed: missing name' });
-
-        const type = msg.type || guessType(name);
-        let content = String(msg.content || '');
-        const compression = msg.compression || 'none';
-        const tags = Array.isArray(msg.tags) ? msg.tags : String(msg.tags || '').split(',').map(s => s.trim()).filter(Boolean);
-
-        if (compression === 'scxq2' && content) {
-          content = SCXQ2.compressUTF8(content);
-        }
-
-        const tape = {
-          id: uid(), name, type, tags, compression, content,
-          created: Date.now(), modified: Date.now()
-        };
-        tape.size = new Blob([tape.content]).size;
-
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_create', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Created tape: ${name}` });
-        break;
-      }
-
-      case 'TAPE_UPDATE': {
-        const tape = await IDB.get('tapes', msg.id);
-        if (!tape) return postAll({ t: 'STATUS', text: 'Tape not found' });
-
-        Object.assign(tape, msg.updates, { modified: Date.now() });
-        if (msg.updates.content) {
-          tape.size = new Blob([tape.content]).size;
-        }
-
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_update', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Updated tape: ${tape.name}` });
-        break;
-      }
-
-      case 'TAPE_DELETE': {
-        if (!msg.id) return;
-        await IDB.del('tapes', msg.id);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_delete', id: msg.id });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: 'Deleted tape' });
-        break;
-      }
-
-      case 'TAPE_OPEN': {
-        const tape = await IDB.get('tapes', msg.id);
-        if (!tape) return;
-
-        // Decompress if needed
-        let content = tape.content;
-        if (tape.compression === 'scxq2') {
-          try { content = SCXQ2.decompressUTF8(content); } catch {}
-        }
-
-        postAll({ t: 'TAPE_OPENED', tape: { ...tape, content } });
-        postAll({ t: 'STATUS', text: `Opened: ${tape.name}` });
-        break;
-      }
-
-      /* ─────── TAPE EXPORT/IMPORT ─────── */
-      case 'TAPE_EXPORT_ALL': {
-        const data = await TapeIO.exportAll(msg.compress !== false);
-        postAll({ t: 'TAPE_EXPORT_RESULT', data, format: msg.compress !== false ? 'scxq2' : 'json' });
-        postAll({ t: 'STATUS', text: 'Exported all tapes' });
-        break;
-      }
-
-      case 'TAPE_EXPORT_SINGLE': {
-        const data = await TapeIO.exportSingleTape(msg.id, msg.compress !== false);
-        postAll({ t: 'TAPE_EXPORT_RESULT', data, id: msg.id, format: msg.compress !== false ? 'scxq2' : 'json' });
-        postAll({ t: 'STATUS', text: 'Exported tape' });
-        break;
-      }
-
-      case 'TAPE_IMPORT': {
-        try {
-          const result = await TapeIO.importBundle(msg.data, msg.merge);
-          await uiRefreshAll();
-          postAll({ t: 'TAPE_IMPORT_RESULT', ok: true, ...result });
-          postAll({ t: 'STATUS', text: `Imported ${result.imported} tapes` });
-        } catch (err) {
-          postAll({ t: 'TAPE_IMPORT_RESULT', ok: false, error: err.message });
-          postAll({ t: 'STATUS', text: 'Import failed' });
-        }
-        break;
-      }
-
-      /* ─────── EDITOR ─────── */
-      case 'EDITOR_SAVE_AS_TAPE': {
-        const name = msg.name || `editor-${Date.now()}.${msg.type || 'txt'}`;
-        const type = msg.type || guessType(name);
-        const content = String(msg.content || '');
-        const tape = { id: uid(), name, type, tags: ['editor'], compression: 'none', content, created: Date.now(), modified: Date.now() };
-        tape.size = new Blob([tape.content]).size;
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'editor_save', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Saved editor → ${tape.name}` });
-        break;
-      }
-
-      /* ─────── COMPRESSION ─────── */
-      case 'SCX_COMPRESS': {
-        const out = SCXQ2.compressUTF8(String(msg.content || ''));
-        postAll({ t: 'SCX_RESULT', mode: 'compress', out });
-        postAll({ t: 'STATUS', text: 'Compressed' });
-        break;
-      }
-
-      case 'SCX_DECOMPRESS': {
-        let out = '';
-        try { out = SCXQ2.decompressUTF8(String(msg.content || '')); }
-        catch { out = 'Decompression failed'; }
-        postAll({ t: 'SCX_RESULT', mode: 'decompress', out });
-        postAll({ t: 'STATUS', text: 'Decompressed' });
-        break;
-      }
-
-      /* ─────── TAB MANAGEMENT ─────── */
-      case 'TAB_CREATE': {
-        const session = await SessionStore.create(msg.url, msg.opts);
-        const tab = await TabManager.create(session.id, { active: true });
-        await uiRefreshAll();
-        postAll({ t: 'TAB_CREATED', tab, session });
-        postAll({ t: 'STATUS', text: `Opened tab: ${msg.url}` });
-        break;
-      }
-
-      case 'TAB_CLOSE': {
-        await TabManager.close(msg.id);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_CLOSED', id: msg.id });
-        postAll({ t: 'STATUS', text: 'Closed tab' });
-        break;
-      }
-
-      case 'TAB_ACTIVATE': {
-        await TabManager.activate(msg.id);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_ACTIVATED', id: msg.id });
-        break;
-      }
-
-      case 'TAB_REORDER': {
-        await TabManager.reorder(msg.id, msg.order);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_REORDERED', id: msg.id, order: msg.order });
-        break;
-      }
-
-      /* ─────── SESSION MANAGEMENT ─────── */
-      case 'SESSION_UPDATE': {
-        await SessionStore.update(msg.id, msg.updates);
-        await uiRefreshAll();
-        break;
-      }
-
-      case 'SESSION_CLOSE': {
-        await SessionStore.close(msg.id);
-        await uiRefreshAll();
-        break;
-      }
-
-      /* ─────── API REQUESTS ─────── */
-      case 'API_SEND': {
-        const url = String(msg.url || '').trim();
-        const method = String(msg.method || 'GET').toUpperCase();
-        const headers = msg.headers || {};
-        const body = msg.body ?? null;
-
-        // Local mx2db:// handler
-        if (url.startsWith('mx2db://')) {
-          if (url === 'mx2db://local/tapes') {
-            const tapes = await IDB.all('tapes');
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: tapes, time: 0, size: JSON.stringify(tapes).length } });
-            postAll({ t: 'STATUS', text: 'API: mx2db tapes' });
-            return;
-          }
-          if (url === 'mx2db://local/sessions') {
-            const sessions = await SessionStore.listAll();
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: sessions, time: 0 } });
-            return;
-          }
-          if (url === 'mx2db://local/tabs') {
-            const tabs = await TabManager.list();
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: tabs, time: 0 } });
-            return;
-          }
-        }
-
-        const t0 = Date.now();
-        try {
-          const opt = { method, headers: { 'Content-Type': 'application/json', ...headers } };
-          if (body && method !== 'GET') opt.body = typeof body === 'string' ? body : JSON.stringify(body);
-          const res = await fetch(url, opt);
-          const ct = res.headers.get('content-type') || '';
-          const data = ct.includes('application/json') ? await res.json() : await res.text();
-          const result = {
-            status: res.status,
-            statusText: res.statusText,
-            headers: Object.fromEntries(res.headers.entries()),
-            data,
-            time: Date.now() - t0,
-            size: typeof data === 'string' ? data.length : JSON.stringify(data).length
-          };
-          postAll({ t: 'API_RESPONSE', result });
-          postAll({ t: 'STATUS', text: `API ${res.status} in ${result.time}ms` });
-        } catch (err) {
-          postAll({ t: 'API_RESPONSE', result: { error: String(err?.message || err), time: Date.now() - t0 } });
-          postAll({ t: 'STATUS', text: 'API error' });
-        }
-        break;
-      }
-
-      /* ─────── CANVAS PROJECTION ─────── */
-      case 'CANVAS_PROJECT': {
-        const projection = await CanvasProjection.projectDOM(msg.url);
-        postAll({ t: 'CANVAS_PROJECTED', projection });
-        postAll({ t: 'STATUS', text: projection.ok ? `Projected: ${msg.url}` : 'Projection failed' });
-        break;
-      }
-
-      case 'CANVAS_CLEAR':
-        CANVAS.tick = 0;
-        postAll({ t: 'CANVAS_CLEAR' });
-        break;
-
-      case 'CANVAS_GRID':
-        CANVAS.grid = !CANVAS.grid;
-        postAll({ t: 'CANVAS_FLAGS', state: { ...CANVAS } });
-        break;
-
-      case 'CANVAS_PLAY':
-        canvasPlay(!CANVAS.playing);
-        postAll({ t: 'CANVAS_FLAGS', state: { ...CANVAS } });
-        break;
-
-      case 'CANVAS_PUSH':
-        postAll({ t: 'STATUS', text: 'Canvas pushed to mesh (stub)' });
-        break;
-
-      /* ─────── π VIDEO ROUTING ─────── */
-      case 'PI_ROUTE': {
-        const route = CanvasProjection.routePiContent(msg.url, msg.type || 'video');
-        postAll({ t: 'PI_ROUTED', url: msg.url, route });
-        break;
-      }
-
-      /* ─────── SETTINGS ─────── */
-      case 'SETTINGS_UPDATE': {
-        const settings = (await IDB.all('settings')).find(x => x.k === 'settings') || { k: 'settings', v: {} };
-        Object.assign(settings.v, msg.updates);
-        await IDB.put('settings', settings);
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: 'Settings updated' });
-        break;
-      }
-
-      case 'SETTINGS_GET': {
-        const settings = (await IDB.all('settings')).find(x => x.k === 'settings')?.v || {};
-        postAll({ t: 'SETTINGS_DATA', settings });
-        break;
-      }
-    }
-  })();
 });
 
-/* ══════════════════════════════════════════════════════════════
-   BOOT STATUS
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FETCH HOOK
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-postAll({ t: 'STATUS', text: `SW v${SW_VERSION} online` });
+self.addEventListener("fetch", (event) => {
+  event.respondWith(handleFetch(event));
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [20] ASM v1.0 — ATOMIC SYMBOLIC MARKUP TRANSFORMER
+   ═══════════════════════════════════════════════════════════════════════════════
+   Invariants:
+   - Symbols live as ATTRIBUTES, not tag names (<div ⚛️D ⟁MC> not <⚛️D>)
+   - ⚛️X = element type (D=div, H=header, M=main, etc.)
+   - ⟁X = composition tokens (MC, C0, N1, etc.)
+   - Output modes: "attrs" | "data" | "class"
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const ASM = (() => {
+  // ⚛️ element symbol → HTML tag mapping
+  const ATOM_TO_TAG = Object.freeze({
+    'D': 'div',
+    'H': 'header',
+    'M': 'main',
+    'N': 'nav',
+    'C': 'div',
+    'S': 'section',
+    'A': 'article',
+    'F': 'footer',
+    'B': 'button',
+    'I': 'span',
+    'L': 'a',
+    'P': 'p',
+    'T': 'h1',
+  });
+
+  // Composition mode: "attrs" | "data" | "class"
+  let compositionMode = 'attrs';
+  let strictMode = false;
+
+  function setOptions(opts = {}) {
+    if (opts.compositionMode) compositionMode = opts.compositionMode;
+    if (opts.strict !== undefined) strictMode = opts.strict;
+  }
+
+  // Pick atom symbol from attributes (⚛️X or data-⚛)
+  function pickAtomSymbol(attrNames, el) {
+    // Prefer unicode attrs like "⚛️D"
+    const atomAttrs = attrNames
+      .filter(n => n.startsWith('⚛️'))
+      .map(n => n.slice(2));
+
+    if (atomAttrs.length > 0) {
+      if (strictMode && atomAttrs.length > 1) {
+        console.warn('ASM strict: multiple ⚛️ symbols on element');
+      }
+      return atomAttrs[0];
+    }
+
+    // Fallback: data-⚛="D"
+    const dataAtom = el.getAttribute ? el.getAttribute('data-⚛') : null;
+    if (dataAtom && ATOM_TO_TAG[dataAtom]) return dataAtom;
+
+    return null;
+  }
+
+  // Collect composition symbols (⟁X or data-⟁)
+  function collectCompSymbols(attrNames, el) {
+    const set = new Set();
+
+    // Unicode boolean attrs like "⟁MC"
+    attrNames.forEach(n => {
+      if (n.startsWith('⟁')) set.add(n.slice(1));
+    });
+
+    // Fallback: data-⟁="MC C0 N1"
+    const dataComp = el.getAttribute ? el.getAttribute('data-⟁') : null;
+    if (dataComp) {
+      dataComp.split(/\s+/).map(s => s.trim()).filter(Boolean).forEach(s => set.add(s));
+    }
+
+    return [...set];
+  }
+
+  // Apply composition based on mode
+  function applyComposition(el, compSymbols) {
+    if (!compSymbols || compSymbols.length === 0) return;
+
+    if (compositionMode === 'attrs') {
+      // Keep ⟁XYZ attrs for CSS selectors
+      compSymbols.forEach(s => el.setAttribute(`⟁${s}`, ''));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    } else if (compositionMode === 'data') {
+      // Remove unicode attrs, keep portable attribute
+      compSymbols.forEach(s => el.removeAttribute(`⟁${s}`));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    } else if (compositionMode === 'class') {
+      // Convert into classes
+      compSymbols.forEach(s => el.classList.add(`⟁${s}`));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    }
+  }
+
+  // Transform a single element
+  function transformElement(el, doc) {
+    if (!el.getAttributeNames) return el;
+
+    const attrNames = el.getAttributeNames();
+    const atomSymbol = pickAtomSymbol(attrNames, el);
+    const compSymbols = collectCompSymbols(attrNames, el);
+
+    let node = el;
+
+    // Apply element conversion if needed
+    if (atomSymbol) {
+      const targetTag = ATOM_TO_TAG[atomSymbol];
+      if (targetTag && el.tagName.toLowerCase() !== targetTag) {
+        node = replaceTag(el, targetTag, doc);
+      }
+      node.setAttribute('data-⚛', atomSymbol);
+    }
+
+    // Apply composition
+    applyComposition(node, compSymbols);
+
+    return node;
+  }
+
+  // Replace element tag while preserving attributes and children
+  function replaceTag(oldEl, newTag, doc) {
+    const newEl = doc.createElement(newTag);
+
+    // Copy attributes
+    oldEl.getAttributeNames().forEach(name => {
+      newEl.setAttribute(name, oldEl.getAttribute(name));
+    });
+
+    // Move children
+    while (oldEl.firstChild) newEl.appendChild(oldEl.firstChild);
+
+    if (oldEl.parentNode) {
+      oldEl.replaceWith(newEl);
+    }
+
+    return newEl;
+  }
+
+  // Transform a DOM subtree
+  function transform(root) {
+    const doc = root.ownerDocument || root;
+    const all = root.querySelectorAll ? root.querySelectorAll('*') : [];
+    all.forEach(el => transformElement(el, doc));
+  }
+
+  // Parse HTML string and transform
+  function fromHTML(html, doc) {
+    const template = doc.createElement('template');
+    template.innerHTML = html;
+    transform(template.content);
+    return template.content;
+  }
+
+  // Get registry info
+  function registry() {
+    return {
+      elements: { ...ATOM_TO_TAG },
+      compositionMode,
+      strictMode,
+      version: '1.0',
+    };
+  }
+
+  return {
+    ATOM_TO_TAG,
+    setOptions,
+    pickAtomSymbol,
+    collectCompSymbols,
+    applyComposition,
+    transformElement,
+    transform,
+    fromHTML,
+    registry,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [21] XCFE REPLAY VERIFIER v1
+   ═══════════════════════════════════════════════════════════════════════════════
+   Core Invariant:
+   > Control flow is a cryptographic consequence of prior truth collapse.
+   > No @then/@else branch is valid unless gated by verified ⚡ proof_hash
+   > under the pinned epoch policy hash.
+
+   Structures:
+   - @epoch_policy: Policy carrier with rules
+   - @⚡: Lightning events (truth collapse)
+   - @xcfe.branch_gate: Branch gate verification
+   - @rotation_replay_result: Verification result
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const XCFE = (() => {
+  // MX2 Canonical JSON v1.0
+  function isPlainObject(x) {
+    return !!x && typeof x === 'object' && !Array.isArray(x);
+  }
+
+  function canonNumber(n) {
+    if (!Number.isFinite(n)) throw new Error('Non-finite number in canonicalization');
+    if (Object.is(n, -0)) return '0';
+    if (Number.isInteger(n)) return String(n);
+
+    let s = n.toString();
+
+    // Handle exponent notation
+    if (s.includes('e') || s.includes('E')) {
+      const [mant, expStr] = s.toLowerCase().split('e');
+      const exp = parseInt(expStr, 10);
+      const [intPart, fracPart = ''] = mant.split('.');
+      const digits = (intPart.replace('-', '') + fracPart);
+      const sign = intPart.startsWith('-') ? '-' : '';
+
+      const decimalPos = (intPart.replace('-', '').length) + exp;
+      if (decimalPos <= 0) {
+        s = sign + '0.' + '0'.repeat(-decimalPos) + digits.replace(/^0+/, '');
+        if (s.endsWith('.')) s += '0';
+      } else if (decimalPos >= digits.length) {
+        s = sign + digits + '0'.repeat(decimalPos - digits.length);
+      } else {
+        s = sign + digits.slice(0, decimalPos) + '.' + digits.slice(decimalPos);
+      }
+    }
+
+    // Trim trailing zeros
+    if (s.includes('.')) {
+      s = s.replace(/(\.\d*?[1-9])0+$/u, '$1');
+      s = s.replace(/\.0+$/u, '');
+    }
+
+    // Ensure leading zero
+    if (s.startsWith('.')) s = '0' + s;
+    if (s.startsWith('-.')) s = s.replace('-.', '-0.');
+
+    if (s.includes('e') || s.includes('E')) throw new Error('Exponent not allowed');
+    return s;
+  }
+
+  function canonString(str) {
+    return JSON.stringify(str);
+  }
+
+  function canonValue(v) {
+    if (v === null) return 'null';
+    const t = typeof v;
+    if (t === 'boolean') return v ? 'true' : 'false';
+    if (t === 'number') return canonNumber(v);
+    if (t === 'string') return canonString(v);
+    if (Array.isArray(v)) return '[' + v.map(canonValue).join(',') + ']';
+    if (isPlainObject(v)) {
+      const keys = Object.keys(v).sort();
+      const parts = keys.map(k => canonString(k) + ':' + canonValue(v[k]));
+      return '{' + parts.join(',') + '}';
+    }
+    throw new Error(`Unsupported type: ${t}`);
+  }
+
+  // SHA-256 hex via SubtleCrypto
+  async function sha256Hex(data) {
+    const bytes = typeof data === 'string' ? utf8.enc.encode(data) : data;
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function hashObject(obj) {
+    const canon = canonValue(obj);
+    const hex = await sha256Hex(canon);
+    return { canon, hash: `h:sha256:${hex}` };
+  }
+
+  // Proof rule: proof_hash = H(input_hash || ":" || truth)
+  async function computeProofHash(inputHash, truthBool) {
+    const payload = `${inputHash}:${truthBool ? 'true' : 'false'}`;
+    const hex = await sha256Hex(payload);
+    return `h:sha256:${hex}`;
+  }
+
+  // Extract structures from stream
+  function pickSingleEpochPolicy(stream) {
+    const policies = stream.filter(x => isPlainObject(x) && x['@epoch_policy']);
+    if (policies.length !== 1) throw new Error(`Expected 1 @epoch_policy, found ${policies.length}`);
+    return policies[0]['@epoch_policy'];
+  }
+
+  function extractLightningEvents(stream) {
+    const blocks = stream.filter(x => isPlainObject(x) && Array.isArray(x['@⚡']));
+    const events = [];
+    for (const b of blocks) events.push(...b['@⚡']);
+    return events;
+  }
+
+  function extractBranchGates(stream) {
+    const blocks = stream.filter(x => isPlainObject(x) && isPlainObject(x['@xcfe.branch_gate']));
+    return blocks.map(b => b['@xcfe.branch_gate']);
+  }
+
+  // Build rotation result
+  function rotationResult(ok, policy_hash, proof_hash, failure_stage, verified) {
+    return {
+      '@rotation_replay_result': {
+        ok,
+        policy_hash,
+        proof_hash,
+        failure_stage,
+        verified,
+      }
+    };
+  }
+
+  // Main verifier
+  async function replayVerify(stream) {
+    try {
+      const epochPolicy = pickSingleEpochPolicy(stream);
+
+      // Pin policy_hash
+      const policyToHash = {
+        epoch: epochPolicy.epoch,
+        policy_id: epochPolicy.policy_id,
+        canon: epochPolicy.canon,
+        rules: epochPolicy.rules,
+      };
+      const policyDigest = await hashObject(policyToHash);
+
+      if (epochPolicy.policy_hash !== policyDigest.hash) {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'epoch_policy', { epoch_policy: 0 });
+      }
+
+      if (epochPolicy.canon !== 'MX2_CANON_JSON_v1.0') {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'canon_mismatch', { epoch_policy: 1 });
+      }
+
+      // Verify ⚡ events
+      const lightning = extractLightningEvents(stream);
+      const validProofs = new Set();
+      let okLightning = 0;
+
+      for (const ev of lightning) {
+        if (ev.policy_hash !== epochPolicy.policy_hash) continue;
+        if (ev.epoch !== epochPolicy.epoch) continue;
+        if (ev.resolved !== true) continue;
+        if (typeof ev.truth !== 'boolean') continue;
+
+        const expected = await computeProofHash(ev.proof.input_hash, ev.truth);
+        if (expected !== ev.proof.proof_hash) continue;
+
+        validProofs.add(ev.proof.proof_hash);
+        okLightning++;
+      }
+
+      if (okLightning === 0) {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'lightning_verify', {
+          epoch_policy: 1,
+          lightning: 0,
+        });
+      }
+
+      // Verify branch gates
+      const gates = extractBranchGates(stream);
+      let okGates = 0;
+
+      for (const g of gates) {
+        if (g.policy_hash !== epochPolicy.policy_hash) {
+          return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+            epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+          });
+        }
+        if (g.epoch !== epochPolicy.epoch) {
+          return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+            epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+          });
+        }
+
+        if (g.ok === true) {
+          if (!g.proof_hash || typeof g.truth !== 'boolean') {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          if (!validProofs.has(g.proof_hash)) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          const expectedSelected = g.truth ? '@then' : '@else';
+          if (g.selected !== expectedSelected) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          okGates++;
+        } else {
+          // ok==false: must not select branch
+          if (g.proof_hash !== null || g.selected !== null) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+        }
+      }
+
+      // Final replay proof
+      const finalPayload = `${epochPolicy.policy_hash}:${okLightning}:${okGates}`;
+      const finalHex = await sha256Hex(finalPayload);
+      const finalProof = `h:sha256:${finalHex}`;
+
+      audit_event('xcfe.verify', { ok: true, lightning: okLightning, gates: okGates });
+
+      return rotationResult(true, epochPolicy.policy_hash, finalProof, null, {
+        epoch_policy: 1,
+        lightning: okLightning,
+        branch_gate: okGates,
+      });
+    } catch (err) {
+      audit_event('xcfe.verify.error', { error: String(err?.message || err) });
+      return rotationResult(false, 'h:sha256:0000', null, 'branch_gate_verify', { epoch_policy: 0 });
+    }
+  }
+
+  return {
+    canonValue,
+    canonNumber,
+    sha256Hex,
+    hashObject,
+    computeProofHash,
+    replayVerify,
+    rotationResult,
+    extractLightningEvents,
+    extractBranchGates,
+    pickSingleEpochPolicy,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [22] K'UHUL π VIRTUAL CLUSTER v1.0
+   ═══════════════════════════════════════════════════════════════════════════════
+   Browser-native distributed computing via mathematical regeneration.
+   Nodes regenerate weights using π/e/φ/τ instead of storing parameters.
+
+   See: SPEC-KPC-V1.0.md for full specification
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const VirtualCluster = (() => {
+  // Node state machine
+  const NodeStates = Object.freeze({
+    BOOTSTRAP: 'bootstrap',
+    DISCOVERING: 'discovering',
+    CONNECTING: 'connecting',
+    SYNCING: 'syncing',
+    READY: 'ready',
+    DEGRADED: 'degraded',
+    RECOVERING: 'recovering',
+    OFFLINE: 'offline',
+  });
+
+  // Valid state transitions
+  const TRANSITIONS = Object.freeze({
+    [NodeStates.BOOTSTRAP]: [NodeStates.DISCOVERING],
+    [NodeStates.DISCOVERING]: [NodeStates.CONNECTING, NodeStates.OFFLINE],
+    [NodeStates.CONNECTING]: [NodeStates.SYNCING, NodeStates.DEGRADED],
+    [NodeStates.SYNCING]: [NodeStates.READY, NodeStates.RECOVERING],
+    [NodeStates.READY]: [NodeStates.DEGRADED, NodeStates.RECOVERING, NodeStates.OFFLINE],
+    [NodeStates.DEGRADED]: [NodeStates.RECOVERING, NodeStates.OFFLINE],
+    [NodeStates.RECOVERING]: [NodeStates.READY, NodeStates.DEGRADED, NodeStates.OFFLINE],
+  });
+
+  // Mathematical constants for weight regeneration
+  const MATH_CONSTANTS = Object.freeze({
+    π: Math.PI,
+    e: Math.E,
+    φ: 1.618033988749895,
+    τ: Math.PI * 2,
+  });
+
+  // π-Node: Virtual compute unit
+  class PiNode {
+    constructor(id) {
+      this.id = id || `pi-node-${Date.now().toString(36)}`;
+      this.state = NodeStates.BOOTSTRAP;
+      this.connections = new Map();
+      this.vectorClock = new Map([[this.id, 0]]);
+      this.lastHeartbeat = Date.now();
+      this.healthScore = 1.0;
+      this.recoveryAttempts = 0;
+    }
+
+    canTransitionTo(newState) {
+      const valid = TRANSITIONS[this.state];
+      return valid && valid.includes(newState);
+    }
+
+    async transitionTo(newState) {
+      if (!this.canTransitionTo(newState)) {
+        audit_event('cluster.transition.invalid', { from: this.state, to: newState, node: this.id });
+        return false;
+      }
+
+      const prevState = this.state;
+      this.state = newState;
+      audit_event('cluster.transition', { from: prevState, to: newState, node: this.id });
+
+      // State-specific handlers
+      if (newState === NodeStates.DEGRADED) {
+        this.healthScore = 0.3;
+      } else if (newState === NodeStates.READY) {
+        this.healthScore = 1.0;
+        this.recoveryAttempts = 0;
+      } else if (newState === NodeStates.RECOVERING) {
+        this.recoveryAttempts++;
+      }
+
+      return true;
+    }
+
+    tick() {
+      this.vectorClock.set(this.id, (this.vectorClock.get(this.id) || 0) + 1);
+      return this.vectorClock.get(this.id);
+    }
+
+    status() {
+      return {
+        id: this.id,
+        state: this.state,
+        connections: this.connections.size,
+        healthScore: this.healthScore,
+        vectorClock: Object.fromEntries(this.vectorClock),
+        lastHeartbeat: this.lastHeartbeat,
+        recoveryAttempts: this.recoveryAttempts,
+      };
+    }
+  }
+
+  // CRDT Sync Engine
+  class SyncEngine {
+    constructor(nodeId) {
+      this.nodeId = nodeId;
+      this.state = new Map();
+      this.pendingUpdates = [];
+      this.consensusThreshold = 0.67;
+    }
+
+    // Last-write-wins merge with vector clock tie-breaking
+    merge(remoteState, remoteNodeId) {
+      let merged = 0;
+
+      for (const [key, remote] of Object.entries(remoteState)) {
+        const local = this.state.get(key);
+
+        if (!local || this.compare(remote, local) > 0) {
+          this.state.set(key, remote);
+          merged++;
+        }
+      }
+
+      audit_event('cluster.sync.merge', { from: remoteNodeId, merged, total: Object.keys(remoteState).length });
+      return merged;
+    }
+
+    compare(a, b) {
+      // Timestamp comparison
+      if (a.timestamp !== b.timestamp) {
+        return a.timestamp - b.timestamp;
+      }
+      // Tie-break by nodeId
+      return a.nodeId.localeCompare(b.nodeId);
+    }
+
+    set(key, value) {
+      const entry = {
+        value,
+        timestamp: Date.now(),
+        nodeId: this.nodeId,
+        checksum: hash_str(stable_stringify(value)),
+      };
+      this.state.set(key, entry);
+      return entry;
+    }
+
+    get(key) {
+      const entry = this.state.get(key);
+      return entry ? entry.value : undefined;
+    }
+
+    // Check if consensus reached
+    hasConsensus(responses) {
+      const total = responses.length;
+      if (total === 0) return false;
+      const agreements = responses.filter(r => r.agree).length;
+      return (agreements / total) >= this.consensusThreshold;
+    }
+
+    export() {
+      return Object.fromEntries(this.state);
+    }
+  }
+
+  // Mathematical Regeneration Engine
+  class MathRegenEngine {
+    constructor(seed) {
+      this.seed = seed || Date.now();
+      this.cache = new Map();
+      this.cacheHits = 0;
+      this.cacheMisses = 0;
+      this.maxCacheSize = 1000;
+    }
+
+    // Deterministic hash of seed string
+    hashSeed(seedStr) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < seedStr.length; i++) {
+        h ^= seedStr.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return (h >>> 0) / 0xffffffff;
+    }
+
+    // Core regeneration function: f(x, c) = sin(x*c*π) * cos(x*e) * (1 + φ*tanh(x))
+    regenerateFunction(x, constant) {
+      return Math.sin(x * constant * MATH_CONSTANTS.π) *
+             Math.cos(x * MATH_CONSTANTS.e) *
+             (1 + MATH_CONSTANTS.φ * Math.tanh(x));
+    }
+
+    // Regenerate weights for a layer/position
+    regenerateWeights(layer, position, dimensions) {
+      const cacheKey = `${this.seed}:${layer}:${position}:${dimensions}`;
+
+      if (this.cache.has(cacheKey)) {
+        this.cacheHits++;
+        return this.cache.get(cacheKey);
+      }
+
+      this.cacheMisses++;
+      const weights = new Float32Array(dimensions);
+      const base = this.hashSeed(`${this.seed}:${layer}:${position}`);
+      const constants = [MATH_CONSTANTS.π, MATH_CONSTANTS.e, MATH_CONSTANTS.φ];
+
+      for (let i = 0; i < dimensions; i++) {
+        const constant = constants[i % 3];
+        const x = (base + i) / dimensions;
+        weights[i] = this.regenerateFunction(x, constant);
+      }
+
+      // Normalize to unit length
+      const norm = Math.sqrt(weights.reduce((sum, w) => sum + w * w, 0));
+      if (norm > 0) {
+        for (let i = 0; i < weights.length; i++) {
+          weights[i] /= norm;
+        }
+      }
+
+      // Cache management
+      if (this.cache.size >= this.maxCacheSize) {
+        const firstKey = this.cache.keys().next().value;
+        this.cache.delete(firstKey);
+      }
+      this.cache.set(cacheKey, weights);
+
+      return weights;
+    }
+
+    // Verify weights match expected regeneration
+    verifyWeights(layer, position, weights, tolerance = 0.0001) {
+      const expected = this.regenerateWeights(layer, position, weights.length);
+      let maxDiff = 0;
+
+      for (let i = 0; i < weights.length; i++) {
+        const diff = Math.abs(expected[i] - weights[i]);
+        if (diff > maxDiff) maxDiff = diff;
+      }
+
+      return {
+        valid: maxDiff <= tolerance,
+        maxDiff,
+        tolerance,
+      };
+    }
+
+    stats() {
+      return {
+        seed: this.seed,
+        cacheSize: this.cache.size,
+        cacheHits: this.cacheHits,
+        cacheMisses: this.cacheMisses,
+        hitRate: this.cacheHits / (this.cacheHits + this.cacheMisses) || 0,
+      };
+    }
+
+    clearCache() {
+      this.cache.clear();
+      this.cacheHits = 0;
+      this.cacheMisses = 0;
+    }
+  }
+
+  // Auto-Recovery Protocol
+  class RecoveryProtocol {
+    constructor(node, syncEngine, mathEngine) {
+      this.node = node;
+      this.sync = syncEngine;
+      this.math = mathEngine;
+      this.failureLog = [];
+      this.maxRecoveryAttempts = 5;
+    }
+
+    async detectAndRecover() {
+      const health = this.assessHealth();
+
+      if (health.score < 0.5) {
+        this.failureLog.push({
+          timestamp: Date.now(),
+          health,
+          state: this.node.state,
+        });
+
+        if (this.node.recoveryAttempts >= this.maxRecoveryAttempts) {
+          await this.node.transitionTo(NodeStates.OFFLINE);
+          return { recovered: false, reason: 'max_attempts_exceeded' };
+        }
+
+        await this.node.transitionTo(NodeStates.RECOVERING);
+
+        // Try recovery strategies in order
+        const strategies = [
+          () => this.strategyResyncState(),
+          () => this.strategyResetMathEngine(),
+          () => this.strategyHardReset(),
+        ];
+
+        for (let i = 0; i < strategies.length; i++) {
+          try {
+            const success = await strategies[i]();
+            if (success) {
+              await this.node.transitionTo(NodeStates.READY);
+              audit_event('cluster.recovery.success', { strategy: i, node: this.node.id });
+              return { recovered: true, strategy: i };
+            }
+          } catch (err) {
+            audit_event('cluster.recovery.strategy.failed', { strategy: i, error: String(err) });
+          }
+        }
+
+        await this.node.transitionTo(NodeStates.DEGRADED);
+        return { recovered: false, reason: 'all_strategies_failed' };
+      }
+
+      return { recovered: true, reason: 'healthy' };
+    }
+
+    assessHealth() {
+      const now = Date.now();
+      const heartbeatAge = now - this.node.lastHeartbeat;
+
+      let score = 1.0;
+
+      // Penalize stale heartbeat
+      if (heartbeatAge > 10000) score -= 0.3;
+      if (heartbeatAge > 30000) score -= 0.3;
+
+      // Penalize degraded state
+      if (this.node.state === NodeStates.DEGRADED) score -= 0.2;
+
+      // Penalize low connections
+      if (this.node.connections.size === 0) score -= 0.2;
+
+      return {
+        score: Math.max(0, score),
+        heartbeatAge,
+        state: this.node.state,
+        connections: this.node.connections.size,
+      };
+    }
+
+    async strategyResyncState() {
+      // Clear and rebuild sync state
+      this.sync.state.clear();
+      this.sync.pendingUpdates = [];
+      return true;
+    }
+
+    async strategyResetMathEngine() {
+      this.math.clearCache();
+      return true;
+    }
+
+    async strategyHardReset() {
+      this.sync.state.clear();
+      this.math.clearCache();
+      this.node.connections.clear();
+      this.node.vectorClock.clear();
+      this.node.vectorClock.set(this.node.id, 0);
+      return true;
+    }
+  }
+
+  // Main Virtual Cluster Controller
+  class ClusterController {
+    constructor(config = {}) {
+      this.config = {
+        minPeers: config.minPeers || 3,
+        syncInterval: config.syncInterval || 1000,
+        heartbeatInterval: config.heartbeatInterval || 5000,
+        seed: config.seed || Date.now(),
+        ...config,
+      };
+
+      this.node = new PiNode(config.nodeId);
+      this.sync = new SyncEngine(this.node.id);
+      this.math = new MathRegenEngine(this.config.seed);
+      this.recovery = new RecoveryProtocol(this.node, this.sync, this.math);
+
+      this.isInitialized = false;
+      this.heartbeatTimer = null;
+    }
+
+    async initialize() {
+      if (this.isInitialized) return { ok: true, already: true };
+
+      try {
+        // Phase 1: Bootstrap
+        await this.node.transitionTo(NodeStates.DISCOVERING);
+
+        // Phase 2: Skip network (service worker context)
+        await this.node.transitionTo(NodeStates.CONNECTING);
+
+        // Phase 3: Sync
+        await this.node.transitionTo(NodeStates.SYNCING);
+
+        // Phase 4: Ready
+        await this.node.transitionTo(NodeStates.READY);
+
+        // Start heartbeat
+        this.startHeartbeat();
+
+        this.isInitialized = true;
+        audit_event('cluster.init', { node: this.node.id, seed: this.config.seed });
+
+        return { ok: true, node: this.node.id };
+      } catch (err) {
+        audit_event('cluster.init.error', { error: String(err) });
+        return { ok: false, error: String(err) };
+      }
+    }
+
+    startHeartbeat() {
+      if (this.heartbeatTimer) return;
+
+      this.heartbeatTimer = setInterval(() => {
+        this.node.lastHeartbeat = Date.now();
+        this.node.tick();
+
+        // Check health
+        const health = this.recovery.assessHealth();
+        this.node.healthScore = health.score;
+
+        if (health.score < 0.5 && this.node.state === NodeStates.READY) {
+          this.node.transitionTo(NodeStates.DEGRADED);
+        }
+      }, this.config.heartbeatInterval);
+    }
+
+    stopHeartbeat() {
+      if (this.heartbeatTimer) {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
+      }
+    }
+
+    // API: Regenerate weights
+    regenerateWeights(layer, position, dimensions) {
+      return this.math.regenerateWeights(layer, position, dimensions);
+    }
+
+    // API: Verify weights
+    verifyWeights(layer, position, weights) {
+      return this.math.verifyWeights(layer, position, weights);
+    }
+
+    // API: Sync state
+    syncState(key, value) {
+      return this.sync.set(key, value);
+    }
+
+    // API: Get state
+    getState(key) {
+      return this.sync.get(key);
+    }
+
+    // API: Merge remote state
+    mergeState(remoteState, remoteNodeId) {
+      return this.sync.merge(remoteState, remoteNodeId);
+    }
+
+    // API: Trigger recovery
+    async recover() {
+      return this.recovery.detectAndRecover();
+    }
+
+    // API: Full status
+    status() {
+      return {
+        ok: true,
+        initialized: this.isInitialized,
+        node: this.node.status(),
+        sync: {
+          entries: this.sync.state.size,
+          pendingUpdates: this.sync.pendingUpdates.length,
+        },
+        math: this.math.stats(),
+        health: this.recovery.assessHealth(),
+      };
+    }
+
+    // API: Shutdown
+    async shutdown() {
+      this.stopHeartbeat();
+      await this.node.transitionTo(NodeStates.OFFLINE);
+      audit_event('cluster.shutdown', { node: this.node.id });
+      return { ok: true };
+    }
+  }
+
+  // Singleton instance
+  let instance = null;
+
+  function getInstance(config) {
+    if (!instance) {
+      instance = new ClusterController(config);
+    }
+    return instance;
+  }
+
+  return {
+    NodeStates,
+    MATH_CONSTANTS,
+    PiNode,
+    SyncEngine,
+    MathRegenEngine,
+    RecoveryProtocol,
+    ClusterController,
+    getInstance,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [23] SEMANTIC GATING LAYER (Vocab + Tokenizer + Lex.Resolve)
+   ═══════════════════════════════════════════════════════════════════════════════
+   Control decides WHEN execution may branch (⚡)
+   Vocab + Tokenizers decide WHAT symbols mean (🧠 + 🔡)
+
+   Pipeline:
+   INPUT → TOKENIZER → VOCAB → CLUSTER → COLLAPSE → ⚡ → BRANCH_GATE → @then/@else
+
+   Core Invariant:
+   > Cluster output MUST NEVER be referenced directly by control flow.
+   > Only resolve_hash, vocab_hash, tokenizer_hash, policy_hash may be referenced.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SemanticGating = (() => {
+  // Registered vocabs and tokenizers (epoch-pinned)
+  const vocabs = new Map();
+  const tokenizers = new Map();
+  const resolveCache = new Map();
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @vocab — Semantic vocabulary for glyphs, operators, literals
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function createVocab(epoch, vocabId, entries, policyHash) {
+    const entriesCanon = XCFE.canonValue(entries);
+    const vocabHash = `h:sha256:${XCFE.sha256Hex(entriesCanon).then ? 'pending' : ''}`;
+
+    // Sync hash computation
+    const vocab = {
+      epoch,
+      vocab_id: vocabId,
+      policy_hash: policyHash,
+      canon: 'MX2_CANON_JSON_v1.0',
+      entries,
+      vocab_hash: null, // Filled async
+    };
+
+    return vocab;
+  }
+
+  async function registerVocab(vocab) {
+    const entriesCanon = XCFE.canonValue(vocab.entries);
+    const hex = await XCFE.sha256Hex(entriesCanon);
+    vocab.vocab_hash = `h:sha256:${hex}`;
+
+    vocabs.set(vocab.vocab_hash, vocab);
+    audit_event('semantic.vocab.register', {
+      vocab_id: vocab.vocab_id,
+      epoch: vocab.epoch,
+      entries: Object.keys(vocab.entries).length,
+    });
+
+    return vocab;
+  }
+
+  function getVocab(vocabHash) {
+    return vocabs.get(vocabHash) || null;
+  }
+
+  function lookupSymbol(vocabHash, symbol) {
+    const vocab = vocabs.get(vocabHash);
+    if (!vocab) return null;
+    return vocab.entries[symbol] || null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @tokenizer — Deterministic pattern → token mapping
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function createTokenizer(epoch, tokenizerId, rules, policyHash) {
+    return {
+      epoch,
+      tokenizer_id: tokenizerId,
+      policy_hash: policyHash,
+      canon: 'MX2_CANON_JSON_v1.0',
+      rules, // Array of { match, emit }
+      tokenizer_hash: null,
+    };
+  }
+
+  async function registerTokenizer(tokenizer) {
+    const rulesCanon = XCFE.canonValue(tokenizer.rules);
+    const hex = await XCFE.sha256Hex(rulesCanon);
+    tokenizer.tokenizer_hash = `h:sha256:${hex}`;
+
+    tokenizers.set(tokenizer.tokenizer_hash, tokenizer);
+    audit_event('semantic.tokenizer.register', {
+      tokenizer_id: tokenizer.tokenizer_id,
+      epoch: tokenizer.epoch,
+      rules: tokenizer.rules.length,
+    });
+
+    return tokenizer;
+  }
+
+  function getTokenizer(tokenizerHash) {
+    return tokenizers.get(tokenizerHash) || null;
+  }
+
+  // Deterministic tokenization (no ML, no ambiguity)
+  function tokenize(tokenizerHash, input) {
+    const tokenizer = tokenizers.get(tokenizerHash);
+    if (!tokenizer) return { ok: false, error: 'tokenizer_not_found' };
+
+    const tokens = [];
+    let remaining = String(input);
+    let position = 0;
+
+    while (remaining.length > 0) {
+      let matched = false;
+
+      for (const rule of tokenizer.rules) {
+        if (remaining.startsWith(rule.match)) {
+          tokens.push(...rule.emit);
+          remaining = remaining.slice(rule.match.length);
+          position += rule.match.length;
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        // Unknown character — emit as TOK_UNKNOWN
+        tokens.push(`TOK_UNKNOWN_${remaining.charCodeAt(0)}`);
+        remaining = remaining.slice(1);
+        position++;
+      }
+    }
+
+    return { ok: true, tokens, input, position };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @lex.resolve — Semantic resolution (symbols → meaning)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function createResolve(epoch, policyHash, vocabHash, tokenizerHash, input, resolved) {
+    const tokenResult = tokenize(tokenizerHash, input);
+    if (!tokenResult.ok) {
+      return { ok: false, error: tokenResult.error };
+    }
+
+    const resolveObj = {
+      epoch,
+      policy_hash: policyHash,
+      vocab_hash: vocabHash,
+      tokenizer_hash: tokenizerHash,
+      input,
+      tokens: tokenResult.tokens,
+      resolved,
+    };
+
+    const canon = XCFE.canonValue({
+      input: resolveObj.input,
+      tokens: resolveObj.tokens,
+      resolved: resolveObj.resolved,
+    });
+    const hex = await XCFE.sha256Hex(canon);
+    resolveObj.resolve_hash = `h:sha256:${hex}`;
+
+    resolveCache.set(resolveObj.resolve_hash, resolveObj);
+    audit_event('semantic.resolve', {
+      input,
+      tokens: tokenResult.tokens.length,
+      resolve_hash: resolveObj.resolve_hash,
+    });
+
+    return { ok: true, resolve: resolveObj };
+  }
+
+  function getResolve(resolveHash) {
+    return resolveCache.get(resolveHash) || null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster Proposal Collapse
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Cluster generates proposals, but only ONE canonical result is committed
+  function collapseProposals(proposals, collapsePolicy = 'highest_confidence') {
+    if (!proposals || proposals.length === 0) {
+      return { ok: false, error: 'no_proposals' };
+    }
+
+    let selected;
+
+    switch (collapsePolicy) {
+      case 'highest_confidence':
+        selected = proposals.reduce((best, p) =>
+          (p.confidence || 0) > (best.confidence || 0) ? p : best
+        );
+        break;
+
+      case 'first':
+        selected = proposals[0];
+        break;
+
+      case 'majority':
+        // Group by value, pick most common
+        const groups = new Map();
+        for (const p of proposals) {
+          const key = stable_stringify(p.value);
+          if (!groups.has(key)) groups.set(key, { proposal: p, count: 0 });
+          groups.get(key).count++;
+        }
+        let maxCount = 0;
+        for (const g of groups.values()) {
+          if (g.count > maxCount) {
+            maxCount = g.count;
+            selected = g.proposal;
+          }
+        }
+        break;
+
+      default:
+        selected = proposals[0];
+    }
+
+    return {
+      ok: true,
+      collapsed: {
+        ast: selected.ast,
+        value: selected.value,
+        confidence: selected.confidence,
+        source: 'cluster_collapse',
+        policy: collapsePolicy,
+        proposalCount: proposals.length,
+      },
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Extended ⚡ Creation (with semantic hashes)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function createSemanticLightning(epoch, policyHash, vocabHash, tokenizerHash, resolveHash, truth) {
+    const inputHash = resolveHash; // resolve_hash is the semantic input
+
+    const proofPayload = `${inputHash}:${truth ? 'true' : 'false'}`;
+    const proofHex = await XCFE.sha256Hex(proofPayload);
+    const proofHash = `h:sha256:${proofHex}`;
+
+    const lightning = {
+      epoch,
+      policy_hash: policyHash,
+      vocab_hash: vocabHash,
+      tokenizer_hash: tokenizerHash,
+      resolve_hash: resolveHash,
+      runtime: '⚡',
+      resolved: true,
+      truth,
+      proof: {
+        input_hash: inputHash,
+        proof_hash: proofHash,
+      },
+    };
+
+    audit_event('semantic.lightning', {
+      epoch,
+      truth,
+      resolve_hash: resolveHash,
+      proof_hash: proofHash,
+    });
+
+    return lightning;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Extended Branch Gate Verification
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function verifySemanticBranchGate(gate, lightningEvents) {
+    // Must have all required hashes
+    if (!gate.policy_hash || !gate.resolve_hash) {
+      return { ok: false, error: 'missing_required_hashes' };
+    }
+
+    // Find matching lightning event
+    const matchingLightning = lightningEvents.find(ev =>
+      ev.policy_hash === gate.policy_hash &&
+      ev.resolve_hash === gate.resolve_hash &&
+      ev.proof?.proof_hash === gate.proof_hash
+    );
+
+    if (!matchingLightning) {
+      return { ok: false, error: 'no_matching_lightning' };
+    }
+
+    // Verify truth → selected mapping
+    const expectedSelected = matchingLightning.truth ? '@then' : '@else';
+    if (gate.selected !== expectedSelected) {
+      return { ok: false, error: 'truth_selected_mismatch' };
+    }
+
+    // Verify resolve exists
+    const resolve = getResolve(gate.resolve_hash);
+    if (!resolve) {
+      return { ok: false, error: 'resolve_not_found' };
+    }
+
+    // Verify vocab and tokenizer if specified
+    if (matchingLightning.vocab_hash && !getVocab(matchingLightning.vocab_hash)) {
+      return { ok: false, error: 'vocab_not_found' };
+    }
+    if (matchingLightning.tokenizer_hash && !getTokenizer(matchingLightning.tokenizer_hash)) {
+      return { ok: false, error: 'tokenizer_not_found' };
+    }
+
+    return {
+      ok: true,
+      gate,
+      lightning: matchingLightning,
+      resolve,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Default Core Vocab (glyph-vocab-v1)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const CORE_VOCAB_ENTRIES = Object.freeze({
+    '⚡': { kind: 'control', meaning: 'branch_decision', domain: 'xcfe', allowed_outputs: ['@then', '@else'] },
+    '@': { kind: 'glyph', meaning: 'weight_1', domain: 'kuhul', base: 1.0 },
+    '@@': { kind: 'glyph', meaning: 'weight_2', domain: 'kuhul', base: 2.0 },
+    '@@@': { kind: 'glyph', meaning: 'weight_3', domain: 'kuhul', base: 3.0 },
+    'π': { kind: 'constant', meaning: 'pi', domain: 'math', value: Math.PI },
+    'φ': { kind: 'constant', meaning: 'golden_ratio', domain: 'math', value: 1.618033988749895 },
+    'e': { kind: 'constant', meaning: 'euler', domain: 'math', value: Math.E },
+    'τ': { kind: 'constant', meaning: 'tau', domain: 'math', value: Math.PI * 2 },
+    '+': { kind: 'operator', meaning: 'addition', arity: 2 },
+    '-': { kind: 'operator', meaning: 'subtraction', arity: 2 },
+    '*': { kind: 'operator', meaning: 'multiplication', arity: 2 },
+    '/': { kind: 'operator', meaning: 'division', arity: 2 },
+    '=': { kind: 'operator', meaning: 'equality', arity: 2 },
+    '(': { kind: 'delimiter', meaning: 'open_paren' },
+    ')': { kind: 'delimiter', meaning: 'close_paren' },
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Default Core Tokenizer (glyph-tokenizer-v1)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const CORE_TOKENIZER_RULES = Object.freeze([
+    { match: '⚡', emit: ['TOK_LIGHTNING'] },
+    { match: '@@@', emit: ['TOK_GLYPH_3'] },
+    { match: '@@', emit: ['TOK_GLYPH_2'] },
+    { match: '@', emit: ['TOK_GLYPH_1'] },
+    { match: 'π', emit: ['TOK_PI'] },
+    { match: 'φ', emit: ['TOK_PHI'] },
+    { match: 'τ', emit: ['TOK_TAU'] },
+    { match: '+', emit: ['TOK_ADD'] },
+    { match: '-', emit: ['TOK_SUB'] },
+    { match: '*', emit: ['TOK_MUL'] },
+    { match: '/', emit: ['TOK_DIV'] },
+    { match: '=', emit: ['TOK_EQ'] },
+    { match: '(', emit: ['TOK_LPAREN'] },
+    { match: ')', emit: ['TOK_RPAREN'] },
+    { match: '0', emit: ['TOK_NUM_0'] },
+    { match: '1', emit: ['TOK_NUM_1'] },
+    { match: '2', emit: ['TOK_NUM_2'] },
+    { match: '3', emit: ['TOK_NUM_3'] },
+    { match: '4', emit: ['TOK_NUM_4'] },
+    { match: '5', emit: ['TOK_NUM_5'] },
+    { match: '6', emit: ['TOK_NUM_6'] },
+    { match: '7', emit: ['TOK_NUM_7'] },
+    { match: '8', emit: ['TOK_NUM_8'] },
+    { match: '9', emit: ['TOK_NUM_9'] },
+    { match: ' ', emit: [] }, // Whitespace ignored
+  ]);
+
+  // Status
+  function status() {
+    return {
+      vocabs: vocabs.size,
+      tokenizers: tokenizers.size,
+      resolves: resolveCache.size,
+      vocabList: [...vocabs.keys()],
+      tokenizerList: [...tokenizers.keys()],
+    };
+  }
+
+  return {
+    // Vocab
+    createVocab,
+    registerVocab,
+    getVocab,
+    lookupSymbol,
+    CORE_VOCAB_ENTRIES,
+
+    // Tokenizer
+    createTokenizer,
+    registerTokenizer,
+    getTokenizer,
+    tokenize,
+    CORE_TOKENIZER_RULES,
+
+    // Resolve
+    createResolve,
+    getResolve,
+
+    // Cluster collapse
+    collapseProposals,
+
+    // Extended ⚡
+    createSemanticLightning,
+    verifySemanticBranchGate,
+
+    // Status
+    status,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [24] SCXQ2 CONTAINER ENGINE — 1000 Brains / Icons / Clusters
+   ═══════════════════════════════════════════════════════════════════════════════
+
+   SYSTEM LAW (LOCKED):
+   ┌─────────────────────────────────────────────────────────────────────────────┐
+   │  ICONS IDENTIFY.     — Carriers, addresses, never authoritative            │
+   │  CLUSTERS COMPUTE.   — Substrates, disposable, never decide                 │
+   │  BRAINS DECIDE.      — Proof-anchored, deterministic, sole authority        │
+   │  ONLY ⚡ COLLAPSES TRUTH.                                                   │
+   └─────────────────────────────────────────────────────────────────────────────┘
+
+   INVARIANT: Multiplicity is allowed everywhere except authority.
+
+   The π Virtual Cluster is a non-authoritative compute substrate.
+   All semantic resolution and control-flow decisions MUST be derived
+   exclusively from verified ⚡ events and are explicitly forbidden from
+   being inferred directly from cluster outputs.
+
+   BINARY FORMAT: SCX2BRAIN v1
+   - FixedHeader (64 bytes)
+   - SectionTable (N * 32 bytes)
+   - Sections (aligned 16 bytes)
+   - Footer (32 bytes)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SCXQ2 = (() => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Binary Constants
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const MAGIC = new Uint8Array([0x53, 0x43, 0x58, 0x32]); // 'SCX2'
+  const FOOTER_MAGIC = new Uint8Array([0x53, 0x43, 0x58, 0x32, 0x45, 0x4E, 0x44, 0x00]); // 'SCX2END\0'
+  const VERSION_MAJOR = 0x0001;
+  const VERSION_MINOR = 0x0000;
+  const ALIGNMENT = 16;
+
+  // Section IDs
+  const SECTION = Object.freeze({
+    META:      0x0001,
+    CANON:     0x0002,
+    DICT:      0x0003,
+    STRS:      0x0004,
+    BRAIN_TBL: 0x0005,
+    ICON_TBL:  0x0006,
+    CLUS_TBL:  0x0007,
+    EDGE_TBL:  0x0008,
+    PACKS:     0x0009,
+    PROOFS:    0x000A,
+    FOOTIDX:   0x000B,
+  });
+
+  // Edge types
+  const EDGE_TYPE = Object.freeze({
+    MEMBER_OF:   0x0001,
+    DEPENDS_ON:  0x0002,
+    ROUTES_TO:   0x0003,
+    BINDS_TO:    0x0004,
+    PRECEDES:    0x0005,
+  });
+
+  // Entity kinds
+  const ENTITY_KIND = Object.freeze({
+    BRAIN:   0,
+    ICON:    1,
+    CLUSTER: 2,
+  });
+
+  // Codec types
+  const CODEC = Object.freeze({
+    RAW:       0,
+    SCXQ2:     1,
+    SCXQ2_HUFF: 2,
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // In-Memory Container State
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const container = {
+    header: null,
+    sections: new Map(),
+    strings: [],
+    brains: new Map(),    // brain_id → BrainRow
+    icons: new Map(),     // icon_id → IconRow
+    clusters: new Map(),  // cluster_id → ClusterRow
+    edges: [],
+    rules: [],
+    packs: new Map(),
+    proofs: new Map(),    // canon_hash → ProofEntry
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Binary Helpers
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function alignOffset(offset) {
+    return Math.ceil(offset / ALIGNMENT) * ALIGNMENT;
+  }
+
+  function readU16LE(view, offset) {
+    return view.getUint16(offset, true);
+  }
+
+  function readU32LE(view, offset) {
+    return view.getUint32(offset, true);
+  }
+
+  function readU64LE(view, offset) {
+    // JavaScript doesn't have native 64-bit, use BigInt
+    const lo = view.getUint32(offset, true);
+    const hi = view.getUint32(offset + 4, true);
+    return BigInt(lo) | (BigInt(hi) << 32n);
+  }
+
+  function writeU16LE(view, offset, value) {
+    view.setUint16(offset, value, true);
+  }
+
+  function writeU32LE(view, offset, value) {
+    view.setUint32(offset, value, true);
+  }
+
+  function writeU64LE(view, offset, value) {
+    const bigVal = BigInt(value);
+    view.setUint32(offset, Number(bigVal & 0xFFFFFFFFn), true);
+    view.setUint32(offset + 4, Number(bigVal >> 32n), true);
+  }
+
+  function readBytes(view, offset, length) {
+    const arr = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      arr[i] = view.getUint8(offset + i);
+    }
+    return arr;
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToBytes(hex) {
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    }
+    return bytes;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Header Parsing (64 bytes)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseHeader(buffer) {
+    const view = new DataView(buffer);
+
+    // Verify magic
+    const magic = readBytes(view, 0x00, 4);
+    if (bytesToHex(magic) !== bytesToHex(MAGIC)) {
+      throw new Error('Invalid SCXQ2 magic bytes');
+    }
+
+    const header = {
+      magic: 'SCX2',
+      version_major: readU16LE(view, 0x04),
+      version_minor: readU16LE(view, 0x06),
+      flags: readU32LE(view, 0x08),
+      header_bytes: readU32LE(view, 0x0C),
+      file_bytes: readU64LE(view, 0x10),
+      section_table_off: readU64LE(view, 0x18),
+      section_count: readU32LE(view, 0x20),
+      reserved0: readU32LE(view, 0x24),
+      epoch: readU64LE(view, 0x28),
+      policy_hash: bytesToHex(readBytes(view, 0x30, 16)),
+    };
+
+    if (header.version_major !== VERSION_MAJOR) {
+      throw new Error(`Unsupported SCXQ2 version: ${header.version_major}.${header.version_minor}`);
+    }
+
+    return header;
+  }
+
+  function buildHeader(epoch, policyHash, sectionCount, fileBytes) {
+    const buffer = new ArrayBuffer(64);
+    const view = new DataView(buffer);
+
+    // Magic
+    for (let i = 0; i < 4; i++) view.setUint8(i, MAGIC[i]);
+
+    writeU16LE(view, 0x04, VERSION_MAJOR);
+    writeU16LE(view, 0x06, VERSION_MINOR);
+    writeU32LE(view, 0x08, 0); // flags
+    writeU32LE(view, 0x0C, 64); // header_bytes
+    writeU64LE(view, 0x10, fileBytes);
+    writeU64LE(view, 0x18, 64); // section_table_off (right after header)
+    writeU32LE(view, 0x20, sectionCount);
+    writeU32LE(view, 0x24, 0); // reserved
+    writeU64LE(view, 0x28, epoch);
+
+    // policy_hash (16 bytes)
+    const hashBytes = hexToBytes(policyHash.padEnd(32, '0').slice(0, 32));
+    for (let i = 0; i < 16; i++) view.setUint8(0x30 + i, hashBytes[i]);
+
+    return buffer;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Section Table Parsing (32 bytes per entry)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseSectionTable(buffer, header) {
+    const view = new DataView(buffer);
+    const sections = [];
+    const tableOff = Number(header.section_table_off);
+
+    for (let i = 0; i < header.section_count; i++) {
+      const off = tableOff + (i * 32);
+      sections.push({
+        section_id: readU32LE(view, off + 0x00),
+        section_flags: readU32LE(view, off + 0x04),
+        off: readU64LE(view, off + 0x08),
+        len: readU64LE(view, off + 0x10),
+        crc64: readU64LE(view, off + 0x18),
+      });
+    }
+
+    return sections;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // String Pool (STRS section)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseStrings(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const stringCount = readU32LE(view, off);
+    const bytesTotal = readU32LE(view, off + 4);
+
+    const offsets = [];
+    for (let i = 0; i < stringCount; i++) {
+      offsets.push(readU32LE(view, off + 8 + (i * 4)));
+    }
+
+    const blobStart = off + 8 + (stringCount * 4);
+    const decoder = new TextDecoder('utf-8');
+    const strings = [];
+
+    for (let i = 0; i < stringCount; i++) {
+      const start = offsets[i];
+      const end = (i + 1 < stringCount) ? offsets[i + 1] : bytesTotal;
+      const strBytes = new Uint8Array(buffer, blobStart + start, end - start - 1); // -1 for null terminator
+      strings.push(decoder.decode(strBytes));
+    }
+
+    return strings;
+  }
+
+  function buildStrings(strings) {
+    const encoder = new TextEncoder();
+    const encoded = strings.map(s => encoder.encode(s + '\0'));
+    const bytesTotal = encoded.reduce((sum, e) => sum + e.length, 0);
+
+    const headerSize = 8 + (strings.length * 4);
+    const buffer = new ArrayBuffer(alignOffset(headerSize + bytesTotal));
+    const view = new DataView(buffer);
+    const u8 = new Uint8Array(buffer);
+
+    writeU32LE(view, 0, strings.length);
+    writeU32LE(view, 4, bytesTotal);
+
+    let offset = 0;
+    for (let i = 0; i < strings.length; i++) {
+      writeU32LE(view, 8 + (i * 4), offset);
+      offset += encoded[i].length;
+    }
+
+    let blobOff = headerSize;
+    for (const enc of encoded) {
+      u8.set(enc, blobOff);
+      blobOff += enc.length;
+    }
+
+    return buffer;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BRAIN_TBL (64 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseBrainTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const brainCount = readU32LE(view, off);
+    const brains = new Map();
+
+    for (let i = 0; i < brainCount; i++) {
+      const rowOff = off + 4 + (i * 64);
+      const brain = {
+        brain_id: readU32LE(view, rowOff + 0x00),
+        sid_name: readU32LE(view, rowOff + 0x04),
+        name: null, // resolved from strings
+        brain_hash: bytesToHex(readBytes(view, rowOff + 0x08, 16)),
+        pack_id: readU32LE(view, rowOff + 0x18),
+        pack_off: readU32LE(view, rowOff + 0x1C),
+        pack_len: readU32LE(view, rowOff + 0x20),
+        class_id: readU32LE(view, rowOff + 0x24),
+        last_tick: readU64LE(view, rowOff + 0x28),
+        flags: readU64LE(view, rowOff + 0x30),
+        // Brain authority markers
+        vocab_hash: null,
+        tokenizer_hash: null,
+        policy_hash: null,
+      };
+
+      if (strings && brain.sid_name < strings.length) {
+        brain.name = strings[brain.sid_name];
+      }
+
+      brains.set(brain.brain_id, brain);
+    }
+
+    return brains;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ICON_TBL (48 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseIconTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const iconCount = readU32LE(view, off);
+    const icons = new Map();
+
+    for (let i = 0; i < iconCount; i++) {
+      const rowOff = off + 4 + (i * 48);
+      const icon = {
+        icon_id: readU32LE(view, rowOff + 0x00),
+        sid_label: readU32LE(view, rowOff + 0x04),
+        label: null,
+        svg_ref: readU32LE(view, rowOff + 0x08),
+        brain_id: readU32LE(view, rowOff + 0x0C),
+        pack_id: readU32LE(view, rowOff + 0x10),
+        pack_off: readU32LE(view, rowOff + 0x14),
+        pack_len: readU32LE(view, rowOff + 0x18),
+        flags: readU64LE(view, rowOff + 0x1C),
+        // Icons are carriers, never authoritative
+        _carrier: true,
+        _authority: false,
+      };
+
+      if (strings && icon.sid_label < strings.length) {
+        icon.label = strings[icon.sid_label];
+      }
+
+      icons.set(icon.icon_id, icon);
+    }
+
+    return icons;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CLUS_TBL (64 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseClusterTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const clusterCount = readU32LE(view, off);
+    const clusters = new Map();
+
+    for (let i = 0; i < clusterCount; i++) {
+      const rowOff = off + 4 + (i * 64);
+      const cluster = {
+        cluster_id: readU32LE(view, rowOff + 0x00),
+        sid_label: readU32LE(view, rowOff + 0x04),
+        label: null,
+        cluster_hash: bytesToHex(readBytes(view, rowOff + 0x08, 16)),
+        pack_id: readU32LE(view, rowOff + 0x18),
+        pack_off: readU32LE(view, rowOff + 0x1C),
+        pack_len: readU32LE(view, rowOff + 0x20),
+        brain_map_off: readU32LE(view, rowOff + 0x24),
+        brain_map_len: readU32LE(view, rowOff + 0x28),
+        flags: readU64LE(view, rowOff + 0x2C),
+        // Clusters compute, never decide
+        _compute_only: true,
+        _authority: false,
+      };
+
+      if (strings && cluster.sid_label < strings.length) {
+        cluster.label = strings[cluster.sid_label];
+      }
+
+      clusters.set(cluster.cluster_id, cluster);
+    }
+
+    return clusters;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EDGE_TBL (16 bytes per edge, 32 bytes per rule)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseEdgeTable(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const edgeCount = readU32LE(view, off);
+    const ruleCount = readU32LE(view, off + 4);
+
+    const edges = [];
+    const edgeStart = off + 8;
+
+    for (let i = 0; i < edgeCount; i++) {
+      const eOff = edgeStart + (i * 16);
+      edges.push({
+        a_kind: view.getUint8(eOff + 0x00),
+        b_kind: view.getUint8(eOff + 0x01),
+        edge_type: readU16LE(view, eOff + 0x02),
+        a_id: readU32LE(view, eOff + 0x04),
+        b_id: readU32LE(view, eOff + 0x08),
+        weight: view.getFloat32(eOff + 0x0C, true),
+      });
+    }
+
+    const rules = [];
+    const ruleStart = edgeStart + (edgeCount * 16);
+
+    for (let i = 0; i < ruleCount; i++) {
+      const rOff = ruleStart + (i * 32);
+      rules.push({
+        rule_id: readU32LE(view, rOff + 0x00),
+        class_id: readU32LE(view, rOff + 0x04),
+        must_precede_class: readU32LE(view, rOff + 0x08),
+        edge_type: readU16LE(view, rOff + 0x0C),
+        flags: readU16LE(view, rOff + 0x0E),
+        reserved: readU64LE(view, rOff + 0x10),
+        rule_hash: bytesToHex(readBytes(view, rOff + 0x18, 8)),
+      });
+    }
+
+    return { edges, rules };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PROOFS Section
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseProofs(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const canonHashCount = readU32LE(view, off);
+    const proofs = new Map();
+
+    for (let i = 0; i < canonHashCount; i++) {
+      const rowOff = off + 4 + (i * 24);
+      const canonHash = bytesToHex(readBytes(view, rowOff, 16));
+      proofs.set(canonHash, {
+        canon_hash: canonHash,
+        domain_kind: view.getUint8(rowOff + 0x10),
+        entity_id: readU32LE(view, rowOff + 0x12),
+        proof_off: readU32LE(view, rowOff + 0x16),
+        proof_len: readU32LE(view, rowOff + 0x1A),
+      });
+    }
+
+    return proofs;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Container Load/Parse
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function loadContainer(buffer) {
+    container.header = parseHeader(buffer);
+
+    const sectionList = parseSectionTable(buffer, container.header);
+    for (const sec of sectionList) {
+      container.sections.set(sec.section_id, sec);
+    }
+
+    // Parse STRS first (needed for name resolution)
+    const strsSection = container.sections.get(SECTION.STRS);
+    if (strsSection) {
+      container.strings = parseStrings(buffer, strsSection);
+    }
+
+    // Parse index tables
+    const brainSection = container.sections.get(SECTION.BRAIN_TBL);
+    if (brainSection) {
+      container.brains = parseBrainTable(buffer, brainSection, container.strings);
+    }
+
+    const iconSection = container.sections.get(SECTION.ICON_TBL);
+    if (iconSection) {
+      container.icons = parseIconTable(buffer, iconSection, container.strings);
+    }
+
+    const clusSection = container.sections.get(SECTION.CLUS_TBL);
+    if (clusSection) {
+      container.clusters = parseClusterTable(buffer, clusSection, container.strings);
+    }
+
+    // Parse edges and rules
+    const edgeSection = container.sections.get(SECTION.EDGE_TBL);
+    if (edgeSection) {
+      const { edges, rules } = parseEdgeTable(buffer, edgeSection);
+      container.edges = edges;
+      container.rules = rules;
+    }
+
+    // Parse proofs
+    const proofsSection = container.sections.get(SECTION.PROOFS);
+    if (proofsSection) {
+      container.proofs = parseProofs(buffer, proofsSection);
+    }
+
+    audit_event('scxq2.load', {
+      epoch: Number(container.header.epoch),
+      brains: container.brains.size,
+      icons: container.icons.size,
+      clusters: container.clusters.size,
+      edges: container.edges.length,
+    });
+
+    return container;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Brain Registry (1000 Brains)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerBrain(brainSpec) {
+    if (!brainSpec.brain_id || !brainSpec.brain_hash) {
+      throw new Error('Brain requires brain_id and brain_hash');
+    }
+    if (!brainSpec.vocab_hash || !brainSpec.tokenizer_hash || !brainSpec.policy_hash) {
+      throw new Error('Brain requires vocab_hash, tokenizer_hash, policy_hash');
+    }
+
+    const brain = {
+      brain_id: brainSpec.brain_id,
+      sid_name: 0,
+      name: brainSpec.name || `brain_${brainSpec.brain_id}`,
+      brain_hash: brainSpec.brain_hash,
+      vocab_hash: brainSpec.vocab_hash,
+      tokenizer_hash: brainSpec.tokenizer_hash,
+      policy_hash: brainSpec.policy_hash,
+      pack_id: brainSpec.pack_id || 0,
+      pack_off: brainSpec.pack_off || 0,
+      pack_len: brainSpec.pack_len || 0,
+      class_id: brainSpec.class_id || 0,
+      last_tick: BigInt(Date.now()),
+      flags: BigInt(brainSpec.flags || 0),
+      epoch: brainSpec.epoch || Number(container.header?.epoch || 0),
+    };
+
+    container.brains.set(brain.brain_id, brain);
+
+    audit_event('brain.register', {
+      brain_id: brain.brain_id,
+      brain_hash: brain.brain_hash.slice(0, 16) + '...',
+    });
+
+    return brain;
+  }
+
+  function getBrain(brainId) {
+    return container.brains.get(brainId);
+  }
+
+  function listBrains() {
+    return [...container.brains.values()];
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Icon Registry (1000 Icons) — Carriers, never authoritative
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerIcon(iconSpec) {
+    if (typeof iconSpec.icon_id !== 'number') {
+      throw new Error('Icon requires icon_id');
+    }
+
+    const icon = {
+      icon_id: iconSpec.icon_id,
+      sid_label: 0,
+      label: iconSpec.label || `icon_${iconSpec.icon_id}`,
+      svg_ref: iconSpec.svg_ref || 0,
+      brain_id: iconSpec.brain_id, // Icon → Brain binding
+      pack_id: iconSpec.pack_id || 0,
+      pack_off: iconSpec.pack_off || 0,
+      pack_len: iconSpec.pack_len || 0,
+      flags: BigInt(iconSpec.flags || 0),
+      // INVARIANT: Icons are carriers, never authoritative
+      _carrier: true,
+      _authority: false,
+    };
+
+    container.icons.set(icon.icon_id, icon);
+
+    // Create edge binding icon → brain
+    if (icon.brain_id !== undefined) {
+      container.edges.push({
+        a_kind: ENTITY_KIND.ICON,
+        b_kind: ENTITY_KIND.BRAIN,
+        edge_type: EDGE_TYPE.BINDS_TO,
+        a_id: icon.icon_id,
+        b_id: icon.brain_id,
+        weight: 1.0,
+      });
+    }
+
+    return icon;
+  }
+
+  function getIcon(iconId) {
+    return container.icons.get(iconId);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster Registry (1000 Clusters) — Compute substrates, never decide
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerCluster(clusterSpec) {
+    if (typeof clusterSpec.cluster_id !== 'number') {
+      throw new Error('Cluster requires cluster_id');
+    }
+
+    const cluster = {
+      cluster_id: clusterSpec.cluster_id,
+      sid_label: 0,
+      label: clusterSpec.label || `cluster_${clusterSpec.cluster_id}`,
+      cluster_hash: clusterSpec.cluster_hash || '',
+      pack_id: clusterSpec.pack_id || 0,
+      pack_off: clusterSpec.pack_off || 0,
+      pack_len: clusterSpec.pack_len || 0,
+      brain_map_off: clusterSpec.brain_map_off || 0,
+      brain_map_len: clusterSpec.brain_map_len || 0,
+      flags: BigInt(clusterSpec.flags || 0),
+      // INVARIANT: Clusters compute, never decide
+      _compute_only: true,
+      _authority: false,
+    };
+
+    container.clusters.set(cluster.cluster_id, cluster);
+
+    return cluster;
+  }
+
+  function getCluster(clusterId) {
+    return container.clusters.get(clusterId);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster → Brain Membership
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function addClusterMember(clusterId, brainId) {
+    container.edges.push({
+      a_kind: ENTITY_KIND.BRAIN,
+      b_kind: ENTITY_KIND.CLUSTER,
+      edge_type: EDGE_TYPE.MEMBER_OF,
+      a_id: brainId,
+      b_id: clusterId,
+      weight: 1.0,
+    });
+  }
+
+  function getClusterMembers(clusterId) {
+    return container.edges
+      .filter(e =>
+        e.b_kind === ENTITY_KIND.CLUSTER &&
+        e.b_id === clusterId &&
+        e.edge_type === EDGE_TYPE.MEMBER_OF
+      )
+      .map(e => container.brains.get(e.a_id))
+      .filter(Boolean);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Class-Order Validation (GSR Adjacency)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function addClassOrderRule(classId, mustPrecedeClass) {
+    const rule = {
+      rule_id: container.rules.length,
+      class_id: classId,
+      must_precede_class: mustPrecedeClass,
+      edge_type: EDGE_TYPE.PRECEDES,
+      flags: 0,
+      reserved: 0n,
+      rule_hash: '',
+    };
+    container.rules.push(rule);
+    return rule;
+  }
+
+  function validateClassOrder(brainSequence) {
+    // brainSequence is array of brain_ids in execution order
+    const classPositions = new Map();
+
+    for (let i = 0; i < brainSequence.length; i++) {
+      const brain = container.brains.get(brainSequence[i]);
+      if (brain) {
+        classPositions.set(brain.class_id, i);
+      }
+    }
+
+    // Check all rules
+    for (const rule of container.rules) {
+      const aPos = classPositions.get(rule.class_id);
+      const bPos = classPositions.get(rule.must_precede_class);
+
+      if (aPos !== undefined && bPos !== undefined && aPos >= bPos) {
+        return {
+          valid: false,
+          error: `Class ${rule.class_id} must precede class ${rule.must_precede_class}`,
+          rule,
+        };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Collapse Boundary — THE CRITICAL AUTHORITY GATE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * SYSTEM LAW: Cluster output MUST go through collapse boundary.
+   * Cluster output may NOT directly drive @if/@then/@else.
+   * Only verified ⚡ events may control flow.
+   */
+  async function collapseClusterOutput(clusterOutput, brainId, epoch) {
+    const brain = container.brains.get(brainId);
+    if (!brain) {
+      throw new Error(`Brain ${brainId} not found`);
+    }
+
+    // Step 1: Canonicalize cluster output
+    const resolved = {
+      brain_id: brainId,
+      brain_hash: brain.brain_hash,
+      vocab_hash: brain.vocab_hash,
+      tokenizer_hash: brain.tokenizer_hash,
+      policy_hash: brain.policy_hash,
+      epoch,
+      cluster_output: clusterOutput,
+      timestamp: Date.now(),
+    };
+
+    // Step 2: Compute canonical hash (using XCFE if available)
+    const canonJson = XCFE ? XCFE.canonValue(resolved) : stableStringify(resolved);
+    const inputHashHex = await (XCFE ? XCFE.sha256Hex(canonJson) : sha256Hex(canonJson));
+    const inputHash = `h:sha256:${inputHashHex}`;
+
+    // Step 3: Determine truth (this is where semantic resolution happens)
+    const truth = determineTruth(clusterOutput, brain);
+
+    // Step 4: Compute proof hash
+    const proofPayload = `${inputHash}:${truth ? 'true' : 'false'}`;
+    const proofHex = await (XCFE ? XCFE.sha256Hex(proofPayload) : sha256Hex(proofPayload));
+    const proofHash = `h:sha256:${proofHex}`;
+
+    // Step 5: Emit ⚡ event (ONLY THIS MAY DRIVE CONTROL FLOW)
+    const lightning = {
+      '@⚡': {
+        epoch,
+        brain_id: brainId,
+        policy_hash: brain.policy_hash,
+        vocab_hash: brain.vocab_hash,
+        tokenizer_hash: brain.tokenizer_hash,
+        input_hash: inputHash,
+        proof_hash: proofHash,
+        truth,
+        source: 'scxq2_collapse',
+        runtime: '⚡',
+        resolved: true,
+      },
+    };
+
+    // Step 6: Store proof
+    container.proofs.set(inputHash.slice(9), {
+      canon_hash: inputHash,
+      domain_kind: ENTITY_KIND.BRAIN,
+      entity_id: brainId,
+      proof_off: 0,
+      proof_len: 0,
+      lightning,
+    });
+
+    audit_event('scxq2.collapse', {
+      brain_id: brainId,
+      epoch,
+      truth,
+      proof_hash: proofHash.slice(0, 24) + '...',
+    });
+
+    return lightning;
+  }
+
+  function determineTruth(clusterOutput, brain) {
+    // Default truth determination
+    // In real implementation, this uses SemanticGating.collapseProposals
+    if (typeof clusterOutput === 'boolean') return clusterOutput;
+    if (typeof clusterOutput === 'number') return clusterOutput > 0;
+    if (Array.isArray(clusterOutput)) {
+      // Use highest confidence proposal
+      if (clusterOutput.length > 0 && clusterOutput[0].confidence !== undefined) {
+        const best = clusterOutput.reduce((a, b) =>
+          (a.confidence || 0) > (b.confidence || 0) ? a : b
+        );
+        return Boolean(best.value);
+      }
+      return clusterOutput.length > 0;
+    }
+    if (clusterOutput && typeof clusterOutput === 'object') {
+      return Boolean(clusterOutput.value || clusterOutput.truth || clusterOutput.result);
+    }
+    return Boolean(clusterOutput);
+  }
+
+  // Helper for sha256 when XCFE not available
+  async function sha256Hex(data) {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    return bytesToHex(new Uint8Array(hashBuffer));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Verify ⚡ for Branch Gate
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function verifyForBranchGate(lightning, gate) {
+    const ev = lightning['@⚡'];
+    if (!ev) {
+      return { ok: false, error: 'missing_lightning' };
+    }
+
+    // Verify brain exists
+    const brain = container.brains.get(ev.brain_id);
+    if (!brain) {
+      return { ok: false, error: 'brain_not_found' };
+    }
+
+    // Verify hashes match brain
+    if (ev.policy_hash !== brain.policy_hash) {
+      return { ok: false, error: 'policy_hash_mismatch' };
+    }
+    if (ev.vocab_hash !== brain.vocab_hash) {
+      return { ok: false, error: 'vocab_hash_mismatch' };
+    }
+    if (ev.tokenizer_hash !== brain.tokenizer_hash) {
+      return { ok: false, error: 'tokenizer_hash_mismatch' };
+    }
+
+    // Verify gate proof matches
+    if (gate.proof_hash && gate.proof_hash !== ev.proof_hash) {
+      return { ok: false, error: 'proof_hash_mismatch' };
+    }
+
+    // Verify truth → selected mapping
+    const expectedSelected = ev.truth ? '@then' : '@else';
+    if (gate.selected && gate.selected !== expectedSelected) {
+      return { ok: false, error: 'truth_selected_mismatch' };
+    }
+
+    return {
+      ok: true,
+      brain,
+      lightning: ev,
+      selected: expectedSelected,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Container Status
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function status() {
+    return {
+      loaded: container.header !== null,
+      epoch: container.header ? Number(container.header.epoch) : null,
+      policy_hash: container.header?.policy_hash || null,
+      brains: container.brains.size,
+      icons: container.icons.size,
+      clusters: container.clusters.size,
+      edges: container.edges.length,
+      rules: container.rules.length,
+      proofs: container.proofs.size,
+      strings: container.strings.length,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Export Container as Binary
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function exportContainer(epoch, policyHash) {
+    // This would build the full binary container
+    // For now, return metadata about what would be exported
+    return {
+      magic: 'SCX2',
+      version: `${VERSION_MAJOR}.${VERSION_MINOR}`,
+      epoch,
+      policy_hash: policyHash,
+      sections: [
+        { id: 'META', count: 1 },
+        { id: 'STRS', count: container.strings.length },
+        { id: 'BRAIN_TBL', count: container.brains.size },
+        { id: 'ICON_TBL', count: container.icons.size },
+        { id: 'CLUS_TBL', count: container.clusters.size },
+        { id: 'EDGE_TBL', edges: container.edges.length, rules: container.rules.length },
+        { id: 'PROOFS', count: container.proofs.size },
+      ],
+      estimated_size: estimateContainerSize(),
+    };
+  }
+
+  function estimateContainerSize() {
+    let size = 64; // Header
+    size += container.sections.size * 32; // Section table
+    size += container.strings.reduce((s, str) => s + str.length + 1, 8 + container.strings.length * 4); // STRS
+    size += 4 + container.brains.size * 64; // BRAIN_TBL
+    size += 4 + container.icons.size * 48; // ICON_TBL
+    size += 4 + container.clusters.size * 64; // CLUS_TBL
+    size += 8 + container.edges.length * 16 + container.rules.length * 32; // EDGE_TBL
+    size += 4 + container.proofs.size * 24; // PROOFS
+    size += 32; // Footer
+    return alignOffset(size);
+  }
+
+  return {
+    // Constants
+    SECTION,
+    EDGE_TYPE,
+    ENTITY_KIND,
+    CODEC,
+
+    // Container operations
+    loadContainer,
+    exportContainer,
+    status,
+
+    // Brain registry (1000 brains)
+    registerBrain,
+    getBrain,
+    listBrains,
+
+    // Icon registry (1000 icons) — carriers
+    registerIcon,
+    getIcon,
+
+    // Cluster registry (1000 clusters) — compute substrates
+    registerCluster,
+    getCluster,
+    addClusterMember,
+    getClusterMembers,
+
+    // Class-order validation
+    addClassOrderRule,
+    validateClassOrder,
+
+    // THE CRITICAL GATE: Collapse boundary
+    collapseClusterOutput,
+    verifyForBranchGate,
+
+    // Low-level binary helpers
+    parseHeader,
+    buildHeader,
+    buildStrings,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   KERNEL BOOT COMPLETE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+Cluster.init(4);
+audit_event('kernel.boot', { v: KERNEL.v, id: KUHUL_KERNEL_ID });
+postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} loaded` });
