@@ -32,11 +32,19 @@
    [8] Fetch Strategy & Cache
    [9] Lifecycle & Boot Sequencing
    [10] Message / Agent Bridge
+   [11] Stable Stringify + Hash (FNV-1a)
+   [12] Audit Log (Hash-Chain Journal)
+   [13] JavaCrypt Opcode Contract v1
+   [14] JavaCrypt Dispatch Table (Audited)
+   [15] Research Agent Registry
+   [16] Research Routes & Implementations
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /// <reference lib="webworker" />
 /* global self, clients, indexedDB, caches, fetch, Response, Headers, Blob, URL, TextEncoder, TextDecoder, Worker */
+
+'use strict';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [0] KERNEL HEADER & LAW
@@ -55,12 +63,16 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  * MODEL ≠ TOKENS     MODEL = FIELD        ANSWER = CLUSTER COLLAPSE
  */
 
+const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
+const KUHUL_KERNEL_VERSION = "1.2.4";
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const KERNEL = Object.freeze({
-  v: "1.2.3",
+  v: KUHUL_KERNEL_VERSION,
+  id: KUHUL_KERNEL_ID,
   name: "K'UHUL π KERNEL",
   build: "mx2lm-blackcode-kernel",
   mode: SYSTEM_MODE,
@@ -88,9 +100,10 @@ const KERNEL = Object.freeze({
 
   // Cache names
   cache: Object.freeze({
-    staticName: "mx2lm-static-v1.2.3",
-    runtimeName: "mx2lm-runtime-v1.2.3",
-    projectionName: "mx2lm-projection-v1.2.3",
+    staticName: `mx2lm-static-v${KUHUL_KERNEL_VERSION}`,
+    runtimeName: `mx2lm-runtime-v${KUHUL_KERNEL_VERSION}`,
+    projectionName: `mx2lm-projection-v${KUHUL_KERNEL_VERSION}`,
+    researchName: `mx2lm-research-v${KUHUL_KERNEL_VERSION}`,
   }),
 
   // JavaCrypt sandbox limits
@@ -100,6 +113,11 @@ const KERNEL = Object.freeze({
     maxExecMs: 1200,
     maxOps: 10_000,
     maxJobsInFlight: 64,
+    maxTapeSize: 1024 * 1024, // 1MB per tape
+    maxQueryLen: 280,
+    maxResults: 10,
+    maxFetchMs: 12_000,
+    maxBytes: 300_000,
   }),
 
   // Kernel API routes
@@ -115,6 +133,21 @@ const KERNEL = Object.freeze({
     storagePut: "/_mx2/api/storage/put",
     piEmit: "/_mx2/api/pi/emit",
     piInfer: "/_mx2/api/pi/infer",
+    auditExport: "/_mx2/api/audit/export",
+  }),
+
+  // Research config
+  research: Object.freeze({
+    mode: 'PROXY', // 'DIRECT' | 'PROXY'
+    proxyBase: '/api/research',
+    allowlistDomains: Object.freeze([
+      'en.wikipedia.org',
+      'api.github.com',
+      'raw.githubusercontent.com',
+      'hnrss.org',
+      'www.reddit.com',
+      'rss.nytimes.com',
+    ]),
   }),
 
   // SCXQ2 field map for compression
@@ -124,6 +157,17 @@ const KERNEL = Object.freeze({
     'compression': 0x09, 'version': 0x0A, 'author': 0x0B, 'meta': 0x0C
   }),
 });
+
+// Kernel state (mutable runtime state)
+const KernelState = {
+  tapes: new Map(),
+  agents: new Map(),
+  metrics: {
+    messages: 0,
+    fetches: 0,
+    errors: 0,
+  },
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [2] IDB STORAGE LAYER
@@ -136,7 +180,7 @@ const utf8 = {
 
 const DB = {
   name: "mx2lm_kernel_db",
-  v: 2,
+  v: 3,
   stores: {
     kv: "kv",
     tapes: "tapes",
@@ -146,16 +190,20 @@ const DB = {
     endpoints: "endpoints",
     settings: "settings",
     projectionCache: "projectionCache",
+    audit: "audit",
   },
 };
 
-function idbOpen() {
-  return new Promise((resolve, reject) => {
+let _dbPromise = null;
+
+function openDB() {
+  if (_dbPromise) return _dbPromise;
+
+  _dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB.name, DB.v);
     req.onupgradeneeded = () => {
       const db = req.result;
-      // Create all stores
-      for (const [name] of Object.entries(DB.stores)) {
+      for (const name of Object.values(DB.stores)) {
         if (!db.objectStoreNames.contains(name)) {
           db.createObjectStore(name);
         }
@@ -164,72 +212,191 @@ function idbOpen() {
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
+
+  return _dbPromise;
 }
 
-async function idbGet(store, key) {
-  const db = await idbOpen();
+// Shorthand IDB helpers
+function idb_tx(db, store, mode = 'readonly') {
+  return db.transaction(store, mode).objectStore(store);
+}
+
+function idb_get(db, store, key) {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readonly");
-    const os = tx.objectStore(store);
-    const req = os.get(key);
+    const req = idb_tx(db, store).get(key);
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
-async function idbPut(store, key, value) {
-  const db = await idbOpen();
+function idb_put(db, store, key, val) {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readwrite");
-    const os = tx.objectStore(store);
-    const req = os.put(value, key);
+    const req = idb_tx(db, store, 'readwrite').put(val, key);
     req.onsuccess = () => resolve(true);
     req.onerror = () => reject(req.error);
   });
+}
+
+function idb_del(db, store, key) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store, 'readwrite').delete(key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idb_all(db, store) {
+  return new Promise((resolve, reject) => {
+    const req = idb_tx(db, store).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Async wrappers
+async function idbGet(store, key) {
+  const db = await openDB();
+  return idb_get(db, store, key);
+}
+
+async function idbPut(store, key, value) {
+  const db = await openDB();
+  return idb_put(db, store, key, value);
 }
 
 async function idbDel(store, key) {
-  const db = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readwrite");
-    const os = tx.objectStore(store);
-    const req = os.delete(key);
-    req.onsuccess = () => resolve(true);
-    req.onerror = () => reject(req.error);
-  });
+  const db = await openDB();
+  return idb_del(db, store, key);
 }
 
 async function idbAll(store) {
-  const db = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readonly");
-    const os = tx.objectStore(store);
-    const req = os.getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbAllKeys(store) {
-  const db = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readonly");
-    const os = tx.objectStore(store);
-    const req = os.getAllKeys();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
+  const db = await openDB();
+  return idb_all(db, store);
 }
 
 async function idbClear(store) {
-  const db = await idbOpen();
+  const db = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, "readwrite");
-    const os = tx.objectStore(store);
-    const req = os.clear();
+    const req = idb_tx(db, store, 'readwrite').clear();
     req.onsuccess = () => resolve(true);
     req.onerror = () => reject(req.error);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [11] STABLE STRINGIFY + HASH (FNV-1a)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function stable_stringify(obj) {
+  if (obj === null || obj === undefined) return String(obj);
+  if (typeof obj !== 'object') return JSON.stringify(obj);
+
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(stable_stringify).join(',') + ']';
+  }
+
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + stable_stringify(obj[k])).join(',') + '}';
+}
+
+// FNV-1a 32-bit (fast, deterministic, no dependencies)
+function hash_str(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return 'fnv1a32:' + h.toString(16).padStart(8, '0');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [12] AUDIT LOG (HASH-CHAIN JOURNAL)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const AUDIT = {
+  enabled: true,
+  chain_head: 'GENESIS',
+  log: [],
+  max: 2048,
+};
+
+function audit_event(type, payload, meta = {}) {
+  if (!AUDIT.enabled) return null;
+
+  const entry = {
+    t: Date.now(),
+    type,
+    payload: payload ?? null,
+    meta: {
+      ...meta,
+      kernel: KUHUL_KERNEL_ID,
+      version: KUHUL_KERNEL_VERSION
+    },
+    prev: AUDIT.chain_head,
+  };
+
+  // Hash chain: head = H(prev + canonical(entry w/o hash))
+  entry.hash = hash_str(entry.prev + '|' + stable_stringify({
+    t: entry.t, type: entry.type, payload: entry.payload, meta: entry.meta, prev: entry.prev
+  }));
+
+  AUDIT.chain_head = entry.hash;
+
+  AUDIT.log.push(entry);
+  if (AUDIT.log.length > AUDIT.max) AUDIT.log.shift();
+
+  return entry;
+}
+
+function audit_export(limit = 256) {
+  return {
+    ok: true,
+    head: AUDIT.chain_head,
+    log: AUDIT.log.slice(-limit),
+    kernel: KUHUL_KERNEL_ID,
+    version: KUHUL_KERNEL_VERSION,
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [13] JAVACRYPT OPCODE CONTRACT v1
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const JAVACRYPT = {
+  v: 1,
+  allowlist: new Set([
+    'kernel.ping',
+    'audit.export',
+    'tape.put',
+    'tape.get',
+    'tape.list',
+    'cluster.run',
+    'cluster.status',
+    'agent.spawn',
+    'agent.list',
+    'research.fetch',
+    'research.search',
+    'pi.emit',
+    'pi.infer',
+    'host.probe',
+    'manifest.get',
+    'manifest.patch',
+  ])
+};
+
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg);
+}
+
+function validate_opcode(block) {
+  assert(block && typeof block === 'object', 'JavaCrypt: opcode must be object');
+  assert(typeof block.op === 'string', 'JavaCrypt: missing op');
+  assert(JAVACRYPT.allowlist.has(block.op), `JavaCrypt: op not allowed → ${block.op}`);
+  assert(block.v === JAVACRYPT.v, `JavaCrypt: bad v (expected ${JAVACRYPT.v})`);
+  assert(block.id && typeof block.id === 'string', 'JavaCrypt: missing id');
+  assert(block.t && Number.isFinite(block.t), 'JavaCrypt: missing t');
+  assert(block.payload === undefined || typeof block.payload === 'object', 'JavaCrypt: payload must be object');
+  return true;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -309,10 +476,10 @@ async function patchMutableManifest(patchObj) {
   const cur = (await idbGet(DB.stores.kv, MANIFEST_KEY)) || {};
   const next = deepMerge(cur, patchObj);
   await idbPut(DB.stores.kv, MANIFEST_KEY, next);
+  audit_event('manifest.patch', { keys: Object.keys(patchObj) });
   return next;
 }
 
-// Virtual file serving from atomic.fold
 async function virtualFromAtomicFold(pathname) {
   const m = await getDynamicManifest();
   if (!m?.atomic?.fold) return null;
@@ -335,10 +502,10 @@ async function virtualFromAtomicFold(pathname) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   [4] JAVACRYPT EXECUTION FIREWALL
+   [4] JAVACRYPT EXECUTION FIREWALL (Worker-based sandbox)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-const JavaCrypt = (() => {
+const JavaCryptWorker = (() => {
   let execWorker = null;
   let execWorkerBusy = false;
 
@@ -388,7 +555,6 @@ const JavaCrypt = (() => {
           } else if (t === "math.pi") {
             S.out.push(Math.PI * Number(op.factor || 1));
           } else if (t === "glyph.weight") {
-            // Return glyph base weight
             const glyphTable = {
               "@": 1.0, "@@": 2.0, "@@@": 3.0,
               "π": Math.PI, "φ": 1.6180339887, "e": Math.E,
@@ -396,7 +562,6 @@ const JavaCrypt = (() => {
             };
             S.out.push(glyphTable[op.glyph] || 0);
           } else if (t === "tokenize.pi") {
-            // π token emission
             const n = clamp(Number(op.n || 24), 1, 256);
             const seed = Number(op.seed || 1);
             const glyphs = ["@", "@@", "@@@", "π", "φ", "e", "τ", "⤍", "↻", "⟲"];
@@ -506,6 +671,7 @@ const Cluster = (() => {
         lastMs: 0,
       });
     }
+    audit_event('cluster.init', { workers: n });
   }
 
   async function runJob(job) {
@@ -520,7 +686,7 @@ const Cluster = (() => {
     worker.state = "busy";
 
     try {
-      const result = await JavaCrypt.exec(job.program || {}, job.caps || {});
+      const result = await JavaCryptWorker.exec(job.program || {}, job.caps || {});
       worker.jobsOk++;
       worker.lastMs = result.ms || 0;
       state.jobsOk++;
@@ -588,7 +754,6 @@ const Cluster = (() => {
     };
   }
 
-  // π Token Emission (NO TOKENIZER)
   function piEmit(query, steps = 24) {
     const seed = query.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
     const glyphKeys = Object.keys(KERNEL.glyphs);
@@ -607,7 +772,7 @@ const Cluster = (() => {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   [6] OPTIONAL NATIVE HOST BRIDGE (mx2lm-host.exe / kuhul_pi_merged_runtime.py)
+   [6] OPTIONAL NATIVE HOST BRIDGE
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const Host = (() => {
@@ -623,6 +788,7 @@ const Host = (() => {
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
           cached = { ok: true, base, ts: Date.now(), runtime: data.runtime || "unknown" };
+          audit_event('host.probe', { base, ok: true });
           return cached;
         }
       } catch { /* continue */ }
@@ -646,11 +812,9 @@ const Host = (() => {
     }
   }
 
-  // Forward inference to Python host
   async function infer(query, events = [], ticks = 50) {
     const p = await probe(false);
     if (!p.ok) {
-      // Fallback: run locally via Cluster
       const tokens = Cluster.piEmit(query, 24);
       return {
         ok: true,
@@ -679,6 +843,329 @@ const Host = (() => {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   [15] RESEARCH AGENT REGISTRY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const AgentBus = (() => {
+  const agents = new Map();
+  const log = [];
+
+  function logEvent(evt) {
+    log.push({ t: Date.now(), ...evt });
+    if (log.length > 400) log.shift();
+  }
+
+  function register(def) {
+    agents.set(def.id, {
+      ...def,
+      state: 'idle',
+      calls: 0,
+      lastMs: 0,
+      lastAt: 0,
+      errors: 0,
+    });
+    logEvent({ k: 'agent.register', id: def.id, caps: def.caps || [] });
+    KernelState.agents.set(def.id, def);
+    return def.id;
+  }
+
+  async function run(id, input, runner) {
+    const a = agents.get(id);
+    if (!a) throw new Error(`Unknown agent: ${id}`);
+
+    a.state = 'processing';
+    a.calls++;
+    a.lastAt = Date.now();
+    logEvent({ k: 'agent.start', id, input: { q: safeText(input.q, 64) } });
+
+    const t0 = Date.now();
+    try {
+      const out = await runner(a, input);
+      a.lastMs = Date.now() - t0;
+      a.state = 'idle';
+      logEvent({ k: 'agent.ok', id, ms: a.lastMs, n: out?.items?.length ?? 0 });
+      return out;
+    } catch (e) {
+      a.lastMs = Date.now() - t0;
+      a.state = 'idle';
+      a.errors++;
+      logEvent({ k: 'agent.err', id, ms: a.lastMs, err: String(e?.message || e) });
+      throw e;
+    }
+  }
+
+  function list() {
+    return [...agents.values()].map(({ runner, ...rest }) => rest);
+  }
+
+  function getAudit() {
+    return log.slice(-200);
+  }
+
+  return { register, run, list, getAudit };
+})();
+
+// Register research agents
+AgentBus.register({ id: 'agent.research.router', caps: ['research.dispatch', 'normalize.results'] });
+AgentBus.register({ id: 'agent.research.wikipedia', caps: ['source.wikipedia', 'summary'] });
+AgentBus.register({ id: 'agent.research.github', caps: ['source.github', 'repos', 'issues'] });
+AgentBus.register({ id: 'agent.research.rss', caps: ['source.rss', 'headlines'] });
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [14] JAVACRYPT DISPATCH TABLE (AUDITED)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const JavaCryptOps = {
+  'kernel.ping': async () => ({
+    ok: true,
+    kernel: KUHUL_KERNEL_ID,
+    version: KUHUL_KERNEL_VERSION,
+    head: AUDIT.chain_head
+  }),
+
+  'audit.export': async () => audit_export(),
+
+  'tape.put': async ({ tape_id, tape }) => {
+    assert(typeof tape_id === 'string' && tape_id.length < 256, 'tape.put: invalid tape_id');
+    const size = stable_stringify(tape).length;
+    assert(size <= KERNEL.limits.maxTapeSize, `tape.put: tape too large (${size})`);
+
+    const db = await openDB();
+    await idb_put(db, 'tapes', tape_id, tape);
+
+    KernelState.tapes.set(tape_id, { size, t: Date.now() });
+    return { ok: true, tape_id, size };
+  },
+
+  'tape.get': async ({ tape_id }) => {
+    assert(typeof tape_id === 'string', 'tape.get: invalid tape_id');
+    const db = await openDB();
+    const tape = await idb_get(db, 'tapes', tape_id);
+    return { ok: true, tape_id, tape: tape ?? null };
+  },
+
+  'tape.list': async () => {
+    const db = await openDB();
+    const keys = await new Promise((resolve, reject) => {
+      const req = idb_tx(db, 'tapes').getAllKeys();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    return { ok: true, tapes: keys };
+  },
+
+  'cluster.run': async ({ job }) => {
+    assert(job && typeof job === 'object', 'cluster.run: missing job');
+    const result = await Cluster.runJob(job);
+    return { ok: true, ...result };
+  },
+
+  'cluster.status': async () => Cluster.status(),
+
+  'agent.spawn': async ({ agent }) => {
+    assert(agent && typeof agent === 'object', 'agent.spawn: missing agent');
+    assert(typeof agent.id === 'string', 'agent.spawn: agent.id required');
+    AgentBus.register(agent);
+    return { ok: true, id: agent.id };
+  },
+
+  'agent.list': async () => ({
+    ok: true,
+    agents: [...KernelState.agents.keys()]
+  }),
+
+  'research.search': async ({ q, n }) => {
+    const input = { q: safeText(q, KERNEL.limits.maxQueryLen), n: clampInt(n, 1, KERNEL.limits.maxResults, 10) };
+    const out = await AgentBus.run('agent.research.router', input, researchDispatch);
+    return { ok: true, query: input.q, items: normalizeItems(out.items) };
+  },
+
+  'pi.emit': async ({ query, steps }) => {
+    const tokens = Cluster.piEmit(query || '', steps || 24);
+    return { ok: true, tokens };
+  },
+
+  'pi.infer': async ({ query, events, ticks }) => {
+    return Host.infer(query || '', events || [], ticks || 50);
+  },
+
+  'host.probe': async () => Host.probe(true),
+
+  'manifest.get': async () => ({ ok: true, manifest: await getDynamicManifest() }),
+
+  'manifest.patch': async ({ patch }) => {
+    assert(patch && typeof patch === 'object', 'manifest.patch: invalid patch');
+    await patchMutableManifest(patch);
+    return { ok: true };
+  },
+};
+
+async function javacrypt_execute(block) {
+  validate_opcode(block);
+
+  audit_event('javacrypt.call', { op: block.op, id: block.id }, { client: block.client ?? 'unknown' });
+
+  const handler = JavaCryptOps[block.op];
+  assert(typeof handler === 'function', `JavaCrypt: missing handler for ${block.op}`);
+
+  const result = await handler(block.payload || {});
+  audit_event('javacrypt.result', { op: block.op, id: block.id, ok: !!result?.ok });
+
+  return result;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [16] RESEARCH ROUTES & IMPLEMENTATIONS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function safeText(s, maxLen) {
+  const t = String(s ?? '').trim();
+  return t.length > maxLen ? t.slice(0, maxLen) : t;
+}
+
+function clampInt(n, lo, hi, fallback) {
+  const x = Number.parseInt(String(n ?? ''), 10);
+  if (Number.isFinite(x)) return Math.max(lo, Math.min(hi, x));
+  return fallback;
+}
+
+function isAllowedUrl(u) {
+  try {
+    const url = new URL(u);
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      KERNEL.research.allowlistDomains.includes(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWithTimeout(url, init = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort('timeout'), KERNEL.limits.maxFetchMs);
+  try {
+    const res = await fetch(url, { ...init, signal: ctrl.signal });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function normalizeItems(items) {
+  return (items || [])
+    .filter(Boolean)
+    .slice(0, KERNEL.limits.maxResults)
+    .map((x) => ({
+      title: safeText(x.title ?? x.name ?? 'Untitled', 120),
+      url: safeText(x.url ?? x.html_url ?? '', 500),
+      snippet: safeText(x.snippet ?? x.description ?? '', 240),
+      source: safeText(x.source ?? 'unknown', 40),
+      published: x.published ?? null,
+    }));
+}
+
+async function researchDispatch(_agent, input) {
+  const jobs = [
+    AgentBus.run('agent.research.wikipedia', input, researchWikipedia),
+    AgentBus.run('agent.research.github', input, researchGitHub),
+  ];
+
+  const settled = await Promise.allSettled(jobs);
+  const merged = [];
+  for (const s of settled) {
+    if (s.status === 'fulfilled' && Array.isArray(s.value?.items)) merged.push(...s.value.items);
+  }
+
+  const seen = new Set();
+  const items = [];
+  for (const it of merged) {
+    const u = String(it.url || '');
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    items.push(it);
+    if (items.length >= input.n) break;
+  }
+
+  return { items };
+}
+
+async function researchWikipedia(_agent, input) {
+  if (KERNEL.research.mode === 'PROXY') {
+    return proxyCall('wikipedia', input);
+  }
+
+  const u = new URL('https://en.wikipedia.org/w/api.php');
+  u.searchParams.set('action', 'opensearch');
+  u.searchParams.set('search', input.q);
+  u.searchParams.set('limit', String(input.n));
+  u.searchParams.set('namespace', '0');
+  u.searchParams.set('format', 'json');
+  u.searchParams.set('origin', '*');
+
+  const res = await fetchWithTimeout(u.toString());
+  if (!res.ok) throw new Error(`Wikipedia HTTP ${res.status}`);
+  const data = await res.json();
+
+  const titles = data?.[1] || [];
+  const snippets = data?.[2] || [];
+  const urls = data?.[3] || [];
+
+  const items = titles.map((t, i) => ({
+    title: t,
+    url: urls[i],
+    snippet: snippets[i],
+    source: 'wikipedia',
+  }));
+
+  return { items };
+}
+
+async function researchGitHub(_agent, input) {
+  if (KERNEL.research.mode === 'PROXY') {
+    return proxyCall('github', input);
+  }
+
+  const u = new URL('https://api.github.com/search/repositories');
+  u.searchParams.set('q', input.q);
+  u.searchParams.set('per_page', String(Math.min(input.n, 10)));
+
+  const res = await fetchWithTimeout(u.toString(), {
+    headers: { 'accept': 'application/vnd.github+json' },
+  });
+  if (!res.ok) throw new Error(`GitHub HTTP ${res.status}`);
+  const data = await res.json();
+
+  const items = (data.items || []).map((r) => ({
+    title: r.full_name,
+    url: r.html_url,
+    snippet: r.description || '',
+    source: 'github',
+    published: r.pushed_at || null,
+  }));
+
+  return { items };
+}
+
+async function proxyCall(source, input) {
+  const u = new URL(`${KERNEL.research.proxyBase}/${encodeURIComponent(source)}`, self.location.origin);
+
+  const res = await fetchWithTimeout(u.toString(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ q: input.q, n: input.n }),
+  });
+
+  if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+
+  const txt = await res.text();
+  if (txt.length > KERNEL.limits.maxBytes) throw new Error('Proxy payload too large');
+
+  const data = JSON.parse(txt);
+  return { items: data.items || [] };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    [7] INTERNAL REST / MESSAGE ROUTER
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -703,6 +1190,44 @@ function notFound(message = "Not found") {
   return jsonResponse({ ok: false, error: message }, 404);
 }
 
+async function handleResearch(req, url) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return jsonResponse({ ok: false, error: 'method_not_allowed' }, 405);
+  }
+
+  if (url.pathname === '/research/agents') {
+    return jsonResponse({ ok: true, mode: KERNEL.research.mode, agents: AgentBus.list() });
+  }
+
+  if (url.pathname === '/research/audit') {
+    return jsonResponse({ ok: true, audit: AgentBus.getAudit() });
+  }
+
+  if (url.pathname === '/research/search') {
+    let q = url.searchParams.get('q');
+    let n = url.searchParams.get('n');
+
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        q = q ?? body?.q;
+        n = n ?? body?.n;
+      } catch { /* ignore */ }
+    }
+
+    q = safeText(q, KERNEL.limits.maxQueryLen);
+    if (!q) return badRequest('Missing q');
+
+    const maxResults = clampInt(n, 1, KERNEL.limits.maxResults, KERNEL.limits.maxResults);
+    const input = { q, n: maxResults };
+
+    const out = await AgentBus.run('agent.research.router', input, researchDispatch);
+    return jsonResponse({ ok: true, query: input.q, items: normalizeItems(out.items) });
+  }
+
+  return notFound('Unknown research route');
+}
+
 async function handleApi(req) {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -715,7 +1240,6 @@ async function handleApi(req) {
     return JSON.parse(txt);
   }
 
-  // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
@@ -725,6 +1249,11 @@ async function handleApi(req) {
         "Access-Control-Allow-Headers": "Content-Type",
       },
     });
+  }
+
+  // Audit export
+  if (path === KERNEL.routes.auditExport && req.method === "GET") {
+    return jsonResponse(audit_export());
   }
 
   // Storage
@@ -737,6 +1266,7 @@ async function handleApi(req) {
     const body = (await readJson()) || {};
     if (!body.key) return badRequest("missing_key");
     await idbPut(DB.stores.kv, String(body.key), body.value);
+    audit_event('storage.put', { key: body.key });
     return jsonResponse({ ok: true });
   }
 
@@ -745,7 +1275,7 @@ async function handleApi(req) {
     const body = (await readJson()) || {};
     if (!body.program) return badRequest("missing_program");
     try {
-      const result = await JavaCrypt.exec(body.program, body.caps || {});
+      const result = await JavaCryptWorker.exec(body.program, body.caps || {});
       return jsonResponse({ ok: true, result });
     } catch (e) {
       return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
@@ -773,7 +1303,7 @@ async function handleApi(req) {
     return jsonResponse({ ok: true, tokens });
   }
 
-  // π Infer (uses Host if available)
+  // π Infer
   if (path === KERNEL.routes.piInfer && req.method === "POST") {
     const body = (await readJson()) || {};
     const result = await Host.infer(body.query || "", body.events || [], body.ticks || 50);
@@ -818,9 +1348,20 @@ async function handleFetch(event) {
   const req = event.request;
   const url = new URL(req.url);
 
+  KernelState.metrics.fetches++;
+
+  // Health check
+  if (url.pathname === '/health') {
+    return jsonResponse({ ok: true, kernel: KERNEL.v, t: Date.now(), head: AUDIT.chain_head });
+  }
+
+  // Research routes
+  if (url.pathname.startsWith('/research/')) {
+    return handleResearch(req, url);
+  }
+
   // Only same-origin routing
   if (url.origin !== self.location.origin) {
-    // Cross-origin with projection cache for CORS bypass
     return fetchWithProjection(req, url);
   }
 
@@ -829,12 +1370,10 @@ async function handleFetch(event) {
     return handleApi(req);
   }
 
-  // Dynamic manifest (unless seed fetch)
+  // Dynamic manifest
   if (url.pathname === KERNEL.routes.manifest && !url.searchParams.has("__seed")) {
     const dyn = await getDynamicManifest();
-    return jsonResponse(dyn, 200, {
-      "Content-Type": "application/manifest+json; charset=utf-8",
-    });
+    return jsonResponse(dyn, 200, { "Content-Type": "application/manifest+json; charset=utf-8" });
   }
 
   // Virtual atomic endpoints
@@ -850,11 +1389,7 @@ async function handleFetch(event) {
     const targetUrl = url.searchParams.get('url') || url.pathname.split('/').slice(3).join('/');
     return jsonResponse({
       ok: true,
-      projection: {
-        type: piType,
-        url: targetUrl,
-        renderer: `canvas-${piType}`
-      }
+      projection: { type: piType, url: targetUrl, renderer: `canvas-${piType}` }
     });
   }
 
@@ -870,14 +1405,13 @@ async function handleFetch(event) {
   return res;
 }
 
-// Projection cache for cross-origin (CORS bypass via caching)
 async function fetchWithProjection(request, url) {
   const projectionCache = await caches.open(KERNEL.cache.projectionName);
 
   const cached = await projectionCache.match(request);
   if (cached) {
     const age = Date.now() - parseInt(cached.headers.get('x-cached-at') || '0');
-    if (age < 300000) return cached; // 5 min cache
+    if (age < 300000) return cached;
   }
 
   try {
@@ -912,7 +1446,6 @@ async function fetchWithProjection(request, url) {
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
-    // Precache minimal assets
     const cache = await caches.open(KERNEL.cache.staticName);
     await cache.addAll([
       "/",
@@ -920,10 +1453,9 @@ self.addEventListener("install", (event) => {
       "/sw.js",
     ]);
 
-    // Boot cluster
     Cluster.init(4);
+    audit_event('kernel.install', { v: KERNEL.v });
 
-    // Seed dynamic manifest if not present
     const existing = await idbGet(DB.stores.kv, MANIFEST_KEY);
     if (!existing) {
       await patchMutableManifest({
@@ -943,29 +1475,27 @@ self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     await self.clients.claim();
 
-    // Clean old caches
     const keys = await caches.keys();
     await Promise.all(
       keys.filter(k => k.startsWith('mx2lm-') && !Object.values(KERNEL.cache).includes(k))
           .map(k => caches.delete(k))
     );
 
-    // Probe host in background
     Host.probe(false).catch(() => {});
+    audit_event('kernel.activate', { v: KERNEL.v });
 
-    // Notify clients
     const list = await self.clients.matchAll({ includeUncontrolled: true });
     for (const c of list) {
       c.postMessage({
         type: "mx2.kernel.ready",
-        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode }
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode, id: KUHUL_KERNEL_ID }
       });
     }
   })());
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   [10] MESSAGE / AGENT BRIDGE
+   [10] MESSAGE / AGENT BRIDGE (SEALED OPCODE ONLY)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 function uid() {
@@ -978,89 +1508,93 @@ function postAll(msg) {
 }
 
 self.addEventListener("message", (event) => {
-  const msg = event.data || {};
-  const src = event.source;
+  KernelState.metrics.messages++;
 
-  async function reply(payload) {
-    try { src && src.postMessage(payload); } catch {}
-  }
+  const source = event.source;
+  const data = event.data;
 
-  (async () => {
-    // Kernel ready check
+  Promise.resolve().then(async () => {
+    if (!data || typeof data !== 'object') throw new Error('Invalid message');
+
+    // JavaCrypt opcode blocks (sealed interface)
+    if (data.__javacrypt__ === true) {
+      const block = { ...data, client: source?.id || 'client' };
+      const result = await javacrypt_execute(block);
+      source?.postMessage({ ok: true, id: block.id, result });
+      return;
+    }
+
+    // Legacy message interface (for compatibility)
+    const msg = data;
+
     if (msg.type === "mx2.ping") {
-      await reply({ type: "mx2.pong", kernel: { v: KERNEL.v, mode: KERNEL.mode } });
+      source?.postMessage({ type: "mx2.pong", kernel: { v: KERNEL.v, mode: KERNEL.mode, id: KUHUL_KERNEL_ID } });
       return;
     }
 
-    // Manifest patch
     if (msg.type === "mx2.manifest.patch") {
-      const patch = msg.patch || {};
-      await patchMutableManifest(patch);
-      await reply({ type: "mx2.manifest.patched", ok: true });
+      await patchMutableManifest(msg.patch || {});
+      source?.postMessage({ type: "mx2.manifest.patched", ok: true });
       return;
     }
 
-    // Session canvas tabs
     if (msg.type === "mx2.session.setCanvasTabs") {
-      const tabs = Array.isArray(msg.tabs) ? msg.tabs : [];
-      const activeTab = msg.activeTab ?? null;
       await patchMutableManifest({
-        mx2: { session: { canvasTabs: tabs, activeTab } },
+        mx2: { session: { canvasTabs: msg.tabs || [], activeTab: msg.activeTab ?? null } },
       });
-      await reply({ type: "mx2.session.saved", ok: true });
+      source?.postMessage({ type: "mx2.session.saved", ok: true });
       return;
     }
 
-    // JavaCrypt exec via message
     if (msg.type === "mx2.exec") {
       try {
-        const result = await JavaCrypt.exec(msg.program || {}, msg.caps || {});
-        await reply({ type: "mx2.exec.result", ok: true, result, rid: msg.rid || null });
+        const result = await JavaCryptWorker.exec(msg.program || {}, msg.caps || {});
+        source?.postMessage({ type: "mx2.exec.result", ok: true, result, rid: msg.rid });
       } catch (e) {
-        await reply({ type: "mx2.exec.result", ok: false, error: String(e), rid: msg.rid || null });
+        source?.postMessage({ type: "mx2.exec.result", ok: false, error: String(e), rid: msg.rid });
       }
       return;
     }
 
-    // π inference via message
     if (msg.type === "mx2.pi.infer") {
       const result = await Host.infer(msg.query || "", msg.events || [], msg.ticks || 50);
-      await reply({ type: "mx2.pi.result", ...result, rid: msg.rid || null });
+      source?.postMessage({ type: "mx2.pi.result", ...result, rid: msg.rid });
       return;
     }
 
-    // π emit via message
     if (msg.type === "mx2.pi.emit") {
       const tokens = Cluster.piEmit(msg.query || "", msg.steps || 24);
-      await reply({ type: "mx2.pi.tokens", ok: true, tokens, rid: msg.rid || null });
+      source?.postMessage({ type: "mx2.pi.tokens", ok: true, tokens, rid: msg.rid });
       return;
     }
 
-    // Host probe
     if (msg.type === "mx2.host.probe") {
       const out = await Host.probe(true);
-      await reply({ type: "mx2.host.status", ...out });
+      source?.postMessage({ type: "mx2.host.status", ...out });
       return;
     }
 
-    // Cluster status
     if (msg.type === "mx2.cluster.status") {
-      await reply({ type: "mx2.cluster.info", ...Cluster.status() });
+      source?.postMessage({ type: "mx2.cluster.info", ...Cluster.status() });
       return;
     }
 
-    // Boot request
+    if (msg.type === "mx2.audit.export") {
+      source?.postMessage({ type: "mx2.audit.data", ...audit_export() });
+      return;
+    }
+
     if (msg.type === "BOOT" || msg.type === "mx2.boot") {
-      await reply({
+      source?.postMessage({
         type: "mx2.kernel.ready",
-        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode },
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode, id: KUHUL_KERNEL_ID },
         glyphs: Object.keys(KERNEL.glyphs),
       });
       postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} ready` });
       return;
     }
 
-    // UI navigation / search (legacy compat)
+    // Legacy UI compat
     if (msg.t === 'NAV') {
       postAll({ t: 'STATUS', text: `Switched to ${msg.view || 'view'}` });
       return;
@@ -1071,11 +1605,12 @@ self.addEventListener("message", (event) => {
     }
 
     // Unknown
-    if (msg && (msg.type || msg.t)) {
-      await reply({ type: "mx2.kernel.error", ok: false, error: "unknown_message", got: msg.type || msg.t });
+    if (msg.type || msg.t) {
+      source?.postMessage({ type: "mx2.kernel.error", ok: false, error: "unknown_message", got: msg.type || msg.t });
     }
-  })().catch((e) => {
-    reply({ type: "mx2.kernel.error", ok: false, error: String(e) });
+  }).catch((err) => {
+    KernelState.metrics.errors++;
+    source?.postMessage({ ok: false, error: err.message || String(err) });
   });
 });
 
@@ -1092,4 +1627,5 @@ self.addEventListener("fetch", (event) => {
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 Cluster.init(4);
+audit_event('kernel.boot', { v: KERNEL.v, id: KUHUL_KERNEL_ID });
 postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} loaded` });
