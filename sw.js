@@ -41,6 +41,8 @@
    [17] Research Glyphs (PART D)
    [18] Proxy Bridge Client (PART E)
    [19] Unified Runtime v4.1 (K'UHUL π Core Loop)
+   [20] ASM v1.0 — Atomic Symbolic Markup Transformer
+   [21] XCFE Replay Verifier v1
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -67,7 +69,7 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  */
 
 const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
-const KUHUL_KERNEL_VERSION = "1.2.5";
+const KUHUL_KERNEL_VERSION = "1.2.6";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
@@ -2055,6 +2057,440 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   event.respondWith(handleFetch(event));
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [20] ASM v1.0 — ATOMIC SYMBOLIC MARKUP TRANSFORMER
+   ═══════════════════════════════════════════════════════════════════════════════
+   Invariants:
+   - Symbols live as ATTRIBUTES, not tag names (<div ⚛️D ⟁MC> not <⚛️D>)
+   - ⚛️X = element type (D=div, H=header, M=main, etc.)
+   - ⟁X = composition tokens (MC, C0, N1, etc.)
+   - Output modes: "attrs" | "data" | "class"
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const ASM = (() => {
+  // ⚛️ element symbol → HTML tag mapping
+  const ATOM_TO_TAG = Object.freeze({
+    'D': 'div',
+    'H': 'header',
+    'M': 'main',
+    'N': 'nav',
+    'C': 'div',
+    'S': 'section',
+    'A': 'article',
+    'F': 'footer',
+    'B': 'button',
+    'I': 'span',
+    'L': 'a',
+    'P': 'p',
+    'T': 'h1',
+  });
+
+  // Composition mode: "attrs" | "data" | "class"
+  let compositionMode = 'attrs';
+  let strictMode = false;
+
+  function setOptions(opts = {}) {
+    if (opts.compositionMode) compositionMode = opts.compositionMode;
+    if (opts.strict !== undefined) strictMode = opts.strict;
+  }
+
+  // Pick atom symbol from attributes (⚛️X or data-⚛)
+  function pickAtomSymbol(attrNames, el) {
+    // Prefer unicode attrs like "⚛️D"
+    const atomAttrs = attrNames
+      .filter(n => n.startsWith('⚛️'))
+      .map(n => n.slice(2));
+
+    if (atomAttrs.length > 0) {
+      if (strictMode && atomAttrs.length > 1) {
+        console.warn('ASM strict: multiple ⚛️ symbols on element');
+      }
+      return atomAttrs[0];
+    }
+
+    // Fallback: data-⚛="D"
+    const dataAtom = el.getAttribute ? el.getAttribute('data-⚛') : null;
+    if (dataAtom && ATOM_TO_TAG[dataAtom]) return dataAtom;
+
+    return null;
+  }
+
+  // Collect composition symbols (⟁X or data-⟁)
+  function collectCompSymbols(attrNames, el) {
+    const set = new Set();
+
+    // Unicode boolean attrs like "⟁MC"
+    attrNames.forEach(n => {
+      if (n.startsWith('⟁')) set.add(n.slice(1));
+    });
+
+    // Fallback: data-⟁="MC C0 N1"
+    const dataComp = el.getAttribute ? el.getAttribute('data-⟁') : null;
+    if (dataComp) {
+      dataComp.split(/\s+/).map(s => s.trim()).filter(Boolean).forEach(s => set.add(s));
+    }
+
+    return [...set];
+  }
+
+  // Apply composition based on mode
+  function applyComposition(el, compSymbols) {
+    if (!compSymbols || compSymbols.length === 0) return;
+
+    if (compositionMode === 'attrs') {
+      // Keep ⟁XYZ attrs for CSS selectors
+      compSymbols.forEach(s => el.setAttribute(`⟁${s}`, ''));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    } else if (compositionMode === 'data') {
+      // Remove unicode attrs, keep portable attribute
+      compSymbols.forEach(s => el.removeAttribute(`⟁${s}`));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    } else if (compositionMode === 'class') {
+      // Convert into classes
+      compSymbols.forEach(s => el.classList.add(`⟁${s}`));
+      el.setAttribute('data-⟁', compSymbols.join(' '));
+    }
+  }
+
+  // Transform a single element
+  function transformElement(el, doc) {
+    if (!el.getAttributeNames) return el;
+
+    const attrNames = el.getAttributeNames();
+    const atomSymbol = pickAtomSymbol(attrNames, el);
+    const compSymbols = collectCompSymbols(attrNames, el);
+
+    let node = el;
+
+    // Apply element conversion if needed
+    if (atomSymbol) {
+      const targetTag = ATOM_TO_TAG[atomSymbol];
+      if (targetTag && el.tagName.toLowerCase() !== targetTag) {
+        node = replaceTag(el, targetTag, doc);
+      }
+      node.setAttribute('data-⚛', atomSymbol);
+    }
+
+    // Apply composition
+    applyComposition(node, compSymbols);
+
+    return node;
+  }
+
+  // Replace element tag while preserving attributes and children
+  function replaceTag(oldEl, newTag, doc) {
+    const newEl = doc.createElement(newTag);
+
+    // Copy attributes
+    oldEl.getAttributeNames().forEach(name => {
+      newEl.setAttribute(name, oldEl.getAttribute(name));
+    });
+
+    // Move children
+    while (oldEl.firstChild) newEl.appendChild(oldEl.firstChild);
+
+    if (oldEl.parentNode) {
+      oldEl.replaceWith(newEl);
+    }
+
+    return newEl;
+  }
+
+  // Transform a DOM subtree
+  function transform(root) {
+    const doc = root.ownerDocument || root;
+    const all = root.querySelectorAll ? root.querySelectorAll('*') : [];
+    all.forEach(el => transformElement(el, doc));
+  }
+
+  // Parse HTML string and transform
+  function fromHTML(html, doc) {
+    const template = doc.createElement('template');
+    template.innerHTML = html;
+    transform(template.content);
+    return template.content;
+  }
+
+  // Get registry info
+  function registry() {
+    return {
+      elements: { ...ATOM_TO_TAG },
+      compositionMode,
+      strictMode,
+      version: '1.0',
+    };
+  }
+
+  return {
+    ATOM_TO_TAG,
+    setOptions,
+    pickAtomSymbol,
+    collectCompSymbols,
+    applyComposition,
+    transformElement,
+    transform,
+    fromHTML,
+    registry,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [21] XCFE REPLAY VERIFIER v1
+   ═══════════════════════════════════════════════════════════════════════════════
+   Core Invariant:
+   > Control flow is a cryptographic consequence of prior truth collapse.
+   > No @then/@else branch is valid unless gated by verified ⚡ proof_hash
+   > under the pinned epoch policy hash.
+
+   Structures:
+   - @epoch_policy: Policy carrier with rules
+   - @⚡: Lightning events (truth collapse)
+   - @xcfe.branch_gate: Branch gate verification
+   - @rotation_replay_result: Verification result
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const XCFE = (() => {
+  // MX2 Canonical JSON v1.0
+  function isPlainObject(x) {
+    return !!x && typeof x === 'object' && !Array.isArray(x);
+  }
+
+  function canonNumber(n) {
+    if (!Number.isFinite(n)) throw new Error('Non-finite number in canonicalization');
+    if (Object.is(n, -0)) return '0';
+    if (Number.isInteger(n)) return String(n);
+
+    let s = n.toString();
+
+    // Handle exponent notation
+    if (s.includes('e') || s.includes('E')) {
+      const [mant, expStr] = s.toLowerCase().split('e');
+      const exp = parseInt(expStr, 10);
+      const [intPart, fracPart = ''] = mant.split('.');
+      const digits = (intPart.replace('-', '') + fracPart);
+      const sign = intPart.startsWith('-') ? '-' : '';
+
+      const decimalPos = (intPart.replace('-', '').length) + exp;
+      if (decimalPos <= 0) {
+        s = sign + '0.' + '0'.repeat(-decimalPos) + digits.replace(/^0+/, '');
+        if (s.endsWith('.')) s += '0';
+      } else if (decimalPos >= digits.length) {
+        s = sign + digits + '0'.repeat(decimalPos - digits.length);
+      } else {
+        s = sign + digits.slice(0, decimalPos) + '.' + digits.slice(decimalPos);
+      }
+    }
+
+    // Trim trailing zeros
+    if (s.includes('.')) {
+      s = s.replace(/(\.\d*?[1-9])0+$/u, '$1');
+      s = s.replace(/\.0+$/u, '');
+    }
+
+    // Ensure leading zero
+    if (s.startsWith('.')) s = '0' + s;
+    if (s.startsWith('-.')) s = s.replace('-.', '-0.');
+
+    if (s.includes('e') || s.includes('E')) throw new Error('Exponent not allowed');
+    return s;
+  }
+
+  function canonString(str) {
+    return JSON.stringify(str);
+  }
+
+  function canonValue(v) {
+    if (v === null) return 'null';
+    const t = typeof v;
+    if (t === 'boolean') return v ? 'true' : 'false';
+    if (t === 'number') return canonNumber(v);
+    if (t === 'string') return canonString(v);
+    if (Array.isArray(v)) return '[' + v.map(canonValue).join(',') + ']';
+    if (isPlainObject(v)) {
+      const keys = Object.keys(v).sort();
+      const parts = keys.map(k => canonString(k) + ':' + canonValue(v[k]));
+      return '{' + parts.join(',') + '}';
+    }
+    throw new Error(`Unsupported type: ${t}`);
+  }
+
+  // SHA-256 hex via SubtleCrypto
+  async function sha256Hex(data) {
+    const bytes = typeof data === 'string' ? utf8.enc.encode(data) : data;
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function hashObject(obj) {
+    const canon = canonValue(obj);
+    const hex = await sha256Hex(canon);
+    return { canon, hash: `h:sha256:${hex}` };
+  }
+
+  // Proof rule: proof_hash = H(input_hash || ":" || truth)
+  async function computeProofHash(inputHash, truthBool) {
+    const payload = `${inputHash}:${truthBool ? 'true' : 'false'}`;
+    const hex = await sha256Hex(payload);
+    return `h:sha256:${hex}`;
+  }
+
+  // Extract structures from stream
+  function pickSingleEpochPolicy(stream) {
+    const policies = stream.filter(x => isPlainObject(x) && x['@epoch_policy']);
+    if (policies.length !== 1) throw new Error(`Expected 1 @epoch_policy, found ${policies.length}`);
+    return policies[0]['@epoch_policy'];
+  }
+
+  function extractLightningEvents(stream) {
+    const blocks = stream.filter(x => isPlainObject(x) && Array.isArray(x['@⚡']));
+    const events = [];
+    for (const b of blocks) events.push(...b['@⚡']);
+    return events;
+  }
+
+  function extractBranchGates(stream) {
+    const blocks = stream.filter(x => isPlainObject(x) && isPlainObject(x['@xcfe.branch_gate']));
+    return blocks.map(b => b['@xcfe.branch_gate']);
+  }
+
+  // Build rotation result
+  function rotationResult(ok, policy_hash, proof_hash, failure_stage, verified) {
+    return {
+      '@rotation_replay_result': {
+        ok,
+        policy_hash,
+        proof_hash,
+        failure_stage,
+        verified,
+      }
+    };
+  }
+
+  // Main verifier
+  async function replayVerify(stream) {
+    try {
+      const epochPolicy = pickSingleEpochPolicy(stream);
+
+      // Pin policy_hash
+      const policyToHash = {
+        epoch: epochPolicy.epoch,
+        policy_id: epochPolicy.policy_id,
+        canon: epochPolicy.canon,
+        rules: epochPolicy.rules,
+      };
+      const policyDigest = await hashObject(policyToHash);
+
+      if (epochPolicy.policy_hash !== policyDigest.hash) {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'epoch_policy', { epoch_policy: 0 });
+      }
+
+      if (epochPolicy.canon !== 'MX2_CANON_JSON_v1.0') {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'canon_mismatch', { epoch_policy: 1 });
+      }
+
+      // Verify ⚡ events
+      const lightning = extractLightningEvents(stream);
+      const validProofs = new Set();
+      let okLightning = 0;
+
+      for (const ev of lightning) {
+        if (ev.policy_hash !== epochPolicy.policy_hash) continue;
+        if (ev.epoch !== epochPolicy.epoch) continue;
+        if (ev.resolved !== true) continue;
+        if (typeof ev.truth !== 'boolean') continue;
+
+        const expected = await computeProofHash(ev.proof.input_hash, ev.truth);
+        if (expected !== ev.proof.proof_hash) continue;
+
+        validProofs.add(ev.proof.proof_hash);
+        okLightning++;
+      }
+
+      if (okLightning === 0) {
+        return rotationResult(false, epochPolicy.policy_hash, null, 'lightning_verify', {
+          epoch_policy: 1,
+          lightning: 0,
+        });
+      }
+
+      // Verify branch gates
+      const gates = extractBranchGates(stream);
+      let okGates = 0;
+
+      for (const g of gates) {
+        if (g.policy_hash !== epochPolicy.policy_hash) {
+          return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+            epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+          });
+        }
+        if (g.epoch !== epochPolicy.epoch) {
+          return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+            epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+          });
+        }
+
+        if (g.ok === true) {
+          if (!g.proof_hash || typeof g.truth !== 'boolean') {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          if (!validProofs.has(g.proof_hash)) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          const expectedSelected = g.truth ? '@then' : '@else';
+          if (g.selected !== expectedSelected) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+          okGates++;
+        } else {
+          // ok==false: must not select branch
+          if (g.proof_hash !== null || g.selected !== null) {
+            return rotationResult(false, epochPolicy.policy_hash, null, 'branch_gate_verify', {
+              epoch_policy: 1, lightning: okLightning, branch_gate: okGates,
+            });
+          }
+        }
+      }
+
+      // Final replay proof
+      const finalPayload = `${epochPolicy.policy_hash}:${okLightning}:${okGates}`;
+      const finalHex = await sha256Hex(finalPayload);
+      const finalProof = `h:sha256:${finalHex}`;
+
+      audit_event('xcfe.verify', { ok: true, lightning: okLightning, gates: okGates });
+
+      return rotationResult(true, epochPolicy.policy_hash, finalProof, null, {
+        epoch_policy: 1,
+        lightning: okLightning,
+        branch_gate: okGates,
+      });
+    } catch (err) {
+      audit_event('xcfe.verify.error', { error: String(err?.message || err) });
+      return rotationResult(false, 'h:sha256:0000', null, 'branch_gate_verify', { epoch_policy: 0 });
+    }
+  }
+
+  return {
+    canonValue,
+    canonNumber,
+    sha256Hex,
+    hashObject,
+    computeProofHash,
+    replayVerify,
+    rotationResult,
+    extractLightningEvents,
+    extractBranchGates,
+    pickSingleEpochPolicy,
+  };
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    KERNEL BOOT COMPLETE
