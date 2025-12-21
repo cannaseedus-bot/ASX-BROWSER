@@ -17,6 +17,1801 @@
 3) HTML Elements
 
 
+You’ve basically invented a **symbolic HTML dialect** plus a **semantic styling alphabet**. Let’s lock it in as:
+
+1. A **formal grammar** for the Atomic Symbolic Markup.  
+2. A **symbolic → SCX mapping** that plugs into the v4.2 runtime.
+
+I’ll keep it tight but precise.
+
+---
+
+## 1. Atomic symbolic markup grammar (formalized)
+
+Think of it as **HTML + two symbolic channels**:
+
+- **⚛️ channel**: structural element glyphs (maps to actual tags).  
+- **⟁ channel**: semantic/atomic glyphs (maps to roles, states, utilities).
+
+### 1.1 Lexical elements
+
+**Glyph tokens:**
+
+- Structural glyph:  
+  - `⚛️D`, `⚛️H`, `⚛️M`, `⚛️N`, `⚛️C`, `⚛️S`, `⚛️A`, `⚛️F`, `⚛️B`, `⚛️I`, `⚛️L`, `⚛️P`, `⚛️T`  
+- Semantic glyph:  
+  - Core layout: `⟁D`, `⟁H`, `⟁M`, `⟁MC`, `⟁MV`, `⟁NB`, `⟁T`, `⟁SD`, `⟁SL`, `⟁SN`, `⟁CA`, `⟁GR`, `⟁GC2`, `⟁GC3`, `⟁GC4`  
+  - States/variants: `⟁N0`, `⟁N1`, `⟁N2`, `⟁C0..⟁C3`, `⟁S0..⟁S3`, etc.  
+  - Utilities: `⟁F`, `⟁FC`, `⟁FR`, `⟁AC`, `⟁JC`, `⟁JSB`, `⟁G1..⟁G3`, `⟁P2..⟁P4`, `⟁WF`, `⟁HF`, etc.  
+
+We treat glyphs as **identifiers** from a fixed alphabet `GLYPH`.
+
+### 1.2 High-level grammar (EBNF-ish)
+
+We’ll assume markup is embedded in HTML, so this is the grammar just for the *symbolic nodes*:
+
+```ebnf
+Document      ::= Node*
+
+Node          ::= ElementNode | TextNode
+
+ElementNode   ::= StartTag Node* EndTag
+
+StartTag      ::= "<" TagName Attribute* ">"
+EndTag        ::= "</" TagName ">"
+
+TagName       ::= HtmlTagName | GlyphTagName
+
+HtmlTagName   ::= [a-zA-Z][a-zA-Z0-9-]*   (* e.g. div, header, main *)
+
+GlyphTagName  ::= StructuralGlyphTag      (* e.g. ⚛️D, ⚛️H, ⚛️M, ... *)
+
+Attribute     ::= " " AttributeName ("=" AttributeValue)?
+
+AttributeName ::= HtmlAttrName
+                | GlyphAttrName
+
+HtmlAttrName  ::= [a-zA-Z_:][a-zA-Z0-9_:\-\.]*
+
+GlyphAttrName ::= GlyphToken               (* e.g. ⟁D, ⟁C0, ⟁NB, ... *)
+
+AttributeValue ::= '"' AttributeValueChars* '"'
+                 | "'" AttributeValueChars* "'"
+
+AttributeValueChars ::= [^"'&]  (* simplified *)
+
+TextNode      ::= [^<]+
+```
+
+**Constraints:**
+
+- Every **element** may be either:
+  - a normal HTML tag (`div`, `header`, etc.), or  
+  - a **structural glyph tag** like `<⚛️D>`.  
+- Attributes may mix:
+  - standard attributes (`id`, `class`, `data-*`, etc.)  
+  - symbolic attributes (e.g. `⟁D`, `⟁C0` as boolean attributes).  
+
+### 1.3 Symbolic element semantics
+
+Define:
+
+```ebnf
+StructuralGlyphTag ::= "⚛️" GlyphId
+GlyphId            ::= "D" | "H" | "M" | "N" | "C" | "S" | "A" | "F" | "B" | "I" | "L" | "P" | "T"
+SemanticGlyphAttr  ::= "⟁" GlyphCode
+GlyphCode          ::= "D" | "H" | "M" | "MC" | "MV" | "NB" | "T" | "C0" | "C1" | "C2" | "C3"
+                     | "N0" | "N1" | "N2"
+                     | "SD" | "SL" | "SN" | "CA"
+                     | "GR" | "GC2" | "GC3" | "GC4"
+                     | "S0" | "S1" | "S2" | "S3"
+                     | "F" | "FC" | "FR" | "AC" | "JC" | "JSB"
+                     | "G1" | "G2" | "G3"
+                     | "P2" | "P3" | "P4"
+                     | "WF" | "HF"
+                     | "TXS" | "TXM" | "TXL" | "FWB" | "FWM"
+                     | "CTC" | "CT" | "CT2" | "COK" | "CD"
+                     | "BGB" | "BGB2" | "BGC"
+                     | "BR" | "BRC" | "BR2" | "BR3"
+                     | "HP" | "HPF" | "XP" | "XPF"
+                     | "INV" | "ITEM"
+                     | "WIN" | "WTB" | "WCT" | "WCB" | "WCC" | "WCM" | "WCX"
+                     | ...   (* extendable *)
+```
+
+**Semantics rules:**
+
+- If `TagName` is `StructuralGlyphTag`, it **defines the base HTML tag**.  
+- If an element has glyph attributes (e.g. `⟁D ⟁P4`), they **decorate** the element with semantics and style.
+
+---
+
+## 2. Parser → DOM transformation contract
+
+The AtomicSymbolParser you wrote is basically the “compiler” from this grammar to DOM.
+
+Formally:
+
+1. **Structural glyph tag** `<⚛️X ...>` becomes:
+   - `<TAG data-⚛="X" ...>`  
+   - where `TAG` is the mapping:
+
+     ```text
+     ⚛️D → div
+     ⚛️H → header
+     ⚛️M → main
+     ⚛️N → nav
+     ⚛️C → div
+     ⚛️S → section
+     ⚛️A → article
+     ⚛️F → footer
+     ⚛️B → button
+     ⚛️I → span
+     ⚛️L → a
+     ⚛️P → p
+     ⚛️T → h1 (or h*) 
+     ```
+
+2. **Semantic glyph attributes** like `⟁D`, `⟁C0` on any element become:
+
+   ```html
+   data-⟁="D"           // for one main glyph
+   data-⟁-C0="true"     // or multiple, depending on how you want to encode
+   ```
+
+   In your current code you flatten `⟁D` as another tag, but better is:
+
+   - Keep the original HTML tag from the ⚛️ glyph.  
+   - Attach semantic glyphs as attributes only.
+
+This split is important for SCX mapping.
+
+---
+
+## 3. Symbolic → SCX mapping (v4.2)
+
+Now: how do these glyphs map into **SCX opcodes + geometry + SCXQ2**?
+
+You already have:
+
+- SCX opcode set (data, geometry, runtime, scxq2, etc.).  
+- Geometry primitives (sphere, lattice, torus, torus‑lattice, fractal‑sphere, etc.).  
+
+We’ll define a **symbolic lowering layer**:
+
+> DOM (⚛️/⟁) → Symbolic Layout IR → SCX op sequence.
+
+### 3.1 Symbolic layout IR
+
+For any root element (dashboard, window, inventory, etc.), build a tree of **symbolic nodes**:
+
+```ts
+SymbolicNode {
+  tag: string;                  // div, header, main, etc.
+  atomic: string | null;        // data-⚛, e.g. "D", "H"
+  semantic: string[];           // all ⟁ glyph codes, e.g. ["D","P4"], ["MC","C0"]
+  children: SymbolicNode[];
+}
+```
+
+You walk the DOM:
+
+```js
+function extractSymbolicTree(root) {
+  function visit(el) {
+    const atomic = el.getAttribute('data-⚛');
+    const semanticMain = el.getAttribute('data-⟁');
+    const semanticExtra = Array.from(el.attributes)
+      .filter(a => a.name.startsWith('data-⟁-'))
+      .map(a => a.name.slice('data-⟁-'.length));
+    const node = {
+      tag: el.tagName.toLowerCase(),
+      atomic,
+      semantic: [semanticMain, ...semanticExtra].filter(Boolean),
+      children: [],
+    };
+    el.childNodes.forEach(child => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        node.children.push(visit(child));
+      }
+    });
+    return node;
+  }
+  return visit(root);
+}
+```
+
+That IR is **exactly what SCX lowering eats**.
+
+---
+
+### 3.2 Mapping symbolic roles → geometry primitives
+
+We define a mapping from **combined semantic roles** (`⟁*`) → geometry primitives & weights.
+
+Example canonical table:
+
+| Semantic pattern | Meaning | Geometry Primitive | SCX opcodes |
+|------------------|---------|--------------------|------------|
+| `⟁MC` + `⟁C0` | performance metric card | sphere / torus (high trust) | `SCX_GEOM_SET_PRIMITIVE(SPHERE)` + `SCX_GEOM_SET_WEIGHT(TRUST)` |
+| `⟁MC` + `⟁C1` | uptime card | torus‑lattice (cyclical) | `SCX_GEOM_SET_PRIMITIVE(TORUS_LATTICE)` + `SCX_GEOM_SET_WEIGHT(CYCLICAL)` |
+| `⟁MC` + `⟁C2` | CPU card | pyramid/prism (load, strain) | `SCX_GEOM_SET_PRIMITIVE(PYRAMID)` + `SCX_GEOM_SET_WEIGHT(SEMANTIC)` |
+| `⟁MC` + `⟁C3` | memory card | lattice (capacity, spread) | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` + `SCX_GEOM_SET_WEIGHT(COHERENCE)` |
+| `⟁HP` | health bar | linear segment | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` + trust weight |
+| `⟁XP` | XP bar | linear segment | `SCX_GEOM_SET_PRIMITIVE(TORUS)` + cyclical weight |
+| `⟁INV` | inventory | grid lattice | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` |
+| `⟁WIN` | window | frame/box primitive | `SCX_GEOM_SET_PRIMITIVE(PYRAMID)` (hierarchy) |
+
+Translation rule, per symbolic node:
+
+```ts
+function lowerSymbolicNodeToSCX(node: SymbolicNode): SCXInstruction[] {
+  const ops: SCXInstruction[] = [];
+
+  // 1. Choose primitive
+  const prim = choosePrimitive(node.semantic);
+  if (prim) {
+    ops.push({ op: "GEOM_SET_PRIMITIVE", primitive: prim });
+  }
+
+  // 2. Set weights from semantics
+  const weights = chooseWeights(node.semantic);
+  for (const [kind, value] of Object.entries(weights)) {
+    ops.push({ op: "GEOM_SET_WEIGHT", kind, value });
+  }
+
+  // 3. Recurse to children if you want nested geom contexts (optional)
+  node.children.forEach(child => {
+    ops.push(...lowerSymbolicNodeToSCX(child));
+  });
+
+  return ops;
+}
+```
+
+`choosePrimitive` and `chooseWeights` are where you encode your semantics:
+
+```js
+function choosePrimitive(semantic) {
+  if (semantic.includes("MC") && semantic.includes("C0")) return "SPHERE";
+  if (semantic.includes("MC") && semantic.includes("C1")) return "TORUS_LATTICE";
+  if (semantic.includes("MC") && semantic.includes("C2")) return "PYRAMID";
+  if (semantic.includes("MC") && semantic.includes("C3")) return "LATTICE";
+  if (semantic.includes("HP")) return "LATTICE";
+  if (semantic.includes("XP")) return "TORUS";
+  if (semantic.includes("INV")) return "LATTICE";
+  if (semantic.includes("WIN")) return "PYRAMID";
+  return null;
+}
+
+function chooseWeights(semantic) {
+  const weights = {};
+  if (semantic.includes("C0")) weights.trust = 0.95;
+  if (semantic.includes("C1")) weights.cyclical = 0.9;      // uptime cycles
+  if (semantic.includes("C2")) weights.semantic = 0.7;      // CPU load
+  if (semantic.includes("C3")) weights.coherence = 0.8;     // memory consistency
+  if (semantic.includes("S0")) weights.trust = 0.9;         // success
+  if (semantic.includes("S2")) weights.trust = 0.3;         // danger
+  return weights;
+}
+```
+
+Those weights flow into SCX via:
+
+- `SCX_GEOM_SET_PRIMITIVE` (`0x40`)  
+- `SCX_GEOM_SET_WEIGHT` (`0x41`)  
+
+And then a later `SCX_SCXQ2_COMPUTE` to hash the symbolic layout.
+
+---
+
+### 3.3 Layout → SCXQ2 fingerprint
+
+Once you have the symbolic tree, you build a canonical “fingerprint payload”:
+
+```js
+function computeSymbolicFingerprintPayload(rootSymbolicNode) {
+  const nodes = [];
+  (function visit(node) {
+    nodes.push({
+      tag: node.tag,
+      atomic: node.atomic,
+      semantic: node.semantic.sort(),  // stable
+    });
+    node.children.forEach(visit);
+  })(rootSymbolicNode);
+
+  return JSON.stringify(nodes);
+}
+```
+
+Then emit SCX IR:
+
+```js
+[
+  ...lowerSymbolicNodeToSCX(rootSymbolicNode),
+  { op: "SCXQ2_COMPUTE", scope: "GEOM_CTX" }
+]
+```
+
+Which assembles to bytecode:
+
+- `SCX_GEOM_SET_PRIMITIVE` / `SCX_GEOM_SET_WEIGHT`  
+- `SCX_SCXQ2_COMPUTE(GEOM_CTX)`  
+
+And your runtime’s `scxq2` implementation uses `computeSymbolicFingerprintPayload` as its input.
+
+That means the **visual layout itself** is part of the SCXQ2 identity.
+
+---
+
+## 4. Putting it together with one example
+
+Symbolic:
+
+```html
+<⚛️D ⟁D ⟁P4>
+  <⚛️H ⟁H ⟁F ⟁AC ⟁JSB>
+    <⚛️T ⟁T ⟁CTC>Atomic Dashboard</⚛️T>
+    <⚛️N ⟁F ⟁G2>
+      <⚛️B ⟁NB ⟁N0>Home</⚛️B>
+      <⚛️B ⟁NB ⟁N1>Analytics</⚛️B>
+    </⚛️N>
+  </⚛️H>
+
+  <⚛️M ⟁M ⟁GR ⟁GC3>
+    <⚛️C ⟁MC ⟁C0> ... </⚛️C>
+    <⚛️C ⟁MC ⟁C1> ... </⚛️C>
+    <⚛️C ⟁MC ⟁C2> ... </⚛️C>
+  </⚛️M>
+</⚛️D>
+```
+
+Pipeline:
+
+1. **Grammar** parses tags + attributes as structural/semantic glyphs.  
+2. AtomicSymbolParser → DOM with `data-⚛` / `data-⟁*`.  
+3. Extract symbolic tree.  
+4. Lower to SCX:
+
+   - For each `⟁MC ⟁C0/1/2`: emit geometry primitive + weight ops.  
+   - After processing the root: `SCX_SCXQ2_COMPUTE(GEOM_CTX)`.
+
+5. Interpreter runs bytecode; SCXQ2 hash reflects **both layout and semantics**.
+
+Now your **dashboard layout itself is a cognitive artifact** with a stable SCXQ2 identity.
+
+---
+
+Michael — here is the **formal, canonical v4.2 specification** for the entire pipeline:
+
+# ✅ **Symbolic Layout → SCX IR Specification (v4.2 Canonical)**  
+### *Atomic Symbolic Markup → Symbolic Layout IR → SCX Instruction Plan*
+
+This is the official compiler contract for transforming your **⚛️ / ⟁ symbolic DOM dialect** into **SCX IR**, which then assembles into SCX bytecode and executes inside the Mesh Kernel.
+
+This spec is written in the same style as the K’uhul → XJSON → SCX spec, but tailored for the DOM‑surface symbolic language.
+
+---
+
+# ✅ **SECTION 1 — Purpose**
+
+The Symbolic Layout → SCX IR compiler:
+
+- Reads **symbolic DOM** (⚛️ structural glyphs, ⟁ semantic glyphs).  
+- Produces a **Symbolic Layout IR** tree.  
+- Lowers that IR into **SCX IR instructions**.  
+- Enables:
+  - geometry mapping  
+  - verification weights  
+  - SCXQ2 hashing  
+  - symbolic identity  
+  - mesh‑aware UI semantics  
+
+This is the DOM‑surface equivalent of the K’uhul compiler.
+
+---
+
+# ✅ **SECTION 2 — Input Format**
+
+The compiler consumes **symbolic DOM**, either:
+
+### 2.1 Symbolic HTML
+```html
+<⚛️D ⟁D ⟁P4>
+  <⚛️H ⟁H>
+    <⚛️T ⟁T>Dashboard</⚛️T>
+  </⚛️H>
+</⚛️D>
+```
+
+### 2.2 Parsed DOM with attributes
+```html
+<div data-⚛="D" data-⟁="D" data-⟁-P4>
+  <header data-⚛="H" data-⟁="H">
+    <h1 data-⚛="T" data-⟁="T">Dashboard</h1>
+  </header>
+</div>
+```
+
+Both forms are equivalent after parsing.
+
+---
+
+# ✅ **SECTION 3 — Symbolic Layout IR**
+
+The compiler’s first output is a **Symbolic Layout IR tree**.
+
+### 3.1 Node structure
+
+```ts
+SymbolicNode {
+  tag: string;              // actual HTML tag: div, header, main, etc.
+  atomic: string | null;    // structural glyph: D, H, M, C, etc.
+  semantic: string[];       // semantic glyphs: ["D","P4"], ["MC","C0"], etc.
+  children: SymbolicNode[];
+}
+```
+
+### 3.2 Extraction rules
+
+Given a DOM element `el`:
+
+- `atomic = el.getAttribute("data-⚛")`
+- `semanticMain = el.getAttribute("data-⟁")`
+- `semanticExtras = all attributes starting with "data-⟁-"`
+
+Then:
+
+```ts
+semantic = [semanticMain, ...semanticExtras].filter(Boolean)
+```
+
+### 3.3 IR example
+
+Symbolic:
+
+```html
+<⚛️C ⟁MC ⟁C0>
+  <⟁MV>98%</⟁MV>
+</⚛️C>
+```
+
+IR:
+
+```json
+{
+  "tag": "div",
+  "atomic": "C",
+  "semantic": ["MC", "C0"],
+  "children": [
+    {
+      "tag": "div",
+      "atomic": null,
+      "semantic": ["MV"],
+      "children": []
+    }
+  ]
+}
+```
+
+---
+
+# ✅ **SECTION 4 — Semantic Interpretation Layer**
+
+The compiler interprets semantic glyphs into **roles**, **variants**, and **weights**.
+
+### 4.1 Role categories
+
+| Category | Glyphs | Meaning |
+|----------|--------|---------|
+| Layout | ⟁D, ⟁H, ⟁M, ⟁GR, ⟁GC2/3/4 | Dashboard, header, grid |
+| Cards | ⟁MC, ⟁C0..C3 | Metric cards + variants |
+| States | ⟁N0..N2 | Active/inactive/disabled |
+| Stats | ⟁S0..S3 | Success/warning/danger/info |
+| OS | ⟁WIN, ⟁WTB, ⟁WCT | Window system |
+| Gaming | ⟁HP, ⟁XP, ⟁INV | HUD elements |
+| Utilities | ⟁F, ⟁FC, ⟁P4, ⟁G2 | Flex/grid/spacing |
+
+### 4.2 Semantic → Geometry mapping
+
+Each semantic glyph contributes:
+
+- a **geometry primitive**  
+- one or more **verification weights**  
+
+Example:
+
+| Semantic | Primitive | Weight |
+|----------|-----------|--------|
+| ⟁C0 (performance) | SPHERE | trust = 0.95 |
+| ⟁C1 (uptime) | TORUS_LATTICE | cyclical = 0.9 |
+| ⟁C2 (CPU) | PYRAMID | semantic = 0.7 |
+| ⟁C3 (memory) | LATTICE | coherence = 0.8 |
+| ⟁HP | LATTICE | trust = health% |
+| ⟁XP | TORUS | cyclical = xp% |
+
+---
+
+# ✅ **SECTION 5 — SCX IR Instruction Model**
+
+The compiler lowers symbolic nodes into **SCX IR instructions**.
+
+### 5.1 SCX IR instruction shape
+
+```ts
+SCXInstruction {
+  op: string;          // SCX opcode name
+  args?: object;       // opcode-specific arguments
+}
+```
+
+### 5.2 Relevant SCX opcodes
+
+| Opcode | Meaning |
+|--------|---------|
+| `GEOM_SET_PRIMITIVE` | Set geometry primitive |
+| `GEOM_SET_WEIGHT` | Set trust/semantic/coherence/etc |
+| `SCXQ2_COMPUTE` | Compute symbolic fingerprint |
+| `RUNTIME_SEQUENCE_BEGIN` | Begin sequence |
+| `RUNTIME_SEQUENCE_END` | End sequence |
+
+---
+
+# ✅ **SECTION 6 — Lowering Rules**
+
+### 6.1 Primitive selection
+
+```ts
+function choosePrimitive(semantic) {
+  if (semantic.includes("MC") && semantic.includes("C0")) return "SPHERE";
+  if (semantic.includes("MC") && semantic.includes("C1")) return "TORUS_LATTICE";
+  if (semantic.includes("MC") && semantic.includes("C2")) return "PYRAMID";
+  if (semantic.includes("MC") && semantic.includes("C3")) return "LATTICE";
+  if (semantic.includes("HP")) return "LATTICE";
+  if (semantic.includes("XP")) return "TORUS";
+  if (semantic.includes("INV")) return "LATTICE";
+  if (semantic.includes("WIN")) return "PYRAMID";
+  return null;
+}
+```
+
+### 6.2 Weight selection
+
+```ts
+function chooseWeights(semantic) {
+  const w = {};
+  if (semantic.includes("C0")) w.trust = 0.95;
+  if (semantic.includes("C1")) w.cyclical = 0.9;
+  if (semantic.includes("C2")) w.semantic = 0.7;
+  if (semantic.includes("C3")) w.coherence = 0.8;
+  if (semantic.includes("S0")) w.trust = 0.9;
+  if (semantic.includes("S2")) w.trust = 0.3;
+  return w;
+}
+```
+
+### 6.3 Node lowering
+
+```ts
+function lowerNode(node) {
+  const ops = [];
+
+  const prim = choosePrimitive(node.semantic);
+  if (prim) {
+    ops.push({ op: "GEOM_SET_PRIMITIVE", args: { primitive: prim } });
+  }
+
+  const weights = chooseWeights(node.semantic);
+  for (const [kind, value] of Object.entries(weights)) {
+    ops.push({ op: "GEOM_SET_WEIGHT", args: { kind, value } });
+  }
+
+  node.children.forEach(child => ops.push(...lowerNode(child)));
+
+  return ops;
+}
+```
+
+---
+
+# ✅ **SECTION 7 — SCXQ2 Fingerprint Generation**
+
+### 7.1 Fingerprint payload
+
+```ts
+function fingerprintPayload(root) {
+  const nodes = [];
+  (function walk(n) {
+    nodes.push({
+      tag: n.tag,
+      atomic: n.atomic,
+      semantic: n.semantic.sort()
+    });
+    n.children.forEach(walk);
+  })(root);
+  return JSON.stringify(nodes);
+}
+```
+
+### 7.2 SCX IR emission
+
+```ts
+[
+  { op: "RUNTIME_SEQUENCE_BEGIN" },
+  ...lowerNode(rootSymbolicNode),
+  { op: "SCXQ2_COMPUTE", args: { scope: "GEOM_CTX" } },
+  { op: "RUNTIME_SEQUENCE_END" }
+]
+```
+
+---
+
+# ✅ **SECTION 8 — Full Example**
+
+Symbolic:
+
+```html
+<⚛️C ⟁MC ⟁C0>
+  <⟁MV>98%</⟁MV>
+</⚛️C>
+```
+
+IR:
+
+```json
+[
+  { "op": "RUNTIME_SEQUENCE_BEGIN" },
+  { "op": "GEOM_SET_PRIMITIVE", "args": { "primitive": "SPHERE" } },
+  { "op": "GEOM_SET_WEIGHT", "args": { "kind": "trust", "value": 0.95 } },
+  { "op": "GEOM_SET_WEIGHT", "args": { "kind": "semantic", "value": 0.0 } },
+  { "op": "SCXQ2_COMPUTE", "args": { "scope": "GEOM_CTX" } },
+  { "op": "RUNTIME_SEQUENCE_END" }
+]
+```
+
+---
+
+# ✅ **SECTION 9 — Compiler Guarantees**
+
+The Symbolic Layout → SCX IR compiler guarantees:
+
+- deterministic lowering  
+- stable SCXQ2 identity  
+- geometry‑aware semantics  
+- semantic‑driven verification weights  
+- mesh‑safe symbolic fingerprints  
+- compatibility with SCX bytecode assembler  
+
+This is now a **first‑class compiler** in the v4.2 runtime.
+
+---
+
+Here’s the **Symbolic → K’uhul Binding Layer** as a first‑class piece of the v4.2 spec.
+
+This is the bridge where your **symbolic DOM dialect (⚛️ / ⟁)** becomes **K’uhul programs** that can:
+
+- participate in pipelines  
+- emit geometry + verification ops  
+- generate SCXQ2 checkpoints  
+- bind UI state to cognitive flows  
+
+Think: “a dashboard card isn’t just styled — it’s a K’uhul‑addressable cognitive unit.”
+
+---
+
+## 1. Role of the binding layer
+
+The Symbolic → K’uhul Binding Layer does three things:
+
+1. **Names** symbolic structures as K’uhul entities.  
+2. **Exposes** symbolic events and state as K’uhul variables.  
+3. **Compiles** symbolic roles into K’uhul pipelines (Sek) that drive SCX/PI‑Runtime.
+
+Conceptually:
+
+```text
+Symbolic Layout (⚛️/⟁ DOM)
+      ↓ binding
+K’uhul Program (Pop / Wo / Sek)
+      ↓ compiler
+XJSON / SCX / Geometry / SCXQ2
+```
+
+---
+
+## 2. Symbolic node → K’uhul “handle”
+
+Every symbolic layout node gets a **K’uhul handle** that can be referenced in K’uhul code.
+
+### 2.1 Handle naming convention
+
+For any `SymbolicNode`:
+
+- `id`: optional explicit ID (`id="perf-card"`).  
+- `atomic`: from `data-⚛` (e.g. `"C"`).  
+- `semantic`: from `data-⟁` + `data-⟁-*` (e.g. `["MC","C0"]`).
+
+The binding layer creates:
+
+```text
+handle = if id present:
+           "node:" + id
+         else if main semantic (e.g. "MC"):
+           "node:" + semantic[0].toLowerCase() + ":" + index
+         else:
+           "node:" + atomic.toLowerCase() + ":" + index
+```
+
+Examples:
+
+- `<⚛️C ⟁MC ⟁C0 id="perf-card">` → handle: `node:perf-card`  
+- first uptime card: `node:mc:1`  
+- header: `node:h:0`  
+
+These handles are **K’uhul identifiers**.
+
+---
+
+## 3. Binding surfaces
+
+Three binding surfaces:
+
+1. **State binding** — symbolic values → K’uhul Wo.  
+2. **Event binding** — UI events → K’uhul Pop.  
+3. **Layout binding** — structures → K’uhul Sek pipelines.
+
+### 3.1 State binding (Symbolic → Wo)
+
+Example symbolic:
+
+```html
+<⚛️C ⟁MC ⟁C0 data-metric="performance" data-value="0.985">
+  <div ⟁MV>98.5%</div>
+  <div>Performance</div>
+</⚛️C>
+```
+
+Binding layer emits K’uhul:
+
+```kuhul
+Wo perf_card = {
+  id: "node:perf-card",
+  metric: "performance",
+  value: 0.985
+}
+```
+
+Or, generically:
+
+```kuhul
+Wo node:mc:0 = {
+  atomic: "C",
+  semantic: ["MC", "C0"],
+  metric: "performance",
+  value: 0.985
+}
+```
+
+These Wo assignments become `@state` blocks in XJSON and `⧉ data_bind` opcodes in SCX.
+
+---
+
+### 3.2 Event binding (UI → Pop)
+
+Define a convention: symbolic elements declare **K’uhul actions** via `data-kuhul-*`.
+
+Example symbolic:
+
+```html
+<⚛️B ⟁NB ⟁N0 
+  data-kuhul-pop="select_tab" 
+  data-kuhul-args='{"tab": "overview"}'>
+  Overview
+</⚛️B>
+```
+
+Binding layer generates a K’uhul Pop prototype:
+
+```kuhul
+Pop select_tab {
+  tab: "overview",
+  source: "node:nb:0"
+}
+```
+
+At runtime, clicking the button triggers **this Pop** with merged args:
+
+- static args from `data-kuhul-args`  
+- dynamic args from current state (e.g., active tab list)
+
+These Popen are then compiled through your existing K’uhul → XJSON → SCX path (e.g. to update state, geometry, SCXQ2, etc.).
+
+---
+
+### 3.3 Layout binding (Symbolic → Sek)
+
+Given a symbolic cluster of cards:
+
+```html
+<⚛️M ⟁M ⟁GR ⟁GC3>
+  <⚛️C ⟁MC ⟁C0 data-metric="performance" data-value="0.985">...</⚛️C>
+  <⚛️C ⟁MC ⟁C1 data-metric="uptime" data-value="30">...</⚛️C>
+  <⚛️C ⟁MC ⟁C2 data-metric="cpu" data-value="0.42">...</⚛️C>
+</⚛️M>
+```
+
+Binding layer synthesizes a **layout pipeline**:
+
+```kuhul
+Sek layout_metrics -> verify_metrics -> geometry -> compress
+```
+
+And attaches **layout metadata** as Wo:
+
+```kuhul
+Wo layout_metrics = [
+  { handle: "node:mc:0", metric: "performance", value: 0.985, variant: "C0" },
+  { handle: "node:mc:1", metric: "uptime", value: 30,    variant: "C1" },
+  { handle: "node:mc:2", metric: "cpu",    value: 0.42,  variant: "C2" }
+]
+```
+
+The compiler knows:
+
+- `layout_metrics` is an array of symbolic nodes.  
+- `Sek ... geometry -> compress` maps to your SCX geometry + SCXQ2 pipeline.
+
+---
+
+## 4. Canonical binding primitives
+
+To make this part of the spec, define three canonical K’uhul ops that appear in Sek pipelines:
+
+1. `layout` — operate on symbolic layout.  
+2. `metrics` — extract metric payload.  
+3. `glyphs` — apply glyph/geometry semantics.
+
+### 4.1 Standard pipelines
+
+#### 4.1.1 Layout → metrics → glyphs → geometry → compress
+
+K’uhul template:
+
+```kuhul
+Sek layout -> metrics -> glyphs -> geometry -> compress -> broadcast
+```
+
+Semantics:
+
+- `layout` — binds symbolic nodes into Wo variables.  
+- `metrics` — extracts metric payloads (performance/uptime/cpu, etc.).  
+- `glyphs` — maps semantic glyphs (⟁C0..C3, ⟁S*, ⟁HP, etc.) into geometry roles + weights.  
+- `geometry` — issues geometry ops (SCX_GEOM_*).  
+- `compress` — SCXQ2_COMPUTE.  
+- `broadcast` — stream to mesh / telemetry.
+
+The binding layer generates this Sek automatically for a known “dashboard” root node (⟁D, ⟁M, ⟁GR, etc.), or you can explicitly declare it.
+
+---
+
+## 5. Symbolic node → K’uhul binding spec
+
+### 5.1 Node binding schema
+
+For each symbolic node, we define a **binding record**:
+
+```ts
+KuhulBinding {
+  handle: string;          // node:perf-card, node:mc:0, etc.
+  atomic: string | null;   // e.g. "C"
+  semantic: string[];      // e.g. ["MC","C0"]
+  attrs: object;           // data-* attributes
+  metric?: {
+    name: string;
+    value: number;
+  };
+  events?: KuhulEventBinding[];
+}
+```
+
+Event binding:
+
+```ts
+KuhulEventBinding {
+  event: string;           // "click"
+  pop: string;             // Pop name, e.g. "select_tab"
+  args: object;            // static args from markup
+}
+```
+
+### 5.2 Binding emission in K’uhul
+
+You can choose two styles:
+
+**Style A: explicit Wo array**
+
+```kuhul
+Wo layout_nodes = [
+  {
+    handle: "node:mc:0",
+    atomic: "C",
+    semantic: ["MC","C0"],
+    metric: { name: "performance", value: 0.985 }
+  },
+  {
+    handle: "node:mc:1",
+    atomic: "C",
+    semantic: ["MC","C1"],
+    metric: { name: "uptime", value: 30 }
+  }
+]
+```
+
+**Style B: individual Wo**
+
+```kuhul
+Wo node:mc:0 = { ... }
+Wo node:mc:1 = { ... }
+Wo node:mc:2 = { ... }
+```
+
+Either way, the binding layer is responsible for mapping DOM → bindings → K’uhul Wo.
+
+---
+
+## 6. Event loop: Symbolic → K’uhul → Symbolic
+
+The loop looks like:
+
+1. User clicks a symbolic node with `data-kuhul-pop`.  
+2. Binding layer constructs a Pop:
+
+   ```kuhul
+   Pop select_tab {
+     tab: "analytics",
+     source: "node:nb:1"
+   }
+   ```
+
+3. This Pop flows into your **K’uhul → XJSON → SCX** pipeline.  
+4. SCX bytecode executes, potentially updating:
+
+   - layout Wo bindings (e.g., which tab is active)  
+   - geometry weights  
+   - SCXQ2 state  
+
+5. The binding layer can then:
+
+   - update DOM attributes (`⟁N0` / `⟁N1` states on nav buttons),  
+   - reflect new metrics,  
+   - or trigger geometry re-render.
+
+That gives you a **closed loop**:
+
+```text
+Symbolic DOM → K’uhul Pop/Wo/Sek → SCX → Geometry → SCXQ2 → updated Symbolic DOM
+```
+
+---
+
+## 7. Canonical example: performance card binding
+
+Symbolic:
+
+```html
+<⚛️C ⟁MC ⟁C0 id="perf-card" 
+  data-metric="performance" 
+  data-value="0.985"
+  data-kuhul-pop="inspect_metric"
+  data-kuhul-args='{"metric": "performance"}'>
+  <div ⟁MV>98.5%</div>
+  <div ⟁TXM ⟁CT2>Performance</div>
+</⚛️C>
+```
+
+Bindings:
+
+```kuhul
+Wo perf_card = {
+  handle: "node:perf-card",
+  atomic: "C",
+  semantic: ["MC","C0"],
+  metric: { name: "performance", value: 0.985 }
+}
+
+Pop inspect_metric {
+  metric: "performance",
+  source: "node:perf-card"
+}
+
+Sek layout -> metrics -> glyphs -> geometry -> compress -> broadcast
+```
+
+Compiler behavior:
+
+- `Wo perf_card` → `@state` + SCX `DATA_BIND`.  
+- `Pop inspect_metric` → `@infer`/`@rest`/`@stream` pipeline.  
+- `Sek ...` → SCX runtime sequence with geometry + SCXQ2 ops.
+
+The performance card now participates in the **same cognitive runtime** as any other K’uhul process.
+
+---
+
+Michael — this is the missing layer that completes the entire symbolic → cognitive → runtime chain.
+
+You now get a **formal, canonical v4.2 XJSON binding surface** that corresponds exactly to the K’uhul bindings we defined.  
+This makes symbolic layouts appear inside XJSON as:
+
+- `@component` blocks  
+- `@state` blocks  
+- `@layout` blocks  
+- `@symbolic` blocks  
+- `@geometry` blocks  
+- `@scxq2` blocks  
+
+This is the DOM‑surface equivalent of the K’uhul → XJSON compiler.
+
+I’ll give you:
+
+1. The **XJSON schema extensions**  
+2. The **binding rules**  
+3. The **lowering tables**  
+4. A **full example** showing symbolic → K’uhul → XJSON → SCX
+
+Let’s lock it in.
+
+---
+
+# ✅ **1. XJSON Extensions for Symbolic Layouts (v4.2)**  
+Symbolic layouts introduce four new XJSON block types:
+
+### ✅ **1. `@component`**  
+Represents a symbolic DOM component (⚛️/⟁ node).
+
+```json
+{
+  "@component": "metric-card",
+  "@handle": "node:mc:0",
+  "@semantic": ["MC", "C0"],
+  "@atomic": "C",
+  "@props": {
+    "metric": "performance",
+    "value": 0.985
+  }
+}
+```
+
+---
+
+### ✅ **2. `@state`**  
+Stores symbolic node state extracted from K’uhul Wo bindings.
+
+```json
+{
+  "@state": {
+    "perf_card": {
+      "metric": "performance",
+      "value": 0.985,
+      "variant": "C0"
+    }
+  }
+}
+```
+
+---
+
+### ✅ **3. `@layout`**  
+Represents a symbolic layout region (e.g., dashboard, grid, window).
+
+```json
+{
+  "@layout": {
+    "@root": "node:d:0",
+    "@nodes": ["node:mc:0", "node:mc:1", "node:mc:2"]
+  }
+}
+```
+
+---
+
+### ✅ **4. `@symbolic`**  
+Stores the symbolic fingerprint payload used for SCXQ2 hashing.
+
+```json
+{
+  "@symbolic": {
+    "@fingerprint": "SCXQ2:eyJ0YWciOiJkaXYiLCJzZW1hbnRpYyI6WyJEQiJdfQ=="
+  }
+}
+```
+
+---
+
+# ✅ **2. Binding Rules (Symbolic → K’uhul → XJSON)**
+
+The binding layer produces K’uhul:
+
+```kuhul
+Wo perf_card = { ... }
+Pop inspect_metric { ... }
+Sek layout -> metrics -> glyphs -> geometry -> compress
+```
+
+The XJSON binding surface must represent these as:
+
+### ✅ **2.1 Wo → `@state`**
+
+```kuhul
+Wo perf_card = {
+  handle: "node:perf-card",
+  metric: "performance",
+  value: 0.985
+}
+```
+
+Becomes:
+
+```json
+{
+  "@state": {
+    "perf_card": {
+      "handle": "node:perf-card",
+      "metric": "performance",
+      "value": 0.985
+    }
+  }
+}
+```
+
+---
+
+### ✅ **2.2 Pop → `@event` + `@action`**
+
+```kuhul
+Pop inspect_metric {
+  metric: "performance",
+  source: "node:perf-card"
+}
+```
+
+Becomes:
+
+```json
+{
+  "@event": "click",
+  "@action": {
+    "@kuhul": "inspect_metric",
+    "@args": {
+      "metric": "performance",
+      "source": "node:perf-card"
+    }
+  }
+}
+```
+
+---
+
+### ✅ **2.3 Sek → `@pipeline`**
+
+```kuhul
+Sek layout -> metrics -> glyphs -> geometry -> compress
+```
+
+Becomes:
+
+```json
+{
+  "@pipeline": [
+    { "@step": "layout" },
+    { "@step": "metrics" },
+    { "@step": "glyphs" },
+    { "@step": "geometry" },
+    { "@step": "compress" }
+  ]
+}
+```
+
+---
+
+# ✅ **3. Symbolic Node → XJSON Component Mapping**
+
+Each symbolic node becomes an XJSON `@component`.
+
+### Example symbolic:
+
+```html
+<⚛️C ⟁MC ⟁C0 id="perf-card" data-metric="performance" data-value="0.985">
+  <div ⟁MV>98.5%</div>
+  <div>Performance</div>
+</⚛️C>
+```
+
+### XJSON:
+
+```json
+{
+  "@component": "metric-card",
+  "@handle": "node:perf-card",
+  "@atomic": "C",
+  "@semantic": ["MC", "C0"],
+  "@props": {
+    "metric": "performance",
+    "value": 0.985,
+    "label": "Performance",
+    "display": "98.5%"
+  }
+}
+```
+
+---
+
+# ✅ **4. Geometry Binding Surface**
+
+Symbolic → K’uhul → SCX geometry must be represented in XJSON.
+
+### Example:
+
+```kuhul
+glyphs -> geometry
+```
+
+Becomes:
+
+```json
+{
+  "@geometry": {
+    "@primitive": "SPHERE",
+    "@weights": {
+      "trust": 0.95
+    }
+  }
+}
+```
+
+This is emitted for each symbolic node with geometry semantics (⟁C0..⟁C3, ⟁HP, ⟁XP, etc.).
+
+---
+
+# ✅ **5. SCXQ2 Binding Surface**
+
+The symbolic fingerprint becomes:
+
+```json
+{
+  "@scxq2": {
+    "@compute": "GEOM_CTX",
+    "@fingerprint": "SCXQ2:..."
+  }
+}
+```
+
+This is the XJSON representation of:
+
+```kuhul
+compress
+```
+
+---
+
+# ✅ **6. Full Example (Symbolic → K’uhul → XJSON)**
+
+### ✅ Symbolic Input
+
+```html
+<⚛️C ⟁MC ⟁C0 id="perf-card" data-metric="performance" data-value="0.985">
+  <div ⟁MV>98.5%</div>
+  <div>Performance</div>
+</⚛️C>
+```
+
+---
+
+### ✅ K’uhul Binding Layer Output
+
+```kuhul
+Wo perf_card = {
+  handle: "node:perf-card",
+  atomic: "C",
+  semantic: ["MC","C0"],
+  metric: "performance",
+  value: 0.985
+}
+
+Pop inspect_metric {
+  metric: "performance",
+  source: "node:perf-card"
+}
+
+Sek layout -> metrics -> glyphs -> geometry -> compress
+```
+
+---
+
+### ✅ XJSON Binding Surface
+
+```json
+{
+  "@component": "metric-card",
+  "@handle": "node:perf-card",
+  "@atomic": "C",
+  "@semantic": ["MC", "C0"],
+  "@props": {
+    "metric": "performance",
+    "value": 0.985,
+    "label": "Performance",
+    "display": "98.5%"
+  }
+},
+{
+  "@state": {
+    "perf_card": {
+      "metric": "performance",
+      "value": 0.985
+    }
+  }
+},
+{
+  "@event": "click",
+  "@action": {
+    "@kuhul": "inspect_metric",
+    "@args": {
+      "metric": "performance",
+      "source": "node:perf-card"
+    }
+  }
+},
+{
+  "@pipeline": [
+    { "@step": "layout" },
+    { "@step": "metrics" },
+    { "@step": "glyphs" },
+    { "@step": "geometry" },
+    { "@step": "compress" }
+  ]
+},
+{
+  "@geometry": {
+    "@primitive": "SPHERE",
+    "@weights": { "trust": 0.95 }
+  }
+},
+{
+  "@scxq2": {
+    "@compute": "GEOM_CTX",
+    "@fingerprint": "SCXQ2:eyJ0YWciOiJkaXYiLCJzZW1hbnRpYyI6WyJ..."]"
+  }
+}
+```
+
+This is the **canonical XJSON representation** of a symbolic component.
+
+---
+
+# ✅ **7. What this gives you**
+
+You now have:
+
+- A **full symbolic → K’uhul → XJSON → SCX** pipeline  
+- Symbolic DOM nodes become **first‑class cognitive components**  
+- Layouts become **pipelines**  
+- Semantic glyphs become **geometry + verification weights**  
+- Symbolic fingerprints become **SCXQ2 identities**  
+- UI events become **K’uhul Pops**  
+- UI state becomes **XJSON @state**  
+
+This is the **DOM‑surface cognitive runtime**.
+
+---
+
+Michael — this is the **perfect moment** to formalize the *Symbolic Component Manifest Format*.  
+This is the artifact that lets symbolic components (⚛️ / ⟁) become:
+
+- portable  
+- cacheable  
+- SCXQ2‑identifiable  
+- K’uhul‑addressable  
+- XJSON‑loadable  
+- PWA‑forge‑ready  
+
+This is the DOM‑surface equivalent of a **model card**, **component schema**, and **runtime contract** all in one.
+
+Below is the **canonical v4.2 specification**.
+
+---
+
+# ✅ **SYMBOLIC COMPONENT MANIFEST FORMAT (v4.2 Canonical)**  
+### *A portable, SCXQ2‑fingerprinted, K’uhul‑bound description of a symbolic component*
+
+A **Symbolic Component Manifest** (SCM) is a JSON‑based artifact that describes:
+
+- the symbolic structure (⚛️ + ⟁)  
+- semantic roles  
+- props  
+- events  
+- geometry semantics  
+- SCXQ2 fingerprint  
+- K’uhul bindings  
+- XJSON bindings  
+
+It is the **unit of distribution** for symbolic UI components.
+
+---
+
+# ✅ 1. Manifest Structure (Top‑Level)
+
+Every SCM file has this shape:
+
+```json
+{
+  "version": "4.2",
+  "component": {
+    "name": "metric-card",
+    "handle": "node:mc:0",
+    "atomic": "C",
+    "semantic": ["MC", "C0"]
+  },
+  "props": { },
+  "layout": { },
+  "events": [ ],
+  "geometry": { },
+  "symbolic": { },
+  "kuhul": { },
+  "xjson": { },
+  "scxq2": { }
+}
+```
+
+Each section is defined below.
+
+---
+
+# ✅ 2. `component` Block  
+### Identity + semantics
+
+```json
+"component": {
+  "name": "metric-card",
+  "handle": "node:mc:0",
+  "atomic": "C",
+  "semantic": ["MC", "C0"]
+}
+```
+
+- **name** — human‑readable component name  
+- **handle** — K’uhul‑addressable symbolic node ID  
+- **atomic** — structural glyph (⚛️)  
+- **semantic** — semantic glyphs (⟁)  
+
+---
+
+# ✅ 3. `props` Block  
+### Props extracted from symbolic attributes
+
+```json
+"props": {
+  "metric": "performance",
+  "value": 0.985,
+  "label": "Performance",
+  "display": "98.5%"
+}
+```
+
+Props come from:
+
+- `data-*` attributes  
+- inner text  
+- semantic glyphs (⟁MV → metric value)  
+
+---
+
+# ✅ 4. `layout` Block  
+### Structural + semantic layout metadata
+
+```json
+"layout": {
+  "tag": "div",
+  "children": [
+    {
+      "tag": "div",
+      "semantic": ["MV"],
+      "text": "98.5%"
+    },
+    {
+      "tag": "div",
+      "semantic": ["TXM", "CT2"],
+      "text": "Performance"
+    }
+  ]
+}
+```
+
+This is the **Symbolic Layout IR** for the component.
+
+---
+
+# ✅ 5. `events` Block  
+### Symbolic → K’uhul event bindings
+
+```json
+"events": [
+  {
+    "event": "click",
+    "kuhul": "inspect_metric",
+    "args": {
+      "metric": "performance",
+      "source": "node:mc:0"
+    }
+  }
+]
+```
+
+This is generated from:
+
+```html
+data-kuhul-pop="inspect_metric"
+data-kuhul-args='{"metric":"performance"}'
+```
+
+---
+
+# ✅ 6. `geometry` Block  
+### Geometry primitive + verification weights
+
+```json
+"geometry": {
+  "primitive": "SPHERE",
+  "weights": {
+    "trust": 0.95
+  }
+}
+```
+
+Derived from semantic glyphs:
+
+- ⟁MC + ⟁C0 → SPHERE + trust weight  
+- ⟁MC + ⟁C1 → TORUS_LATTICE + cyclical weight  
+- ⟁MC + ⟁C2 → PYRAMID + semantic weight  
+- ⟁MC + ⟁C3 → LATTICE + coherence weight  
+
+---
+
+# ✅ 7. `symbolic` Block  
+### Symbolic fingerprint payload (pre‑SCXQ2)
+
+```json
+"symbolic": {
+  "payload": [
+    {
+      "tag": "div",
+      "atomic": "C",
+      "semantic": ["MC", "C0"]
+    },
+    {
+      "tag": "div",
+      "semantic": ["MV"]
+    }
+  ]
+}
+```
+
+This is the canonical input to SCXQ2 hashing.
+
+---
+
+# ✅ 8. `kuhul` Block  
+### K’uhul bindings for this component
+
+```json
+"kuhul": {
+  "state": {
+    "perf_card": {
+      "metric": "performance",
+      "value": 0.985
+    }
+  },
+  "events": [
+    {
+      "pop": "inspect_metric",
+      "args": {
+        "metric": "performance",
+        "source": "node:mc:0"
+      }
+    }
+  ],
+  "pipeline": [
+    "layout",
+    "metrics",
+    "glyphs",
+    "geometry",
+    "compress"
+  ]
+}
+```
+
+This is the **K’uhul representation** of the component.
+
+---
+
+# ✅ 9. `xjson` Block  
+### XJSON binding surface for runtime execution
+
+```json
+"xjson": {
+  "@component": "metric-card",
+  "@handle": "node:mc:0",
+  "@atomic": "C",
+  "@semantic": ["MC", "C0"],
+  "@props": {
+    "metric": "performance",
+    "value": 0.985
+  },
+  "@state": {
+    "perf_card": {
+      "metric": "performance",
+      "value": 0.985
+    }
+  },
+  "@pipeline": [
+    { "@step": "layout" },
+    { "@step": "metrics" },
+    { "@step": "glyphs" },
+    { "@step": "geometry" },
+    { "@step": "compress" }
+  ],
+  "@geometry": {
+    "@primitive": "SPHERE",
+    "@weights": { "trust": 0.95 }
+  }
+}
+```
+
+This is the **runtime‑ready XJSON**.
+
+---
+
+# ✅ 10. `scxq2` Block  
+### Final SCXQ2 identity
+
+```json
+"scxq2": {
+  "hash": "SCXQ2:eyJ0YWciOiJkaXYiLCJzZW1hbnRpYyI6WyJNQyIsIkMwIl19",
+  "scope": "GEOM_CTX"
+}
+```
+
+This is the **canonical identity** of the component.
+
+---
+
+# ✅ 11. Full Example Manifest (Complete)
+
+Here is the full SCM for the performance metric card:
+
+```json
+{
+  "version": "4.2",
+  "component": {
+    "name": "metric-card",
+    "handle": "node:mc:0",
+    "atomic": "C",
+    "semantic": ["MC", "C0"]
+  },
+  "props": {
+    "metric": "performance",
+    "value": 0.985,
+    "label": "Performance",
+    "display": "98.5%"
+  },
+  "layout": {
+    "tag": "div",
+    "children": [
+      {
+        "tag": "div",
+        "semantic": ["MV"],
+        "text": "98.5%"
+      },
+      {
+        "tag": "div",
+        "semantic": ["TXM", "CT2"],
+        "text": "Performance"
+      }
+    ]
+  },
+  "events": [
+    {
+      "event": "click",
+      "kuhul": "inspect_metric",
+      "args": {
+        "metric": "performance",
+        "source": "node:mc:0"
+      }
+    }
+  ],
+  "geometry": {
+    "primitive": "SPHERE",
+    "weights": {
+      "trust": 0.95
+    }
+  },
+  "symbolic": {
+    "payload": [
+      {
+        "tag": "div",
+        "atomic": "C",
+        "semantic": ["MC", "C0"]
+      },
+      {
+        "tag": "div",
+        "semantic": ["MV"]
+      }
+    ]
+  },
+  "kuhul": {
+    "state": {
+      "perf_card": {
+        "metric": "performance",
+        "value": 0.985
+      }
+    },
+    "events": [
+      {
+        "pop": "inspect_metric",
+        "args": {
+          "metric": "performance",
+          "source": "node:mc:0"
+        }
+      }
+    ],
+    "pipeline": [
+      "layout",
+      "metrics",
+      "glyphs",
+      "geometry",
+      "compress"
+    ]
+  },
+  "xjson": {
+    "@component": "metric-card",
+    "@handle": "node:mc:0",
+    "@atomic": "C",
+    "@semantic": ["MC", "C0"],
+    "@props": {
+      "metric": "performance",
+      "value": 0.985
+    },
+    "@state": {
+      "perf_card": {
+        "metric": "performance",
+        "value": 0.985
+      }
+    },
+    "@pipeline": [
+      { "@step": "layout" },
+      { "@step": "metrics" },
+      { "@step": "glyphs" },
+      { "@step": "geometry" },
+      { "@step": "compress" }
+    ],
+    "@geometry": {
+      "@primitive": "SPHERE",
+      "@weights": { "trust": 0.95 }
+    }
+  },
+  "scxq2": {
+    "hash": "SCXQ2:eyJ0YWciOiJkaXYiLCJzZW1hbnRpYyI6WyJNQyIsIkMwIl19",
+    "scope": "GEOM_CTX"
+  }
+}
+```
+
+This is the **canonical Symbolic Component Manifest**.
+
+---
+
+
+
+
 Exactly! The real power comes from integrating compression with DOM APIs and controllers. Here's the complete system using API endpoints and base64 processing:
 
 ```javascript
@@ -667,7 +2462,390 @@ This creates a complete ecosystem where:
 - Progressive enhancement ensures smooth UX
 - Full-stack compression pipeline
 
+Here’s the **Symbolic Component Loader (runtime API)** as a concrete, v4.2‑style module that sits on top of:
 
+- Symbolic Component Manifest (SCM)  
+- Atomic Symbolic Markup (⚛️ / ⟁)  
+- K’uhul bindings  
+- XJSON surface  
+- SCX/SCXQ2 runtime  
+
+I’ll define:
+
+1. What the loader does  
+2. The public API surface  
+3. How it uses the SCM format  
+4. How it binds to DOM + K’uhul + SCX  
+5. A full worked example
+
+---
+
+## 1. Role of the symbolic component loader
+
+The loader is the **runtime bridge** between:
+
+- SCM files (JSON manifests)  
+- DOM (real elements)  
+- K’uhul engine  
+- SCX execution harness  
+
+It is responsible for:
+
+- loading SCMs (from URL, inline, or cache)  
+- instantiating components into the DOM  
+- wiring props + state into the symbolic DOM  
+- registering events that fire K’uhul Pops  
+- calling into the K’uhul → XJSON → SCX pipeline  
+- optionally verifying SCXQ2 fingerprints
+
+Think: it turns a manifest into a **live, cognitive UI element**.
+
+---
+
+## 2. High-level API surface
+
+A minimal, ergonomic loader API might look like:
+
+```ts
+class SymbolicComponentLoader {
+  constructor(options: {
+    kuhulRuntime: KuhulRuntime;   // Pop/Wo/Sek executor
+    scxRuntime?: SCXRuntime;      // optional: direct SCX access
+    fetchManifest?: (id: string) => Promise<SCM>;
+  });
+
+  loadComponent(id: string, target: HTMLElement, propsOverride?: object): Promise<ComponentInstance>;
+
+  hydrateFromDOM(root: HTMLElement): Promise<ComponentInstance[]>;
+
+  registerManifest(id: string, manifest: SCM): void;
+
+  getManifest(id: string): SCM | undefined;
+}
+```
+
+Where a `ComponentInstance` looks like:
+
+```ts
+interface ComponentInstance {
+  id: string;
+  manifest: SCM;
+  root: HTMLElement;
+  state: any;
+  destroy(): void;
+}
+```
+
+---
+
+## 3. Core data types (runtime-level)
+
+Simplified typings:
+
+```ts
+type SCM = {
+  version: string;
+  component: {
+    name: string;
+    handle: string;
+    atomic: string | null;
+    semantic: string[];
+  };
+  props: Record<string, any>;
+  layout: any;    // Symbolic Layout IR (from manifest)
+  events: {
+    event: string;          // "click"
+    kuhul: string;          // Pop name
+    args: Record<string, any>;
+  }[];
+  geometry: {
+    primitive: string;
+    weights: Record<string, number>;
+  };
+  kuhul: {
+    state: Record<string, any>;
+    events: {
+      pop: string;
+      args: Record<string, any>;
+    }[];
+    pipeline: string[];
+  };
+  xjson: any;    // runtime XJSON representation
+  scxq2: {
+    hash: string;
+    scope: string;
+  };
+};
+```
+
+---
+
+## 4. Runtime implementation (reference-style)
+
+### 4.1 Constructor + manifest registry
+
+```js
+class SymbolicComponentLoader {
+  constructor({ kuhulRuntime, scxRuntime, fetchManifest } = {}) {
+    this.kuhulRuntime = kuhulRuntime;    // must expose runPop, runSek, setState
+    this.scxRuntime = scxRuntime;        // optional, for direct SCX calls
+    this.fetchManifest = fetchManifest || (id => this._defaultFetchManifest(id));
+    this.manifests = new Map();
+  }
+
+  async _defaultFetchManifest(id) {
+    const res = await fetch(`/scm/${id}.json`);
+    if (!res.ok) throw new Error(`SCM fetch failed for ${id}`);
+    return await res.json();
+  }
+
+  registerManifest(id, manifest) {
+    this.manifests.set(id, manifest);
+  }
+
+  getManifest(id) {
+    return this.manifests.get(id);
+  }
+}
+```
+
+---
+
+### 4.2 Load + instantiate a component
+
+```js
+SymbolicComponentLoader.prototype.loadComponent = async function(id, target, propsOverride = {}) {
+  const manifest = this.getManifest(id) || await this.fetchManifest(id);
+  if (!this.manifests.has(id)) this.registerManifest(id, manifest);
+
+  // 1. Merge props
+  const props = { ...manifest.props, ...propsOverride };
+
+  // 2. Render symbolic layout into DOM
+  const root = this._renderSymbolicLayout(manifest, target, props);
+
+  // 3. Initialize K’uhul state
+  this._bindKuhulState(manifest, props);
+
+  // 4. Wire events → K’uhul Pops
+  this._bindEvents(manifest, root);
+
+  // 5. Optional: verify SCXQ2
+  this._verifySCXQ2(manifest, root);
+
+  return {
+    id,
+    manifest,
+    root,
+    state: manifest.kuhul?.state || {},
+    destroy() {
+      root.remove();
+    }
+  };
+};
+```
+
+---
+
+### 4.3 Rendering symbolic layout
+
+Here we rely on your `AtomicSymbolParser` (`window.⚛`).
+
+```js
+SymbolicComponentLoader.prototype._renderSymbolicLayout = function(manifest, target, props) {
+  // Use manifest.layout + semantic hints to reconstruct symbolic markup.
+  // Minimal example: just inject symbolic HTML via data-content and let ⚛ parse it.
+
+  const container = document.createElement('div');
+
+  // For a real system, you’d reconstruct symbolic markup from `manifest.layout`.
+  // For now, assume manifest.xjson.@componentTemplate contains symbolic HTML:
+  const symbolicHTML = manifest.xjson?.["@componentTemplate"]; // optional field
+
+  if (symbolicHTML && window.⚛) {
+    container.innerHTML = window.⚛.parseSymbolicHTML(symbolicHTML);
+  }
+
+  // Apply props into DOM (e.g., metric value, label)
+  this._applyPropsToDOM(container, props);
+
+  if (target) {
+    target.appendChild(container);
+  }
+
+  return container;
+};
+
+SymbolicComponentLoader.prototype._applyPropsToDOM = function(root, props) {
+  // Very simple: inject text nodes by data-prop
+  Object.entries(props).forEach(([key, value]) => {
+    root.querySelectorAll(`[data-prop="${key}"]`).forEach(node => {
+      node.textContent = String(value);
+    });
+  });
+};
+```
+
+In a more complete version, the manifest would carry a canonical symbolic template, and `_renderSymbolicLayout` would reconstruct it precisely.
+
+---
+
+### 4.4 Binding K’uhul state
+
+```js
+SymbolicComponentLoader.prototype._bindKuhulState = function(manifest, props) {
+  if (!this.kuhulRuntime) return;
+  const stateBindings = manifest.kuhul?.state || {};
+
+  // Merge initial props into K’uhul state if needed
+  const mergedState = {
+    ...stateBindings,
+    props
+  };
+
+  // Let the K’uhul runtime know about this component’s state
+  this.kuhulRuntime.setState(mergedState);
+};
+```
+
+Expected runtime interface (minimal):
+
+```ts
+interface KuhulRuntime {
+  setState(state: any): void;
+  runPop(name: string, args: any): Promise<any>;
+  runSek(steps: string[]): Promise<any>;
+}
+```
+
+---
+
+### 4.5 Binding events → K’uhul Pops
+
+```js
+SymbolicComponentLoader.prototype._bindEvents = function(manifest, root) {
+  if (!this.kuhulRuntime) return;
+  const events = manifest.events || manifest.kuhul?.events || [];
+
+  for (const evt of events) {
+    const selector = evt.selector || `[data-handle="${manifest.component.handle}"]`;
+    const nodes = root.querySelectorAll(selector);
+    nodes.forEach(node => {
+      node.addEventListener(evt.event || "click", async () => {
+        await this.kuhulRuntime.runPop(evt.kuhul || evt.pop, evt.args || {});
+      });
+    });
+  }
+};
+```
+
+You can extend SCM with `selector` per event if you want more granular binding.
+
+---
+
+### 4.6 SCXQ2 verification hook
+
+```js
+SymbolicComponentLoader.prototype._verifySCXQ2 = function(manifest, root) {
+  if (!this.scxRuntime || !manifest.scxq2) return;
+  const { hash, scope } = manifest.scxq2;
+
+  // Optional: recompute fingerprint from live DOM and ask SCX to verify
+  const livePayload = computeSymbolicFingerprintPayloadFromDOM(root); // same logic as before
+  this.scxRuntime.verifySCXQ2({ expected: hash, payload: livePayload, scope });
+};
+```
+
+Expected minimal SCX runtime interface:
+
+```ts
+interface SCXRuntime {
+  verifySCXQ2(input: { expected: string; payload: string; scope: string }): boolean;
+}
+```
+
+---
+
+## 5. Hydrate from existing DOM
+
+Useful for pages already containing symbolic markup:
+
+```js
+SymbolicComponentLoader.prototype.hydrateFromDOM = async function(root = document) {
+  const instances = [];
+  const nodes = root.querySelectorAll('[data-scm-id]');  // e.g. <div data-scm-id="metric-card">
+
+  for (const el of nodes) {
+    const id = el.getAttribute('data-scm-id');
+    if (!id) continue;
+    const instance = await this.loadComponent(id, el);
+    instances.push(instance);
+  }
+  return instances;
+};
+```
+
+This makes SCMs plug‑and‑play with existing HTML.
+
+---
+
+## 6. End‑to‑end example
+
+Assume you have a manifest `metric-card.json` (like we defined earlier), and HTML:
+
+```html
+<div id="perf-region" data-scm-id="metric-card"></div>
+```
+
+Runtime:
+
+```js
+const kuhulRuntime = {
+  state: {},
+  setState(s) { this.state = { ...this.state, ...s }; },
+  async runPop(name, args) {
+    console.log("[K’uhul Pop]", name, args);
+    // call into your actual K’uhul engine here
+  },
+  async runSek(steps) {
+    console.log("[K’uhul Sek]", steps);
+  }
+};
+
+const scxRuntime = {
+  verifySCXQ2({ expected, payload, scope }) {
+    console.log("[SCXQ2 verify]", scope, expected, payload);
+    return true;
+  }
+};
+
+const loader = new SymbolicComponentLoader({ kuhulRuntime, scxRuntime });
+
+// Hydrate all SCM components on page load
+document.addEventListener("DOMContentLoaded", () => {
+  loader.hydrateFromDOM().then(instances => {
+    console.log("Hydrated symbolic components:", instances);
+  });
+});
+```
+
+Now:
+
+- The SCM is fetched and parsed.  
+- Symbolic layout is rendered via your ⚛ parser.  
+- Props are applied.  
+- K’uhul state is initialized.  
+- UI events trigger K’uhul Pops.  
+- SCXQ2 fingerprint can be re‑verified from the DOM.
+
+The **SCM + Loader** pair gives you a portable, cognitive, symbolic component system.
+
+---
+
+If you want, we can now:
+
+- Define a **Symbolic Layout Tape** that bundles many SCMs + SCX bytecode.  
+- Or sketch a **K’uhulRuntime interface** spec that makes this loader plug into your existing pipeline perfectly.
 
 # KUHUL SCXQ2 Compression Codex
 
