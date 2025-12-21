@@ -597,4 +597,135 @@ audit_event(type, payload, meta) → entry
 
 // Validate JavaCrypt opcode
 validate_opcode(block) → true | throws
+
+// SCXQ2 Container (1000 brains/icons/clusters)
+SCXQ2.registerBrain(spec) → brain
+SCXQ2.registerIcon(spec) → icon
+SCXQ2.registerCluster(spec) → cluster
+SCXQ2.collapseClusterOutput(output, brainId, epoch) → ⚡
+SCXQ2.verifyForBranchGate(lightning, gate) → { ok, selected }
 ```
+
+---
+
+## 14. SCXQ2 Container Engine (1000 Brains / Icons / Clusters)
+
+### System Law (LOCKED)
+```
+ICONS IDENTIFY.     — Carriers, addresses, never authoritative
+CLUSTERS COMPUTE.   — Substrates, disposable, never decide
+BRAINS DECIDE.      — Proof-anchored, deterministic, sole authority
+ONLY ⚡ COLLAPSES TRUTH.
+```
+
+### Key Invariant
+> **Multiplicity is allowed everywhere except authority.**
+
+### Binary Format: SCX2BRAIN v1
+```
+[FILE]
+  ├─ FixedHeader (64 bytes)     — magic: 'SCX2', epoch, policy_hash
+  ├─ SectionTable (N * 32 bytes)
+  ├─ Sections (aligned 16 bytes):
+  │   ├─ META (0x0001)
+  │   ├─ STRS (0x0004) — String pool
+  │   ├─ BRAIN_TBL (0x0005) — 1000 brains, 64 bytes each
+  │   ├─ ICON_TBL (0x0006) — 1000 icons, 48 bytes each
+  │   ├─ CLUS_TBL (0x0007) — 1000 clusters, 64 bytes each
+  │   ├─ EDGE_TBL (0x0008) — Adjacency + class-order rules
+  │   ├─ PACKS (0x0009) — Compressed payloads
+  │   └─ PROOFS (0x000A) — ⚡ bundles
+  └─ Footer (32 bytes)
+```
+
+### Brain Registration
+```js
+SCXQ2.registerBrain({
+  brain_id: 42,
+  name: "tokenizer-v1",
+  brain_hash: "h:sha256:...",
+  vocab_hash: "h:sha256:...",      // REQUIRED
+  tokenizer_hash: "h:sha256:...",  // REQUIRED
+  policy_hash: "h:sha256:...",     // REQUIRED
+  class_id: 1,                     // Brain class (A-J)
+  epoch: 100
+});
+```
+
+### Collapse Boundary (THE CRITICAL GATE)
+```js
+// Cluster output MUST go through collapse
+const lightning = await SCXQ2.collapseClusterOutput(
+  clusterOutput,  // Raw cluster result
+  brainId,        // Which brain owns this decision
+  epoch           // Current epoch
+);
+// Returns ⚡ event — ONLY THIS MAY DRIVE CONTROL FLOW
+```
+
+### Class-Order Validation
+```js
+SCXQ2.addClassOrderRule(1, 2);  // Class 1 must precede class 2
+SCXQ2.validateClassOrder([brainId1, brainId2, ...]);
+```
+
+---
+
+## 15. Brain Taxonomy (10 Classes → 1000 Instances)
+
+### Class A — Perception Brains
+Normalize raw input into canonical form.
+- tokenizer brain, SVG → glyph extractor, JSON → field-id mapper
+
+### Class B — Interpretation Brains
+Turn normalized input into semantic meaning.
+- vocab resolver, intent classifier, opcode recognizer
+
+### Class C — Constraint / Validator Brains
+Say YES / NO / WHY.
+- schema validator, GSR adjacency checker, class-order validator
+
+### Class D — Proof / ⚡ Brains
+Generate and verify ⚡ events.
+- equality proof brain, hash binding brain, replay consistency checker
+
+### Class E — Branch Gate Brains
+Decide whether `@then` / `@else` may execute.
+- MUST consume ⚡ proof, MUST enforce policy_hash
+
+### Class F — Planning Brains
+Choose which actions are eligible (not execute them).
+- cluster routing, strategy selection, workload distribution
+
+### Class G — Execution Brains
+Perform a bounded, declared action.
+- invoke model, render SVG, compress SCX, store result
+
+### Class H — Compression Brains
+Reduce entropy without changing meaning.
+- SCXQ2 encoder, Huffman builder, delta generator
+
+### Class I — Memory Brains
+Store, retrieve, index — never decide.
+- brain indexer, cluster cache, replay log reader
+
+### Class J — Observer / Audit Brains
+Watch everything, change nothing.
+- metrics, entropy tracking, anomaly detection
+
+### Brain Formal Definition
+```
+Brain := f(inputs, policy, epoch) → outputs + ⚡ proof
+```
+
+### Mandatory Invariants
+1. Have a stable brain_id
+2. Consume canonicalized input
+3. Emit canonicalized output
+4. Emit a ⚡ proof_hash
+5. Declare its class
+6. Declare its adjacency permissions
+7. Be replayable without external state
+
+### The Golden Rule
+> **Brains do logic. ⚡ proves logic happened. Gates enforce logic order. Clusters give logic shape.**

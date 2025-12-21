@@ -45,6 +45,7 @@
    [21] XCFE Replay Verifier v1
    [22] K'UHUL π Virtual Cluster v1.0
    [23] Semantic Gating Layer (Vocab + Tokenizer + Lex.Resolve)
+   [24] SCXQ2 Container Engine (1000 Brains / Icons / Clusters)
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -71,7 +72,7 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  */
 
 const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
-const KUHUL_KERNEL_VERSION = "1.2.8";
+const KUHUL_KERNEL_VERSION = "1.2.9";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
@@ -3415,6 +3416,987 @@ const SemanticGating = (() => {
 
     // Status
     status,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [24] SCXQ2 CONTAINER ENGINE — 1000 Brains / Icons / Clusters
+   ═══════════════════════════════════════════════════════════════════════════════
+
+   SYSTEM LAW (LOCKED):
+   ┌─────────────────────────────────────────────────────────────────────────────┐
+   │  ICONS IDENTIFY.     — Carriers, addresses, never authoritative            │
+   │  CLUSTERS COMPUTE.   — Substrates, disposable, never decide                 │
+   │  BRAINS DECIDE.      — Proof-anchored, deterministic, sole authority        │
+   │  ONLY ⚡ COLLAPSES TRUTH.                                                   │
+   └─────────────────────────────────────────────────────────────────────────────┘
+
+   INVARIANT: Multiplicity is allowed everywhere except authority.
+
+   The π Virtual Cluster is a non-authoritative compute substrate.
+   All semantic resolution and control-flow decisions MUST be derived
+   exclusively from verified ⚡ events and are explicitly forbidden from
+   being inferred directly from cluster outputs.
+
+   BINARY FORMAT: SCX2BRAIN v1
+   - FixedHeader (64 bytes)
+   - SectionTable (N * 32 bytes)
+   - Sections (aligned 16 bytes)
+   - Footer (32 bytes)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SCXQ2 = (() => {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Binary Constants
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const MAGIC = new Uint8Array([0x53, 0x43, 0x58, 0x32]); // 'SCX2'
+  const FOOTER_MAGIC = new Uint8Array([0x53, 0x43, 0x58, 0x32, 0x45, 0x4E, 0x44, 0x00]); // 'SCX2END\0'
+  const VERSION_MAJOR = 0x0001;
+  const VERSION_MINOR = 0x0000;
+  const ALIGNMENT = 16;
+
+  // Section IDs
+  const SECTION = Object.freeze({
+    META:      0x0001,
+    CANON:     0x0002,
+    DICT:      0x0003,
+    STRS:      0x0004,
+    BRAIN_TBL: 0x0005,
+    ICON_TBL:  0x0006,
+    CLUS_TBL:  0x0007,
+    EDGE_TBL:  0x0008,
+    PACKS:     0x0009,
+    PROOFS:    0x000A,
+    FOOTIDX:   0x000B,
+  });
+
+  // Edge types
+  const EDGE_TYPE = Object.freeze({
+    MEMBER_OF:   0x0001,
+    DEPENDS_ON:  0x0002,
+    ROUTES_TO:   0x0003,
+    BINDS_TO:    0x0004,
+    PRECEDES:    0x0005,
+  });
+
+  // Entity kinds
+  const ENTITY_KIND = Object.freeze({
+    BRAIN:   0,
+    ICON:    1,
+    CLUSTER: 2,
+  });
+
+  // Codec types
+  const CODEC = Object.freeze({
+    RAW:       0,
+    SCXQ2:     1,
+    SCXQ2_HUFF: 2,
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // In-Memory Container State
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const container = {
+    header: null,
+    sections: new Map(),
+    strings: [],
+    brains: new Map(),    // brain_id → BrainRow
+    icons: new Map(),     // icon_id → IconRow
+    clusters: new Map(),  // cluster_id → ClusterRow
+    edges: [],
+    rules: [],
+    packs: new Map(),
+    proofs: new Map(),    // canon_hash → ProofEntry
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Binary Helpers
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function alignOffset(offset) {
+    return Math.ceil(offset / ALIGNMENT) * ALIGNMENT;
+  }
+
+  function readU16LE(view, offset) {
+    return view.getUint16(offset, true);
+  }
+
+  function readU32LE(view, offset) {
+    return view.getUint32(offset, true);
+  }
+
+  function readU64LE(view, offset) {
+    // JavaScript doesn't have native 64-bit, use BigInt
+    const lo = view.getUint32(offset, true);
+    const hi = view.getUint32(offset + 4, true);
+    return BigInt(lo) | (BigInt(hi) << 32n);
+  }
+
+  function writeU16LE(view, offset, value) {
+    view.setUint16(offset, value, true);
+  }
+
+  function writeU32LE(view, offset, value) {
+    view.setUint32(offset, value, true);
+  }
+
+  function writeU64LE(view, offset, value) {
+    const bigVal = BigInt(value);
+    view.setUint32(offset, Number(bigVal & 0xFFFFFFFFn), true);
+    view.setUint32(offset + 4, Number(bigVal >> 32n), true);
+  }
+
+  function readBytes(view, offset, length) {
+    const arr = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      arr[i] = view.getUint8(offset + i);
+    }
+    return arr;
+  }
+
+  function bytesToHex(bytes) {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToBytes(hex) {
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    }
+    return bytes;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Header Parsing (64 bytes)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseHeader(buffer) {
+    const view = new DataView(buffer);
+
+    // Verify magic
+    const magic = readBytes(view, 0x00, 4);
+    if (bytesToHex(magic) !== bytesToHex(MAGIC)) {
+      throw new Error('Invalid SCXQ2 magic bytes');
+    }
+
+    const header = {
+      magic: 'SCX2',
+      version_major: readU16LE(view, 0x04),
+      version_minor: readU16LE(view, 0x06),
+      flags: readU32LE(view, 0x08),
+      header_bytes: readU32LE(view, 0x0C),
+      file_bytes: readU64LE(view, 0x10),
+      section_table_off: readU64LE(view, 0x18),
+      section_count: readU32LE(view, 0x20),
+      reserved0: readU32LE(view, 0x24),
+      epoch: readU64LE(view, 0x28),
+      policy_hash: bytesToHex(readBytes(view, 0x30, 16)),
+    };
+
+    if (header.version_major !== VERSION_MAJOR) {
+      throw new Error(`Unsupported SCXQ2 version: ${header.version_major}.${header.version_minor}`);
+    }
+
+    return header;
+  }
+
+  function buildHeader(epoch, policyHash, sectionCount, fileBytes) {
+    const buffer = new ArrayBuffer(64);
+    const view = new DataView(buffer);
+
+    // Magic
+    for (let i = 0; i < 4; i++) view.setUint8(i, MAGIC[i]);
+
+    writeU16LE(view, 0x04, VERSION_MAJOR);
+    writeU16LE(view, 0x06, VERSION_MINOR);
+    writeU32LE(view, 0x08, 0); // flags
+    writeU32LE(view, 0x0C, 64); // header_bytes
+    writeU64LE(view, 0x10, fileBytes);
+    writeU64LE(view, 0x18, 64); // section_table_off (right after header)
+    writeU32LE(view, 0x20, sectionCount);
+    writeU32LE(view, 0x24, 0); // reserved
+    writeU64LE(view, 0x28, epoch);
+
+    // policy_hash (16 bytes)
+    const hashBytes = hexToBytes(policyHash.padEnd(32, '0').slice(0, 32));
+    for (let i = 0; i < 16; i++) view.setUint8(0x30 + i, hashBytes[i]);
+
+    return buffer;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Section Table Parsing (32 bytes per entry)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseSectionTable(buffer, header) {
+    const view = new DataView(buffer);
+    const sections = [];
+    const tableOff = Number(header.section_table_off);
+
+    for (let i = 0; i < header.section_count; i++) {
+      const off = tableOff + (i * 32);
+      sections.push({
+        section_id: readU32LE(view, off + 0x00),
+        section_flags: readU32LE(view, off + 0x04),
+        off: readU64LE(view, off + 0x08),
+        len: readU64LE(view, off + 0x10),
+        crc64: readU64LE(view, off + 0x18),
+      });
+    }
+
+    return sections;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // String Pool (STRS section)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseStrings(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const stringCount = readU32LE(view, off);
+    const bytesTotal = readU32LE(view, off + 4);
+
+    const offsets = [];
+    for (let i = 0; i < stringCount; i++) {
+      offsets.push(readU32LE(view, off + 8 + (i * 4)));
+    }
+
+    const blobStart = off + 8 + (stringCount * 4);
+    const decoder = new TextDecoder('utf-8');
+    const strings = [];
+
+    for (let i = 0; i < stringCount; i++) {
+      const start = offsets[i];
+      const end = (i + 1 < stringCount) ? offsets[i + 1] : bytesTotal;
+      const strBytes = new Uint8Array(buffer, blobStart + start, end - start - 1); // -1 for null terminator
+      strings.push(decoder.decode(strBytes));
+    }
+
+    return strings;
+  }
+
+  function buildStrings(strings) {
+    const encoder = new TextEncoder();
+    const encoded = strings.map(s => encoder.encode(s + '\0'));
+    const bytesTotal = encoded.reduce((sum, e) => sum + e.length, 0);
+
+    const headerSize = 8 + (strings.length * 4);
+    const buffer = new ArrayBuffer(alignOffset(headerSize + bytesTotal));
+    const view = new DataView(buffer);
+    const u8 = new Uint8Array(buffer);
+
+    writeU32LE(view, 0, strings.length);
+    writeU32LE(view, 4, bytesTotal);
+
+    let offset = 0;
+    for (let i = 0; i < strings.length; i++) {
+      writeU32LE(view, 8 + (i * 4), offset);
+      offset += encoded[i].length;
+    }
+
+    let blobOff = headerSize;
+    for (const enc of encoded) {
+      u8.set(enc, blobOff);
+      blobOff += enc.length;
+    }
+
+    return buffer;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BRAIN_TBL (64 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseBrainTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const brainCount = readU32LE(view, off);
+    const brains = new Map();
+
+    for (let i = 0; i < brainCount; i++) {
+      const rowOff = off + 4 + (i * 64);
+      const brain = {
+        brain_id: readU32LE(view, rowOff + 0x00),
+        sid_name: readU32LE(view, rowOff + 0x04),
+        name: null, // resolved from strings
+        brain_hash: bytesToHex(readBytes(view, rowOff + 0x08, 16)),
+        pack_id: readU32LE(view, rowOff + 0x18),
+        pack_off: readU32LE(view, rowOff + 0x1C),
+        pack_len: readU32LE(view, rowOff + 0x20),
+        class_id: readU32LE(view, rowOff + 0x24),
+        last_tick: readU64LE(view, rowOff + 0x28),
+        flags: readU64LE(view, rowOff + 0x30),
+        // Brain authority markers
+        vocab_hash: null,
+        tokenizer_hash: null,
+        policy_hash: null,
+      };
+
+      if (strings && brain.sid_name < strings.length) {
+        brain.name = strings[brain.sid_name];
+      }
+
+      brains.set(brain.brain_id, brain);
+    }
+
+    return brains;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ICON_TBL (48 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseIconTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const iconCount = readU32LE(view, off);
+    const icons = new Map();
+
+    for (let i = 0; i < iconCount; i++) {
+      const rowOff = off + 4 + (i * 48);
+      const icon = {
+        icon_id: readU32LE(view, rowOff + 0x00),
+        sid_label: readU32LE(view, rowOff + 0x04),
+        label: null,
+        svg_ref: readU32LE(view, rowOff + 0x08),
+        brain_id: readU32LE(view, rowOff + 0x0C),
+        pack_id: readU32LE(view, rowOff + 0x10),
+        pack_off: readU32LE(view, rowOff + 0x14),
+        pack_len: readU32LE(view, rowOff + 0x18),
+        flags: readU64LE(view, rowOff + 0x1C),
+        // Icons are carriers, never authoritative
+        _carrier: true,
+        _authority: false,
+      };
+
+      if (strings && icon.sid_label < strings.length) {
+        icon.label = strings[icon.sid_label];
+      }
+
+      icons.set(icon.icon_id, icon);
+    }
+
+    return icons;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CLUS_TBL (64 bytes per row)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseClusterTable(buffer, section, strings) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+    const clusterCount = readU32LE(view, off);
+    const clusters = new Map();
+
+    for (let i = 0; i < clusterCount; i++) {
+      const rowOff = off + 4 + (i * 64);
+      const cluster = {
+        cluster_id: readU32LE(view, rowOff + 0x00),
+        sid_label: readU32LE(view, rowOff + 0x04),
+        label: null,
+        cluster_hash: bytesToHex(readBytes(view, rowOff + 0x08, 16)),
+        pack_id: readU32LE(view, rowOff + 0x18),
+        pack_off: readU32LE(view, rowOff + 0x1C),
+        pack_len: readU32LE(view, rowOff + 0x20),
+        brain_map_off: readU32LE(view, rowOff + 0x24),
+        brain_map_len: readU32LE(view, rowOff + 0x28),
+        flags: readU64LE(view, rowOff + 0x2C),
+        // Clusters compute, never decide
+        _compute_only: true,
+        _authority: false,
+      };
+
+      if (strings && cluster.sid_label < strings.length) {
+        cluster.label = strings[cluster.sid_label];
+      }
+
+      clusters.set(cluster.cluster_id, cluster);
+    }
+
+    return clusters;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EDGE_TBL (16 bytes per edge, 32 bytes per rule)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseEdgeTable(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const edgeCount = readU32LE(view, off);
+    const ruleCount = readU32LE(view, off + 4);
+
+    const edges = [];
+    const edgeStart = off + 8;
+
+    for (let i = 0; i < edgeCount; i++) {
+      const eOff = edgeStart + (i * 16);
+      edges.push({
+        a_kind: view.getUint8(eOff + 0x00),
+        b_kind: view.getUint8(eOff + 0x01),
+        edge_type: readU16LE(view, eOff + 0x02),
+        a_id: readU32LE(view, eOff + 0x04),
+        b_id: readU32LE(view, eOff + 0x08),
+        weight: view.getFloat32(eOff + 0x0C, true),
+      });
+    }
+
+    const rules = [];
+    const ruleStart = edgeStart + (edgeCount * 16);
+
+    for (let i = 0; i < ruleCount; i++) {
+      const rOff = ruleStart + (i * 32);
+      rules.push({
+        rule_id: readU32LE(view, rOff + 0x00),
+        class_id: readU32LE(view, rOff + 0x04),
+        must_precede_class: readU32LE(view, rOff + 0x08),
+        edge_type: readU16LE(view, rOff + 0x0C),
+        flags: readU16LE(view, rOff + 0x0E),
+        reserved: readU64LE(view, rOff + 0x10),
+        rule_hash: bytesToHex(readBytes(view, rOff + 0x18, 8)),
+      });
+    }
+
+    return { edges, rules };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PROOFS Section
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function parseProofs(buffer, section) {
+    const view = new DataView(buffer);
+    const off = Number(section.off);
+
+    const canonHashCount = readU32LE(view, off);
+    const proofs = new Map();
+
+    for (let i = 0; i < canonHashCount; i++) {
+      const rowOff = off + 4 + (i * 24);
+      const canonHash = bytesToHex(readBytes(view, rowOff, 16));
+      proofs.set(canonHash, {
+        canon_hash: canonHash,
+        domain_kind: view.getUint8(rowOff + 0x10),
+        entity_id: readU32LE(view, rowOff + 0x12),
+        proof_off: readU32LE(view, rowOff + 0x16),
+        proof_len: readU32LE(view, rowOff + 0x1A),
+      });
+    }
+
+    return proofs;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Container Load/Parse
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function loadContainer(buffer) {
+    container.header = parseHeader(buffer);
+
+    const sectionList = parseSectionTable(buffer, container.header);
+    for (const sec of sectionList) {
+      container.sections.set(sec.section_id, sec);
+    }
+
+    // Parse STRS first (needed for name resolution)
+    const strsSection = container.sections.get(SECTION.STRS);
+    if (strsSection) {
+      container.strings = parseStrings(buffer, strsSection);
+    }
+
+    // Parse index tables
+    const brainSection = container.sections.get(SECTION.BRAIN_TBL);
+    if (brainSection) {
+      container.brains = parseBrainTable(buffer, brainSection, container.strings);
+    }
+
+    const iconSection = container.sections.get(SECTION.ICON_TBL);
+    if (iconSection) {
+      container.icons = parseIconTable(buffer, iconSection, container.strings);
+    }
+
+    const clusSection = container.sections.get(SECTION.CLUS_TBL);
+    if (clusSection) {
+      container.clusters = parseClusterTable(buffer, clusSection, container.strings);
+    }
+
+    // Parse edges and rules
+    const edgeSection = container.sections.get(SECTION.EDGE_TBL);
+    if (edgeSection) {
+      const { edges, rules } = parseEdgeTable(buffer, edgeSection);
+      container.edges = edges;
+      container.rules = rules;
+    }
+
+    // Parse proofs
+    const proofsSection = container.sections.get(SECTION.PROOFS);
+    if (proofsSection) {
+      container.proofs = parseProofs(buffer, proofsSection);
+    }
+
+    audit_event('scxq2.load', {
+      epoch: Number(container.header.epoch),
+      brains: container.brains.size,
+      icons: container.icons.size,
+      clusters: container.clusters.size,
+      edges: container.edges.length,
+    });
+
+    return container;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Brain Registry (1000 Brains)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerBrain(brainSpec) {
+    if (!brainSpec.brain_id || !brainSpec.brain_hash) {
+      throw new Error('Brain requires brain_id and brain_hash');
+    }
+    if (!brainSpec.vocab_hash || !brainSpec.tokenizer_hash || !brainSpec.policy_hash) {
+      throw new Error('Brain requires vocab_hash, tokenizer_hash, policy_hash');
+    }
+
+    const brain = {
+      brain_id: brainSpec.brain_id,
+      sid_name: 0,
+      name: brainSpec.name || `brain_${brainSpec.brain_id}`,
+      brain_hash: brainSpec.brain_hash,
+      vocab_hash: brainSpec.vocab_hash,
+      tokenizer_hash: brainSpec.tokenizer_hash,
+      policy_hash: brainSpec.policy_hash,
+      pack_id: brainSpec.pack_id || 0,
+      pack_off: brainSpec.pack_off || 0,
+      pack_len: brainSpec.pack_len || 0,
+      class_id: brainSpec.class_id || 0,
+      last_tick: BigInt(Date.now()),
+      flags: BigInt(brainSpec.flags || 0),
+      epoch: brainSpec.epoch || Number(container.header?.epoch || 0),
+    };
+
+    container.brains.set(brain.brain_id, brain);
+
+    audit_event('brain.register', {
+      brain_id: brain.brain_id,
+      brain_hash: brain.brain_hash.slice(0, 16) + '...',
+    });
+
+    return brain;
+  }
+
+  function getBrain(brainId) {
+    return container.brains.get(brainId);
+  }
+
+  function listBrains() {
+    return [...container.brains.values()];
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Icon Registry (1000 Icons) — Carriers, never authoritative
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerIcon(iconSpec) {
+    if (typeof iconSpec.icon_id !== 'number') {
+      throw new Error('Icon requires icon_id');
+    }
+
+    const icon = {
+      icon_id: iconSpec.icon_id,
+      sid_label: 0,
+      label: iconSpec.label || `icon_${iconSpec.icon_id}`,
+      svg_ref: iconSpec.svg_ref || 0,
+      brain_id: iconSpec.brain_id, // Icon → Brain binding
+      pack_id: iconSpec.pack_id || 0,
+      pack_off: iconSpec.pack_off || 0,
+      pack_len: iconSpec.pack_len || 0,
+      flags: BigInt(iconSpec.flags || 0),
+      // INVARIANT: Icons are carriers, never authoritative
+      _carrier: true,
+      _authority: false,
+    };
+
+    container.icons.set(icon.icon_id, icon);
+
+    // Create edge binding icon → brain
+    if (icon.brain_id !== undefined) {
+      container.edges.push({
+        a_kind: ENTITY_KIND.ICON,
+        b_kind: ENTITY_KIND.BRAIN,
+        edge_type: EDGE_TYPE.BINDS_TO,
+        a_id: icon.icon_id,
+        b_id: icon.brain_id,
+        weight: 1.0,
+      });
+    }
+
+    return icon;
+  }
+
+  function getIcon(iconId) {
+    return container.icons.get(iconId);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster Registry (1000 Clusters) — Compute substrates, never decide
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function registerCluster(clusterSpec) {
+    if (typeof clusterSpec.cluster_id !== 'number') {
+      throw new Error('Cluster requires cluster_id');
+    }
+
+    const cluster = {
+      cluster_id: clusterSpec.cluster_id,
+      sid_label: 0,
+      label: clusterSpec.label || `cluster_${clusterSpec.cluster_id}`,
+      cluster_hash: clusterSpec.cluster_hash || '',
+      pack_id: clusterSpec.pack_id || 0,
+      pack_off: clusterSpec.pack_off || 0,
+      pack_len: clusterSpec.pack_len || 0,
+      brain_map_off: clusterSpec.brain_map_off || 0,
+      brain_map_len: clusterSpec.brain_map_len || 0,
+      flags: BigInt(clusterSpec.flags || 0),
+      // INVARIANT: Clusters compute, never decide
+      _compute_only: true,
+      _authority: false,
+    };
+
+    container.clusters.set(cluster.cluster_id, cluster);
+
+    return cluster;
+  }
+
+  function getCluster(clusterId) {
+    return container.clusters.get(clusterId);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster → Brain Membership
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function addClusterMember(clusterId, brainId) {
+    container.edges.push({
+      a_kind: ENTITY_KIND.BRAIN,
+      b_kind: ENTITY_KIND.CLUSTER,
+      edge_type: EDGE_TYPE.MEMBER_OF,
+      a_id: brainId,
+      b_id: clusterId,
+      weight: 1.0,
+    });
+  }
+
+  function getClusterMembers(clusterId) {
+    return container.edges
+      .filter(e =>
+        e.b_kind === ENTITY_KIND.CLUSTER &&
+        e.b_id === clusterId &&
+        e.edge_type === EDGE_TYPE.MEMBER_OF
+      )
+      .map(e => container.brains.get(e.a_id))
+      .filter(Boolean);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Class-Order Validation (GSR Adjacency)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function addClassOrderRule(classId, mustPrecedeClass) {
+    const rule = {
+      rule_id: container.rules.length,
+      class_id: classId,
+      must_precede_class: mustPrecedeClass,
+      edge_type: EDGE_TYPE.PRECEDES,
+      flags: 0,
+      reserved: 0n,
+      rule_hash: '',
+    };
+    container.rules.push(rule);
+    return rule;
+  }
+
+  function validateClassOrder(brainSequence) {
+    // brainSequence is array of brain_ids in execution order
+    const classPositions = new Map();
+
+    for (let i = 0; i < brainSequence.length; i++) {
+      const brain = container.brains.get(brainSequence[i]);
+      if (brain) {
+        classPositions.set(brain.class_id, i);
+      }
+    }
+
+    // Check all rules
+    for (const rule of container.rules) {
+      const aPos = classPositions.get(rule.class_id);
+      const bPos = classPositions.get(rule.must_precede_class);
+
+      if (aPos !== undefined && bPos !== undefined && aPos >= bPos) {
+        return {
+          valid: false,
+          error: `Class ${rule.class_id} must precede class ${rule.must_precede_class}`,
+          rule,
+        };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Collapse Boundary — THE CRITICAL AUTHORITY GATE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * SYSTEM LAW: Cluster output MUST go through collapse boundary.
+   * Cluster output may NOT directly drive @if/@then/@else.
+   * Only verified ⚡ events may control flow.
+   */
+  async function collapseClusterOutput(clusterOutput, brainId, epoch) {
+    const brain = container.brains.get(brainId);
+    if (!brain) {
+      throw new Error(`Brain ${brainId} not found`);
+    }
+
+    // Step 1: Canonicalize cluster output
+    const resolved = {
+      brain_id: brainId,
+      brain_hash: brain.brain_hash,
+      vocab_hash: brain.vocab_hash,
+      tokenizer_hash: brain.tokenizer_hash,
+      policy_hash: brain.policy_hash,
+      epoch,
+      cluster_output: clusterOutput,
+      timestamp: Date.now(),
+    };
+
+    // Step 2: Compute canonical hash (using XCFE if available)
+    const canonJson = XCFE ? XCFE.canonValue(resolved) : stableStringify(resolved);
+    const inputHashHex = await (XCFE ? XCFE.sha256Hex(canonJson) : sha256Hex(canonJson));
+    const inputHash = `h:sha256:${inputHashHex}`;
+
+    // Step 3: Determine truth (this is where semantic resolution happens)
+    const truth = determineTruth(clusterOutput, brain);
+
+    // Step 4: Compute proof hash
+    const proofPayload = `${inputHash}:${truth ? 'true' : 'false'}`;
+    const proofHex = await (XCFE ? XCFE.sha256Hex(proofPayload) : sha256Hex(proofPayload));
+    const proofHash = `h:sha256:${proofHex}`;
+
+    // Step 5: Emit ⚡ event (ONLY THIS MAY DRIVE CONTROL FLOW)
+    const lightning = {
+      '@⚡': {
+        epoch,
+        brain_id: brainId,
+        policy_hash: brain.policy_hash,
+        vocab_hash: brain.vocab_hash,
+        tokenizer_hash: brain.tokenizer_hash,
+        input_hash: inputHash,
+        proof_hash: proofHash,
+        truth,
+        source: 'scxq2_collapse',
+        runtime: '⚡',
+        resolved: true,
+      },
+    };
+
+    // Step 6: Store proof
+    container.proofs.set(inputHash.slice(9), {
+      canon_hash: inputHash,
+      domain_kind: ENTITY_KIND.BRAIN,
+      entity_id: brainId,
+      proof_off: 0,
+      proof_len: 0,
+      lightning,
+    });
+
+    audit_event('scxq2.collapse', {
+      brain_id: brainId,
+      epoch,
+      truth,
+      proof_hash: proofHash.slice(0, 24) + '...',
+    });
+
+    return lightning;
+  }
+
+  function determineTruth(clusterOutput, brain) {
+    // Default truth determination
+    // In real implementation, this uses SemanticGating.collapseProposals
+    if (typeof clusterOutput === 'boolean') return clusterOutput;
+    if (typeof clusterOutput === 'number') return clusterOutput > 0;
+    if (Array.isArray(clusterOutput)) {
+      // Use highest confidence proposal
+      if (clusterOutput.length > 0 && clusterOutput[0].confidence !== undefined) {
+        const best = clusterOutput.reduce((a, b) =>
+          (a.confidence || 0) > (b.confidence || 0) ? a : b
+        );
+        return Boolean(best.value);
+      }
+      return clusterOutput.length > 0;
+    }
+    if (clusterOutput && typeof clusterOutput === 'object') {
+      return Boolean(clusterOutput.value || clusterOutput.truth || clusterOutput.result);
+    }
+    return Boolean(clusterOutput);
+  }
+
+  // Helper for sha256 when XCFE not available
+  async function sha256Hex(data) {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    return bytesToHex(new Uint8Array(hashBuffer));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Verify ⚡ for Branch Gate
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function verifyForBranchGate(lightning, gate) {
+    const ev = lightning['@⚡'];
+    if (!ev) {
+      return { ok: false, error: 'missing_lightning' };
+    }
+
+    // Verify brain exists
+    const brain = container.brains.get(ev.brain_id);
+    if (!brain) {
+      return { ok: false, error: 'brain_not_found' };
+    }
+
+    // Verify hashes match brain
+    if (ev.policy_hash !== brain.policy_hash) {
+      return { ok: false, error: 'policy_hash_mismatch' };
+    }
+    if (ev.vocab_hash !== brain.vocab_hash) {
+      return { ok: false, error: 'vocab_hash_mismatch' };
+    }
+    if (ev.tokenizer_hash !== brain.tokenizer_hash) {
+      return { ok: false, error: 'tokenizer_hash_mismatch' };
+    }
+
+    // Verify gate proof matches
+    if (gate.proof_hash && gate.proof_hash !== ev.proof_hash) {
+      return { ok: false, error: 'proof_hash_mismatch' };
+    }
+
+    // Verify truth → selected mapping
+    const expectedSelected = ev.truth ? '@then' : '@else';
+    if (gate.selected && gate.selected !== expectedSelected) {
+      return { ok: false, error: 'truth_selected_mismatch' };
+    }
+
+    return {
+      ok: true,
+      brain,
+      lightning: ev,
+      selected: expectedSelected,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Container Status
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function status() {
+    return {
+      loaded: container.header !== null,
+      epoch: container.header ? Number(container.header.epoch) : null,
+      policy_hash: container.header?.policy_hash || null,
+      brains: container.brains.size,
+      icons: container.icons.size,
+      clusters: container.clusters.size,
+      edges: container.edges.length,
+      rules: container.rules.length,
+      proofs: container.proofs.size,
+      strings: container.strings.length,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Export Container as Binary
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function exportContainer(epoch, policyHash) {
+    // This would build the full binary container
+    // For now, return metadata about what would be exported
+    return {
+      magic: 'SCX2',
+      version: `${VERSION_MAJOR}.${VERSION_MINOR}`,
+      epoch,
+      policy_hash: policyHash,
+      sections: [
+        { id: 'META', count: 1 },
+        { id: 'STRS', count: container.strings.length },
+        { id: 'BRAIN_TBL', count: container.brains.size },
+        { id: 'ICON_TBL', count: container.icons.size },
+        { id: 'CLUS_TBL', count: container.clusters.size },
+        { id: 'EDGE_TBL', edges: container.edges.length, rules: container.rules.length },
+        { id: 'PROOFS', count: container.proofs.size },
+      ],
+      estimated_size: estimateContainerSize(),
+    };
+  }
+
+  function estimateContainerSize() {
+    let size = 64; // Header
+    size += container.sections.size * 32; // Section table
+    size += container.strings.reduce((s, str) => s + str.length + 1, 8 + container.strings.length * 4); // STRS
+    size += 4 + container.brains.size * 64; // BRAIN_TBL
+    size += 4 + container.icons.size * 48; // ICON_TBL
+    size += 4 + container.clusters.size * 64; // CLUS_TBL
+    size += 8 + container.edges.length * 16 + container.rules.length * 32; // EDGE_TBL
+    size += 4 + container.proofs.size * 24; // PROOFS
+    size += 32; // Footer
+    return alignOffset(size);
+  }
+
+  return {
+    // Constants
+    SECTION,
+    EDGE_TYPE,
+    ENTITY_KIND,
+    CODEC,
+
+    // Container operations
+    loadContainer,
+    exportContainer,
+    status,
+
+    // Brain registry (1000 brains)
+    registerBrain,
+    getBrain,
+    listBrains,
+
+    // Icon registry (1000 icons) — carriers
+    registerIcon,
+    getIcon,
+
+    // Cluster registry (1000 clusters) — compute substrates
+    registerCluster,
+    getCluster,
+    addClusterMember,
+    getClusterMembers,
+
+    // Class-order validation
+    addClassOrderRule,
+    validateClassOrder,
+
+    // THE CRITICAL GATE: Collapse boundary
+    collapseClusterOutput,
+    verifyForBranchGate,
+
+    // Low-level binary helpers
+    parseHeader,
+    buildHeader,
+    buildStrings,
   };
 })();
 
