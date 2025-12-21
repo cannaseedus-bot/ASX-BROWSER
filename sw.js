@@ -38,6 +38,9 @@
    [14] JavaCrypt Dispatch Table (Audited)
    [15] Research Agent Registry
    [16] Research Routes & Implementations
+   [17] Research Glyphs (PART D)
+   [18] Proxy Bridge Client (PART E)
+   [19] Unified Runtime v4.1 (K'UHUL π Core Loop)
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -64,7 +67,7 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  */
 
 const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
-const KUHUL_KERNEL_VERSION = "1.2.4";
+const KUHUL_KERNEL_VERSION = "1.2.5";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
@@ -281,6 +284,69 @@ async function idbClear(store) {
     req.onsuccess = () => resolve(true);
     req.onerror = () => reject(req.error);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [17] RESEARCH GLYPHS (PART D)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const RESEARCH_GLYPHS = Object.freeze({
+  '🧭': { op: 'research.search',  route: '/research/search' },
+  '🔎': { op: 'research.source',  route: '/research/source' },
+  '🧾': { op: 'research.audit',   route: '/research/audit' },
+  '🧠': { op: 'research.agents',  route: '/research/agents' },
+  '📚': { source: 'wikipedia' },
+  '🐙': { source: 'github' },
+  '📰': { source: 'rss' },
+});
+
+// Packet Model (Auditable Envelope)
+function createPacket(op, query, source, n = 10, mode = 'DIRECT', meta = {}) {
+  return {
+    '⟁v': 1,
+    '@t': Date.now(),
+    '@op': op,
+    '@q': safeText(query, KERNEL.limits.maxQueryLen),
+    '@source': source,
+    '@n': clampInt(n, 1, KERNEL.limits.maxResults, 10),
+    '@mode': mode,
+    '@meta': meta,
+  };
+}
+
+// SHA-256 Proof (via SubtleCrypto)
+async function sha256Proof(packet) {
+  const json = stable_stringify(packet);
+  const data = utf8.enc.encode(json);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hex = Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+  return { proof: 'sha256:' + hex, packet };
+}
+
+// Cache Key for research packets
+function researchCacheKey(packet) {
+  return `research:${packet['@source']}:${packet['@q']}:${packet['@n']}`;
+}
+
+// Glyph Router: emoji → route/source
+function glyphRoute(glyph) {
+  return RESEARCH_GLYPHS[glyph] || null;
+}
+
+// Resolve glyph to research packet
+function resolveGlyph(glyph, query, n = 10) {
+  const def = glyphRoute(glyph);
+  if (!def) return null;
+
+  if (def.source) {
+    return createPacket('research.fetch', query, def.source, n, KERNEL.research.mode);
+  }
+  if (def.op && def.route) {
+    return createPacket(def.op, query, 'router', n, 'DIRECT');
+  }
+  return null;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -1164,6 +1230,374 @@ async function proxyCall(source, input) {
   const data = JSON.parse(txt);
   return { items: data.items || [] };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [18] PROXY BRIDGE CLIENT (PART E)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const ProxyBridge = (() => {
+  let hostBase = null;
+  let lastProbe = 0;
+
+  async function probeHost(force = false) {
+    const ttl = 10000;
+    if (!force && hostBase && Date.now() - lastProbe < ttl) {
+      return { ok: true, base: hostBase };
+    }
+
+    for (const base of KERNEL.hostCandidates) {
+      try {
+        const res = await fetchWithTimeout(base + '/', { method: 'GET' });
+        if (res.ok) {
+          hostBase = base;
+          lastProbe = Date.now();
+          return { ok: true, base };
+        }
+      } catch { /* continue */ }
+    }
+
+    hostBase = null;
+    return { ok: false, base: null };
+  }
+
+  async function send(packet) {
+    const probe = await probeHost();
+    if (!probe.ok) {
+      return { ok: false, error: 'host_unavailable', packet };
+    }
+
+    // Generate proof before sending
+    const { proof } = await sha256Proof(packet);
+
+    const payload = {
+      packet,
+      proof,
+      kernel: KUHUL_KERNEL_ID,
+      t: Date.now(),
+    };
+
+    try {
+      const res = await fetchWithTimeout(probe.base + '/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+
+      const data = await res.json();
+
+      // Verify response has expected structure
+      if (!verifyResponse(data, packet)) {
+        throw new Error('Response verification failed');
+      }
+
+      audit_event('proxy.success', { op: packet['@op'], source: packet['@source'] });
+      return { ok: true, ...data };
+    } catch (e) {
+      audit_event('proxy.error', { op: packet['@op'], error: String(e?.message || e) });
+      return { ok: false, error: String(e?.message || e), packet };
+    }
+  }
+
+  function verifyResponse(data, packet) {
+    // Basic structural verification
+    if (!data || typeof data !== 'object') return false;
+    if (data.error) return true; // Error responses are valid
+    if (!Array.isArray(data.items)) return false;
+
+    // Verify items don't exceed requested count
+    if (data.items.length > packet['@n'] + 2) return false;
+
+    return true;
+  }
+
+  async function execGlyph(glyph, query, n = 10) {
+    const packet = resolveGlyph(glyph, query, n);
+    if (!packet) {
+      return { ok: false, error: 'invalid_glyph', glyph };
+    }
+
+    // Check cache first
+    const cacheKey = researchCacheKey(packet);
+    const cache = await caches.open(KERNEL.cache.researchName);
+    const cached = await cache.match(cacheKey);
+
+    if (cached) {
+      const age = Date.now() - parseInt(cached.headers.get('x-cached-at') || '0');
+      if (age < 300000) { // 5 min cache
+        const data = await cached.json();
+        return { ok: true, cached: true, ...data };
+      }
+    }
+
+    // Execute via proxy or direct
+    let result;
+    if (packet['@mode'] === 'PROXY') {
+      result = await send(packet);
+    } else {
+      // Direct mode: use AgentBus
+      const input = { q: packet['@q'], n: packet['@n'] };
+      const source = packet['@source'];
+
+      if (source === 'wikipedia') {
+        result = await AgentBus.run('agent.research.wikipedia', input, researchWikipedia);
+      } else if (source === 'github') {
+        result = await AgentBus.run('agent.research.github', input, researchGitHub);
+      } else {
+        result = await AgentBus.run('agent.research.router', input, researchDispatch);
+      }
+      result = { ok: true, items: result.items || [] };
+    }
+
+    // Cache successful results
+    if (result.ok && result.items) {
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+        'x-cached-at': Date.now().toString(),
+      });
+      const body = JSON.stringify({ items: result.items, packet });
+      await cache.put(cacheKey, new Response(body, { headers }));
+    }
+
+    return result;
+  }
+
+  return { probeHost, send, execGlyph, verifyResponse };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [19] UNIFIED RUNTIME v4.1 (K'UHUL π CORE LOOP)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const UnifiedRuntime = (() => {
+  // Glyph weight table (flat lookup)
+  const GLYPH = Object.freeze({
+    '@': 1.0, '@@': 2.0, '@@@': 3.0,
+    'π': Math.PI, 'φ': 1.618, 'e': Math.E,
+    'τ': Math.PI * 2, '⤍': 0.87, '↻': 0.93, '⟲': 0.76,
+  });
+
+  // Agent state container
+  const agents = new Map();
+  const eventQueue = [];
+  const clusters = [];
+  let tickCount = 0;
+
+  // Create agent (atomic block)
+  function createAgent(id, glyphs = ['@'], meta = {}) {
+    const agent = {
+      id,
+      glyphs,
+      state: {
+        activation: 0,
+        energy: 1.0,
+        phase: 0,
+      },
+      meta,
+      events: [],
+      created: Date.now(),
+    };
+    agents.set(id, agent);
+    return agent;
+  }
+
+  // Pop: invoke agent from queue
+  function pop() {
+    return eventQueue.shift() || null;
+  }
+
+  // Wo: mutate agent state
+  function wo(agent, mutation) {
+    if (!agent) return;
+    Object.assign(agent.state, mutation);
+    agent.state.phase++;
+  }
+
+  // Sek: sequence event
+  function sek(event) {
+    eventQueue.push({
+      t: Date.now(),
+      tick: tickCount,
+      ...event,
+    });
+  }
+
+  // Emit: propagate signal from agent
+  function emit(agent) {
+    if (!agent) return;
+    const signal = {
+      from: agent.id,
+      activation: agent.state.activation,
+      energy: agent.state.energy,
+      glyphs: agent.glyphs,
+      t: Date.now(),
+    };
+    agent.events.push(signal);
+    sek({ type: 'emit', agent: agent.id, signal });
+    audit_event('runtime.emit', { agent: agent.id, activation: agent.state.activation });
+  }
+
+  // Tick agent: update activation based on glyph weights
+  function tickAgent(agent) {
+    if (!agent) return;
+
+    // Sum glyph weights
+    const weight = agent.glyphs.reduce((sum, g) => sum + (GLYPH[g] || 0), 0);
+
+    // Update activation (accumulate)
+    agent.state.activation += weight * 0.01;
+
+    // Decay energy
+    agent.state.energy *= 0.99;
+
+    // Emit if activation threshold crossed
+    if (agent.state.activation > 1) {
+      emit(agent);
+      agent.state.activation *= 0.5; // Reset after emit
+    }
+  }
+
+  // Detect clusters: find agents with similar activation patterns
+  function detectClusters() {
+    const active = [...agents.values()].filter(a => a.state.activation > 0.3);
+    if (active.length < 2) return [];
+
+    const detected = [];
+    const used = new Set();
+
+    for (const a of active) {
+      if (used.has(a.id)) continue;
+
+      const cluster = [a];
+      used.add(a.id);
+
+      for (const b of active) {
+        if (used.has(b.id)) continue;
+
+        // Cluster if activation difference < 0.2
+        const diff = Math.abs(a.state.activation - b.state.activation);
+        if (diff < 0.2) {
+          cluster.push(b);
+          used.add(b.id);
+        }
+      }
+
+      if (cluster.length >= 2) {
+        detected.push({
+          id: 'cluster-' + Date.now().toString(36),
+          agents: cluster.map(x => x.id),
+          avgActivation: cluster.reduce((s, x) => s + x.state.activation, 0) / cluster.length,
+          t: Date.now(),
+        });
+      }
+    }
+
+    clusters.push(...detected);
+    return detected;
+  }
+
+  // Collapse: produce answer from cluster
+  function collapse(cluster) {
+    if (!cluster || !cluster.agents?.length) return null;
+
+    const members = cluster.agents.map(id => agents.get(id)).filter(Boolean);
+    if (!members.length) return null;
+
+    // Compute weighted answer
+    const totalWeight = members.reduce((s, a) => {
+      return s + a.glyphs.reduce((gs, g) => gs + (GLYPH[g] || 0), 0);
+    }, 0);
+
+    const answer = {
+      cluster: cluster.id,
+      agents: cluster.agents,
+      weight: totalWeight,
+      activation: cluster.avgActivation,
+      collapsed: true,
+      t: Date.now(),
+    };
+
+    audit_event('runtime.collapse', { cluster: cluster.id, weight: totalWeight });
+    return answer;
+  }
+
+  // Main clock: tick all agents
+  function tick() {
+    tickCount++;
+
+    // Process event queue
+    let event = pop();
+    while (event) {
+      // Handle event based on type
+      if (event.type === 'spawn') {
+        createAgent(event.id, event.glyphs, event.meta);
+      }
+      event = pop();
+    }
+
+    // Tick all agents
+    for (const agent of agents.values()) {
+      tickAgent(agent);
+    }
+
+    // Detect and process clusters
+    const newClusters = detectClusters();
+    const answers = newClusters.map(collapse).filter(Boolean);
+
+    return {
+      tick: tickCount,
+      agents: agents.size,
+      clusters: newClusters.length,
+      answers,
+    };
+  }
+
+  // Run N ticks
+  function run(n = 1) {
+    const results = [];
+    for (let i = 0; i < n; i++) {
+      results.push(tick());
+    }
+    return {
+      ticks: n,
+      final: results[results.length - 1],
+      answers: results.flatMap(r => r.answers),
+    };
+  }
+
+  // Status
+  function status() {
+    return {
+      tickCount,
+      agents: agents.size,
+      clusters: clusters.length,
+      queueLength: eventQueue.length,
+      agentList: [...agents.keys()],
+    };
+  }
+
+  // Spawn agent via event
+  function spawn(id, glyphs = ['@'], meta = {}) {
+    sek({ type: 'spawn', id, glyphs, meta });
+    return id;
+  }
+
+  return {
+    GLYPH,
+    createAgent,
+    spawn,
+    tick,
+    run,
+    status,
+    detectClusters,
+    collapse,
+    pop,
+    wo,
+    sek,
+    emit,
+  };
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [7] INTERNAL REST / MESSAGE ROUTER
