@@ -1,16 +1,14 @@
 <img style="width:70px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
 
-
-
 ```
-MX2LM.com     ```
+MX2LM.com
+```
+```
 MX2LM.app
-MICRONAUTAI.COM
-
 ```
-
-
-
+```
+MICRONAUTAI.COM
+```
 ```
 📊 SCXQ2 Token Dictionary
 ⚛D  = <div>                        ⟁D   = <div class="dashboard">
