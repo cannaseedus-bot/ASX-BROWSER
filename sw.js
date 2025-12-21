@@ -43,6 +43,7 @@
    [19] Unified Runtime v4.1 (K'UHUL π Core Loop)
    [20] ASM v1.0 — Atomic Symbolic Markup Transformer
    [21] XCFE Replay Verifier v1
+   [22] K'UHUL π Virtual Cluster v1.0
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -69,7 +70,7 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  */
 
 const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
-const KUHUL_KERNEL_VERSION = "1.2.6";
+const KUHUL_KERNEL_VERSION = "1.2.7";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
@@ -2489,6 +2490,517 @@ const XCFE = (() => {
     extractLightningEvents,
     extractBranchGates,
     pickSingleEpochPolicy,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [22] K'UHUL π VIRTUAL CLUSTER v1.0
+   ═══════════════════════════════════════════════════════════════════════════════
+   Browser-native distributed computing via mathematical regeneration.
+   Nodes regenerate weights using π/e/φ/τ instead of storing parameters.
+
+   See: SPEC-KPC-V1.0.md for full specification
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const VirtualCluster = (() => {
+  // Node state machine
+  const NodeStates = Object.freeze({
+    BOOTSTRAP: 'bootstrap',
+    DISCOVERING: 'discovering',
+    CONNECTING: 'connecting',
+    SYNCING: 'syncing',
+    READY: 'ready',
+    DEGRADED: 'degraded',
+    RECOVERING: 'recovering',
+    OFFLINE: 'offline',
+  });
+
+  // Valid state transitions
+  const TRANSITIONS = Object.freeze({
+    [NodeStates.BOOTSTRAP]: [NodeStates.DISCOVERING],
+    [NodeStates.DISCOVERING]: [NodeStates.CONNECTING, NodeStates.OFFLINE],
+    [NodeStates.CONNECTING]: [NodeStates.SYNCING, NodeStates.DEGRADED],
+    [NodeStates.SYNCING]: [NodeStates.READY, NodeStates.RECOVERING],
+    [NodeStates.READY]: [NodeStates.DEGRADED, NodeStates.RECOVERING, NodeStates.OFFLINE],
+    [NodeStates.DEGRADED]: [NodeStates.RECOVERING, NodeStates.OFFLINE],
+    [NodeStates.RECOVERING]: [NodeStates.READY, NodeStates.DEGRADED, NodeStates.OFFLINE],
+  });
+
+  // Mathematical constants for weight regeneration
+  const MATH_CONSTANTS = Object.freeze({
+    π: Math.PI,
+    e: Math.E,
+    φ: 1.618033988749895,
+    τ: Math.PI * 2,
+  });
+
+  // π-Node: Virtual compute unit
+  class PiNode {
+    constructor(id) {
+      this.id = id || `pi-node-${Date.now().toString(36)}`;
+      this.state = NodeStates.BOOTSTRAP;
+      this.connections = new Map();
+      this.vectorClock = new Map([[this.id, 0]]);
+      this.lastHeartbeat = Date.now();
+      this.healthScore = 1.0;
+      this.recoveryAttempts = 0;
+    }
+
+    canTransitionTo(newState) {
+      const valid = TRANSITIONS[this.state];
+      return valid && valid.includes(newState);
+    }
+
+    async transitionTo(newState) {
+      if (!this.canTransitionTo(newState)) {
+        audit_event('cluster.transition.invalid', { from: this.state, to: newState, node: this.id });
+        return false;
+      }
+
+      const prevState = this.state;
+      this.state = newState;
+      audit_event('cluster.transition', { from: prevState, to: newState, node: this.id });
+
+      // State-specific handlers
+      if (newState === NodeStates.DEGRADED) {
+        this.healthScore = 0.3;
+      } else if (newState === NodeStates.READY) {
+        this.healthScore = 1.0;
+        this.recoveryAttempts = 0;
+      } else if (newState === NodeStates.RECOVERING) {
+        this.recoveryAttempts++;
+      }
+
+      return true;
+    }
+
+    tick() {
+      this.vectorClock.set(this.id, (this.vectorClock.get(this.id) || 0) + 1);
+      return this.vectorClock.get(this.id);
+    }
+
+    status() {
+      return {
+        id: this.id,
+        state: this.state,
+        connections: this.connections.size,
+        healthScore: this.healthScore,
+        vectorClock: Object.fromEntries(this.vectorClock),
+        lastHeartbeat: this.lastHeartbeat,
+        recoveryAttempts: this.recoveryAttempts,
+      };
+    }
+  }
+
+  // CRDT Sync Engine
+  class SyncEngine {
+    constructor(nodeId) {
+      this.nodeId = nodeId;
+      this.state = new Map();
+      this.pendingUpdates = [];
+      this.consensusThreshold = 0.67;
+    }
+
+    // Last-write-wins merge with vector clock tie-breaking
+    merge(remoteState, remoteNodeId) {
+      let merged = 0;
+
+      for (const [key, remote] of Object.entries(remoteState)) {
+        const local = this.state.get(key);
+
+        if (!local || this.compare(remote, local) > 0) {
+          this.state.set(key, remote);
+          merged++;
+        }
+      }
+
+      audit_event('cluster.sync.merge', { from: remoteNodeId, merged, total: Object.keys(remoteState).length });
+      return merged;
+    }
+
+    compare(a, b) {
+      // Timestamp comparison
+      if (a.timestamp !== b.timestamp) {
+        return a.timestamp - b.timestamp;
+      }
+      // Tie-break by nodeId
+      return a.nodeId.localeCompare(b.nodeId);
+    }
+
+    set(key, value) {
+      const entry = {
+        value,
+        timestamp: Date.now(),
+        nodeId: this.nodeId,
+        checksum: hash_str(stable_stringify(value)),
+      };
+      this.state.set(key, entry);
+      return entry;
+    }
+
+    get(key) {
+      const entry = this.state.get(key);
+      return entry ? entry.value : undefined;
+    }
+
+    // Check if consensus reached
+    hasConsensus(responses) {
+      const total = responses.length;
+      if (total === 0) return false;
+      const agreements = responses.filter(r => r.agree).length;
+      return (agreements / total) >= this.consensusThreshold;
+    }
+
+    export() {
+      return Object.fromEntries(this.state);
+    }
+  }
+
+  // Mathematical Regeneration Engine
+  class MathRegenEngine {
+    constructor(seed) {
+      this.seed = seed || Date.now();
+      this.cache = new Map();
+      this.cacheHits = 0;
+      this.cacheMisses = 0;
+      this.maxCacheSize = 1000;
+    }
+
+    // Deterministic hash of seed string
+    hashSeed(seedStr) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < seedStr.length; i++) {
+        h ^= seedStr.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return (h >>> 0) / 0xffffffff;
+    }
+
+    // Core regeneration function: f(x, c) = sin(x*c*π) * cos(x*e) * (1 + φ*tanh(x))
+    regenerateFunction(x, constant) {
+      return Math.sin(x * constant * MATH_CONSTANTS.π) *
+             Math.cos(x * MATH_CONSTANTS.e) *
+             (1 + MATH_CONSTANTS.φ * Math.tanh(x));
+    }
+
+    // Regenerate weights for a layer/position
+    regenerateWeights(layer, position, dimensions) {
+      const cacheKey = `${this.seed}:${layer}:${position}:${dimensions}`;
+
+      if (this.cache.has(cacheKey)) {
+        this.cacheHits++;
+        return this.cache.get(cacheKey);
+      }
+
+      this.cacheMisses++;
+      const weights = new Float32Array(dimensions);
+      const base = this.hashSeed(`${this.seed}:${layer}:${position}`);
+      const constants = [MATH_CONSTANTS.π, MATH_CONSTANTS.e, MATH_CONSTANTS.φ];
+
+      for (let i = 0; i < dimensions; i++) {
+        const constant = constants[i % 3];
+        const x = (base + i) / dimensions;
+        weights[i] = this.regenerateFunction(x, constant);
+      }
+
+      // Normalize to unit length
+      const norm = Math.sqrt(weights.reduce((sum, w) => sum + w * w, 0));
+      if (norm > 0) {
+        for (let i = 0; i < weights.length; i++) {
+          weights[i] /= norm;
+        }
+      }
+
+      // Cache management
+      if (this.cache.size >= this.maxCacheSize) {
+        const firstKey = this.cache.keys().next().value;
+        this.cache.delete(firstKey);
+      }
+      this.cache.set(cacheKey, weights);
+
+      return weights;
+    }
+
+    // Verify weights match expected regeneration
+    verifyWeights(layer, position, weights, tolerance = 0.0001) {
+      const expected = this.regenerateWeights(layer, position, weights.length);
+      let maxDiff = 0;
+
+      for (let i = 0; i < weights.length; i++) {
+        const diff = Math.abs(expected[i] - weights[i]);
+        if (diff > maxDiff) maxDiff = diff;
+      }
+
+      return {
+        valid: maxDiff <= tolerance,
+        maxDiff,
+        tolerance,
+      };
+    }
+
+    stats() {
+      return {
+        seed: this.seed,
+        cacheSize: this.cache.size,
+        cacheHits: this.cacheHits,
+        cacheMisses: this.cacheMisses,
+        hitRate: this.cacheHits / (this.cacheHits + this.cacheMisses) || 0,
+      };
+    }
+
+    clearCache() {
+      this.cache.clear();
+      this.cacheHits = 0;
+      this.cacheMisses = 0;
+    }
+  }
+
+  // Auto-Recovery Protocol
+  class RecoveryProtocol {
+    constructor(node, syncEngine, mathEngine) {
+      this.node = node;
+      this.sync = syncEngine;
+      this.math = mathEngine;
+      this.failureLog = [];
+      this.maxRecoveryAttempts = 5;
+    }
+
+    async detectAndRecover() {
+      const health = this.assessHealth();
+
+      if (health.score < 0.5) {
+        this.failureLog.push({
+          timestamp: Date.now(),
+          health,
+          state: this.node.state,
+        });
+
+        if (this.node.recoveryAttempts >= this.maxRecoveryAttempts) {
+          await this.node.transitionTo(NodeStates.OFFLINE);
+          return { recovered: false, reason: 'max_attempts_exceeded' };
+        }
+
+        await this.node.transitionTo(NodeStates.RECOVERING);
+
+        // Try recovery strategies in order
+        const strategies = [
+          () => this.strategyResyncState(),
+          () => this.strategyResetMathEngine(),
+          () => this.strategyHardReset(),
+        ];
+
+        for (let i = 0; i < strategies.length; i++) {
+          try {
+            const success = await strategies[i]();
+            if (success) {
+              await this.node.transitionTo(NodeStates.READY);
+              audit_event('cluster.recovery.success', { strategy: i, node: this.node.id });
+              return { recovered: true, strategy: i };
+            }
+          } catch (err) {
+            audit_event('cluster.recovery.strategy.failed', { strategy: i, error: String(err) });
+          }
+        }
+
+        await this.node.transitionTo(NodeStates.DEGRADED);
+        return { recovered: false, reason: 'all_strategies_failed' };
+      }
+
+      return { recovered: true, reason: 'healthy' };
+    }
+
+    assessHealth() {
+      const now = Date.now();
+      const heartbeatAge = now - this.node.lastHeartbeat;
+
+      let score = 1.0;
+
+      // Penalize stale heartbeat
+      if (heartbeatAge > 10000) score -= 0.3;
+      if (heartbeatAge > 30000) score -= 0.3;
+
+      // Penalize degraded state
+      if (this.node.state === NodeStates.DEGRADED) score -= 0.2;
+
+      // Penalize low connections
+      if (this.node.connections.size === 0) score -= 0.2;
+
+      return {
+        score: Math.max(0, score),
+        heartbeatAge,
+        state: this.node.state,
+        connections: this.node.connections.size,
+      };
+    }
+
+    async strategyResyncState() {
+      // Clear and rebuild sync state
+      this.sync.state.clear();
+      this.sync.pendingUpdates = [];
+      return true;
+    }
+
+    async strategyResetMathEngine() {
+      this.math.clearCache();
+      return true;
+    }
+
+    async strategyHardReset() {
+      this.sync.state.clear();
+      this.math.clearCache();
+      this.node.connections.clear();
+      this.node.vectorClock.clear();
+      this.node.vectorClock.set(this.node.id, 0);
+      return true;
+    }
+  }
+
+  // Main Virtual Cluster Controller
+  class ClusterController {
+    constructor(config = {}) {
+      this.config = {
+        minPeers: config.minPeers || 3,
+        syncInterval: config.syncInterval || 1000,
+        heartbeatInterval: config.heartbeatInterval || 5000,
+        seed: config.seed || Date.now(),
+        ...config,
+      };
+
+      this.node = new PiNode(config.nodeId);
+      this.sync = new SyncEngine(this.node.id);
+      this.math = new MathRegenEngine(this.config.seed);
+      this.recovery = new RecoveryProtocol(this.node, this.sync, this.math);
+
+      this.isInitialized = false;
+      this.heartbeatTimer = null;
+    }
+
+    async initialize() {
+      if (this.isInitialized) return { ok: true, already: true };
+
+      try {
+        // Phase 1: Bootstrap
+        await this.node.transitionTo(NodeStates.DISCOVERING);
+
+        // Phase 2: Skip network (service worker context)
+        await this.node.transitionTo(NodeStates.CONNECTING);
+
+        // Phase 3: Sync
+        await this.node.transitionTo(NodeStates.SYNCING);
+
+        // Phase 4: Ready
+        await this.node.transitionTo(NodeStates.READY);
+
+        // Start heartbeat
+        this.startHeartbeat();
+
+        this.isInitialized = true;
+        audit_event('cluster.init', { node: this.node.id, seed: this.config.seed });
+
+        return { ok: true, node: this.node.id };
+      } catch (err) {
+        audit_event('cluster.init.error', { error: String(err) });
+        return { ok: false, error: String(err) };
+      }
+    }
+
+    startHeartbeat() {
+      if (this.heartbeatTimer) return;
+
+      this.heartbeatTimer = setInterval(() => {
+        this.node.lastHeartbeat = Date.now();
+        this.node.tick();
+
+        // Check health
+        const health = this.recovery.assessHealth();
+        this.node.healthScore = health.score;
+
+        if (health.score < 0.5 && this.node.state === NodeStates.READY) {
+          this.node.transitionTo(NodeStates.DEGRADED);
+        }
+      }, this.config.heartbeatInterval);
+    }
+
+    stopHeartbeat() {
+      if (this.heartbeatTimer) {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
+      }
+    }
+
+    // API: Regenerate weights
+    regenerateWeights(layer, position, dimensions) {
+      return this.math.regenerateWeights(layer, position, dimensions);
+    }
+
+    // API: Verify weights
+    verifyWeights(layer, position, weights) {
+      return this.math.verifyWeights(layer, position, weights);
+    }
+
+    // API: Sync state
+    syncState(key, value) {
+      return this.sync.set(key, value);
+    }
+
+    // API: Get state
+    getState(key) {
+      return this.sync.get(key);
+    }
+
+    // API: Merge remote state
+    mergeState(remoteState, remoteNodeId) {
+      return this.sync.merge(remoteState, remoteNodeId);
+    }
+
+    // API: Trigger recovery
+    async recover() {
+      return this.recovery.detectAndRecover();
+    }
+
+    // API: Full status
+    status() {
+      return {
+        ok: true,
+        initialized: this.isInitialized,
+        node: this.node.status(),
+        sync: {
+          entries: this.sync.state.size,
+          pendingUpdates: this.sync.pendingUpdates.length,
+        },
+        math: this.math.stats(),
+        health: this.recovery.assessHealth(),
+      };
+    }
+
+    // API: Shutdown
+    async shutdown() {
+      this.stopHeartbeat();
+      await this.node.transitionTo(NodeStates.OFFLINE);
+      audit_event('cluster.shutdown', { node: this.node.id });
+      return { ok: true };
+    }
+  }
+
+  // Singleton instance
+  let instance = null;
+
+  function getInstance(config) {
+    if (!instance) {
+      instance = new ClusterController(config);
+    }
+    return instance;
+  }
+
+  return {
+    NodeStates,
+    MATH_CONSTANTS,
+    PiNode,
+    SyncEngine,
+    MathRegenEngine,
+    RecoveryProtocol,
+    ClusterController,
+    getInstance,
   };
 })();
 

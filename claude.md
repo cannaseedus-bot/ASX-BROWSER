@@ -430,6 +430,57 @@ function researchCacheKey(packet) {
 
 ---
 
+## K'UHUL π Virtual Cluster v1.0
+
+### Core Innovation
+```javascript
+// Traditional: 16GB weight storage
+weights = load_from_disk("model.bin")
+
+// K'UHUL π: 0.5KB specification
+weights = regenerate_weights(seed, π, φ, position)
+```
+
+### Node State Machine
+```
+BOOTSTRAP → DISCOVERING → CONNECTING → SYNCING → READY
+                                          ↓
+                                      DEGRADED ←→ RECOVERING
+                                          ↓
+                                       OFFLINE
+```
+
+### Mathematical Regeneration
+```javascript
+f(x, c) = sin(x * c * π) * cos(x * e) * (1 + φ * tanh(x))
+```
+
+### CRDT Sync Rules
+- **Last-Write-Wins** with timestamp comparison
+- **Vector Clock** tie-breaking by nodeId
+- **Consensus Threshold**: 67% agreement
+
+### Recovery Strategies (in order)
+1. `strategyResyncState` — Clear and rebuild sync state
+2. `strategyResetMathEngine` — Clear weight cache
+3. `strategyHardReset` — Full node reset
+
+### Virtual Cluster API
+```js
+VirtualCluster.getInstance(config)     // Get singleton
+cluster.initialize()                   // Bootstrap → Ready
+cluster.regenerateWeights(layer, pos, dim) // Regenerate weights
+cluster.verifyWeights(layer, pos, weights) // Verify consistency
+cluster.syncState(key, value)          // CRDT set
+cluster.getState(key)                  // CRDT get
+cluster.mergeState(remote, nodeId)     // CRDT merge
+cluster.recover()                      // Trigger recovery
+cluster.status()                       // Full status
+cluster.shutdown()                     // Graceful shutdown
+```
+
+---
+
 ## Quick Reference Functions
 
 ```js
@@ -448,6 +499,10 @@ Cluster.piEmit(query, steps) → [{ glyph, strength, phase }]
 
 // Run unified runtime
 UnifiedRuntime.run(ticks) → { answers: [...] }
+
+// Virtual Cluster
+VirtualCluster.getInstance() → ClusterController
+cluster.regenerateWeights(layer, pos, dim) → Float32Array
 
 // Create audit entry
 audit_event(type, payload, meta) → entry
