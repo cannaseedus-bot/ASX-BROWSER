@@ -1,5 +1,6 @@
 <img style="width:100px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
 
+```
 📊 SCXQ2 Token Dictionary
 ⚛D  = <div>                        ⟁D   = <div class="dashboard">
 ⚛H  = <header>                     ⟁H   = <h1 class="title">
@@ -11,7 +12,7 @@
 ⟁C0  = Performance card              ⟁N1  = inactive state
 ⟁C1  = Uptime card                  ⟁N2  = inactive state
 
-
+```
 1) SCXQ2 Structural Tokens
 2) KUHUL Semantic Tokens
 3) HTML Elements
