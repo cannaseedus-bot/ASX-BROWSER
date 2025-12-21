@@ -1,4 +1,4 @@
-<img style="width:100px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
+<img style="width:70px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
 
 ```
 📊 SCXQ2 Token Dictionary
