@@ -1,82 +1,320 @@
-/* sw.js — BLACK CODE BROWSER v1.2.3
-   ATOMIC ⊗ TAPE CMS ⊗ MX2DB Kernel Router
-   ═══════════════════════════════════════════════════════════════
-   Features:
-   - Virtual file serving from manifest.json (atomic.fold)
-   - IDB session store (replaces localStorage)
-   - Fetch projection cache with CORS handshake
-   - π video renderer auto-routing
-   - Tab management (close/reorder)
-   - Tape export/import
-   - Canvas DOM projection (API → Canvas rendering)
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   sw.js — K'UHUL π KERNEL (SEALED)
+   ASX / MX2LM / BLACK CODE BROWSER
+   ═══════════════════════════════════════════════════════════════════════════════
 
-const SW_VERSION = '1.2.3';
-const CACHE_NAME = `blackcode-cache-v${SW_VERSION}`;
-const CORE_ASSETS = ['/', '/index.html', '/manifest.json', '/sw.js'];
-const PROJECTION_CACHE = `blackcode-projection-v${SW_VERSION}`;
+   ARCHITECTURE:
+   ┌─────────────────────────────────────────────────────────────┐
+   │                        index.html                           │
+   │                (Ghost Shell / Canvas / UI)                  │
+   │   - No logic, No authority, All actions → sw.js             │
+   └───────────────────────▲─────────────────────────────────────┘
+                           │ fetch / postMessage
+   ┌───────────────────────┴─────────────────────────────────────┐
+   │                         sw.js                                │
+   │                  K'UHUL π KERNEL (SEALED)                    │
+   └───────────────────────┬─────────────────────────────────────┘
+                           │ localhost (optional)
+   ┌───────────────────────┴─────────────────────────────────────┐
+   │                  mx2lm-host.exe (OPTIONAL)                  │
+   │        Python / Native Acceleration / Model Bridge           │
+   └─────────────────────────────────────────────────────────────┘
 
-/* ══════════════════════════════════════════════════════════════
-   INSTALL / ACTIVATE
-   ══════════════════════════════════════════════════════════════ */
+   SECTIONS:
+   [0] Kernel Header & Law
+   [1] Immutable Kernel Constants
+   [2] IDB Storage Layer
+   [3] Manifest Projection Engine
+   [4] JavaCrypt Execution Firewall
+   [5] π-K'UHUL Cluster Runtime
+   [6] Optional Native Host Bridge (mx2lm-host.exe)
+   [7] Internal REST / Message Router
+   [8] Fetch Strategy & Cache
+   [9] Lifecycle & Boot Sequencing
+   [10] Message / Agent Bridge
 
-self.addEventListener('install', (e) => {
-  e.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(CORE_ASSETS);
-    self.skipWaiting();
-  })());
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/// <reference lib="webworker" />
+/* global self, clients, indexedDB, caches, fetch, Response, Headers, Blob, URL, TextEncoder, TextDecoder, Worker */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [0] KERNEL HEADER & LAW
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SYSTEM_MODE = "FIELD_ONLY";
+
+if (SYSTEM_MODE !== "FIELD_ONLY") {
+  throw new Error("Tensor-based inference is forbidden. K'UHUL π operates in FIELD_ONLY mode.");
+}
+
+/**
+ * SYSTEM LAW (LOCKED):
+ * MODEL ≠ FILE       TOKENS = GLYPHS      TRUTH = EVENT
+ * MODEL ≠ GPU        THOUGHT = SIGNAL     VALIDITY = INVARIANT
+ * MODEL ≠ TOKENS     MODEL = FIELD        ANSWER = CLUSTER COLLAPSE
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [1] IMMUTABLE KERNEL CONSTANTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const KERNEL = Object.freeze({
+  v: "1.2.3",
+  name: "K'UHUL π KERNEL",
+  build: "mx2lm-blackcode-kernel",
+  mode: SYSTEM_MODE,
+
+  // Glyph Table (compressed weight carriers)
+  glyphs: Object.freeze({
+    "@":   { base: 1.0 },
+    "@@":  { base: 2.0 },
+    "@@@": { base: 3.0 },
+    "π":   { base: Math.PI },
+    "φ":   { base: 1.6180339887 },
+    "e":   { base: Math.E },
+    "τ":   { base: Math.PI * 2 },
+    "⤍":   { base: 0.87 },
+    "↻":   { base: 0.93 },
+    "⟲":   { base: 0.76 },
+  }),
+
+  // Optional native host ports
+  hostCandidates: Object.freeze([
+    "http://127.0.0.1:8081",   // kuhul_pi_merged_runtime.py default
+    "http://127.0.0.1:61680",
+    "http://127.0.0.1:61681",
+  ]),
+
+  // Cache names
+  cache: Object.freeze({
+    staticName: "mx2lm-static-v1.2.3",
+    runtimeName: "mx2lm-runtime-v1.2.3",
+    projectionName: "mx2lm-projection-v1.2.3",
+  }),
+
+  // JavaCrypt sandbox limits
+  limits: Object.freeze({
+    maxPayloadBytes: 256 * 1024,
+    maxResultBytes: 256 * 1024,
+    maxExecMs: 1200,
+    maxOps: 10_000,
+    maxJobsInFlight: 64,
+  }),
+
+  // Kernel API routes
+  routes: Object.freeze({
+    manifest: "/manifest.json",
+    apiPrefix: "/_mx2/api",
+    exec: "/_mx2/api/exec",
+    clusterRun: "/_mx2/api/cluster/run",
+    clusterStatus: "/_mx2/api/cluster/status",
+    hostProbe: "/_mx2/api/host/probe",
+    hostProxy: "/_mx2/api/host/proxy",
+    storageGet: "/_mx2/api/storage/get",
+    storagePut: "/_mx2/api/storage/put",
+    piEmit: "/_mx2/api/pi/emit",
+    piInfer: "/_mx2/api/pi/infer",
+  }),
+
+  // SCXQ2 field map for compression
+  fieldMap: Object.freeze({
+    'id': 0x01, 'name': 0x02, 'type': 0x03, 'content': 0x04,
+    'tags': 0x05, 'created': 0x06, 'modified': 0x07, 'size': 0x08,
+    'compression': 0x09, 'version': 0x0A, 'author': 0x0B, 'meta': 0x0C
+  }),
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil((async () => {
-    // Clean old caches
-    const keys = await caches.keys();
-    await Promise.all(
-      keys.filter(k => k.startsWith('blackcode-') && k !== CACHE_NAME && k !== PROJECTION_CACHE)
-          .map(k => caches.delete(k))
-    );
-    await self.clients.claim();
-  })());
-});
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [2] IDB STORAGE LAYER
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ══════════════════════════════════════════════════════════════
-   MANIFEST DB HELPERS
-   ══════════════════════════════════════════════════════════════ */
+const utf8 = {
+  enc: new TextEncoder(),
+  dec: new TextDecoder(),
+};
 
-async function getManifestJSON() {
-  try {
-    const res = await fetch('/manifest.json', { cache: 'no-cache' });
-    return res.json();
-  } catch {
-    return null;
+const DB = {
+  name: "mx2lm_kernel_db",
+  v: 2,
+  stores: {
+    kv: "kv",
+    tapes: "tapes",
+    sessions: "sessions",
+    tabs: "tabs",
+    activity: "activity",
+    endpoints: "endpoints",
+    settings: "settings",
+    projectionCache: "projectionCache",
+  },
+};
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB.name, DB.v);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      // Create all stores
+      for (const [name] of Object.entries(DB.stores)) {
+        if (!db.objectStoreNames.contains(name)) {
+          db.createObjectStore(name);
+        }
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(store, key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readonly");
+    const os = tx.objectStore(store);
+    const req = os.get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbPut(store, key, value) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    const req = os.put(value, key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDel(store, key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    const req = os.delete(key);
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbAll(store) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readonly");
+    const os = tx.objectStore(store);
+    const req = os.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbAllKeys(store) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readonly");
+    const os = tx.objectStore(store);
+    const req = os.getAllKeys();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbClear(store) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    const req = os.clear();
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [3] MANIFEST PROJECTION ENGINE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const MANIFEST_KEY = "manifest.mutable";
+const MANIFEST_SEED_KEY = "manifest.seed.cached";
+
+function deepMerge(a, b) {
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    const out = Array.isArray(a) ? a.slice() : { ...a };
+    for (const k of Object.keys(b)) {
+      const av = out[k];
+      const bv = b[k];
+      if (av && bv && typeof av === "object" && typeof bv === "object" && !Array.isArray(bv)) {
+        out[k] = deepMerge(av, bv);
+      } else {
+        out[k] = bv;
+      }
+    }
+    return out;
   }
+  return b ?? a;
 }
 
-function jsonResponse(obj, status = 200, headers = {}) {
-  return new Response(JSON.stringify(obj, null, 2), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers }
-  });
+async function getSeedManifest() {
+  const cached = await idbGet(DB.stores.kv, MANIFEST_SEED_KEY);
+  if (cached) return cached;
+
+  try {
+    const url = new URL(KERNEL.routes.manifest, self.location.origin);
+    url.searchParams.set("__seed", "1");
+    const res = await fetch(url.toString(), { cache: "no-store" });
+    if (res.ok) {
+      const seed = await res.json();
+      await idbPut(DB.stores.kv, MANIFEST_SEED_KEY, seed);
+      return seed;
+    }
+  } catch { /* fallback below */ }
+
+  // Minimal seed fallback
+  return {
+    name: "MX2LM OS — K'UHUL π",
+    short_name: "MX2LM",
+    version: KERNEL.v,
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    background_color: "#020617",
+    theme_color: "#16f2aa",
+    description: "K'UHUL π three-file OS (index.html + sw.js + manifest.json)",
+    icons: [],
+    mx2: {
+      law: "ASX = XCFE = XJSON = KUHUL = AST = ATOMIC_BLOCK",
+      kernel: { v: KERNEL.v, mode: KERNEL.mode },
+      tapes: { index: [], byId: {} },
+      settings: {},
+      session: { canvasTabs: [], activeTab: null },
+    },
+    atomic: {
+      fold: {
+        "atomic.css": `:root{--bg:#020617;--fg:#e6fffa;--accent:#16f2aa}`,
+        "atomic.xjson": `{"version":"${KERNEL.v}","mode":"${KERNEL.mode}"}`,
+      }
+    }
+  };
 }
 
-function textResponse(txt, contentType = 'text/plain; charset=utf-8', status = 200, headers = {}) {
-  return new Response(txt, { status, headers: { 'Content-Type': contentType, ...headers } });
+async function getDynamicManifest() {
+  const seed = await getSeedManifest();
+  const mutable = (await idbGet(DB.stores.kv, MANIFEST_KEY)) || {};
+  return deepMerge(seed, mutable);
 }
 
-function htmlResponse(html, status = 200) {
-  return new Response(html, {
-    status,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-  });
+async function patchMutableManifest(patchObj) {
+  const cur = (await idbGet(DB.stores.kv, MANIFEST_KEY)) || {};
+  const next = deepMerge(cur, patchObj);
+  await idbPut(DB.stores.kv, MANIFEST_KEY, next);
+  return next;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   VIRTUAL FILE SERVING (atomic.fold)
-   ══════════════════════════════════════════════════════════════ */
-
+// Virtual file serving from atomic.fold
 async function virtualFromAtomicFold(pathname) {
-  const m = await getManifestJSON();
+  const m = await getDynamicManifest();
   if (!m?.atomic?.fold) return null;
 
   const fold = m.atomic.fold;
@@ -85,36 +323,557 @@ async function virtualFromAtomicFold(pathname) {
   if (fold[key] == null) return null;
 
   const content = fold[key];
+  const ct = key.endsWith('.css') ? 'text/css; charset=utf-8'
+           : key.endsWith('.json') || key.endsWith('.xjson') ? 'application/json; charset=utf-8'
+           : key.endsWith('.html') ? 'text/html; charset=utf-8'
+           : 'text/plain; charset=utf-8';
 
-  if (key.endsWith('.css')) return textResponse(content, 'text/css; charset=utf-8');
-  if (key.endsWith('.xjson') || key.endsWith('.json')) return textResponse(content, 'application/json; charset=utf-8');
-  if (key.endsWith('.khl')) return textResponse(content, 'text/plain; charset=utf-8');
-  if (key.endsWith('.html')) return htmlResponse(content);
-
-  return textResponse(content, 'text/plain; charset=utf-8');
+  return new Response(content, {
+    status: 200,
+    headers: { "Content-Type": ct, "Cache-Control": "no-store" }
+  });
 }
 
-/* ══════════════════════════════════════════════════════════════
-   FETCH PROJECTION CACHE (CORS bypass via DOM projection)
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [4] JAVACRYPT EXECUTION FIREWALL
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-const PROJECTION_HANDLERS = {
-  // π video renderer routes
-  'π:video': async (url) => {
-    return { type: 'video', url, renderer: 'canvas-video' };
-  },
-  'π:stream': async (url) => {
-    return { type: 'stream', url, renderer: 'canvas-stream' };
-  },
-  'π:image': async (url) => {
-    return { type: 'image', url, renderer: 'canvas-image' };
+const JavaCrypt = (() => {
+  let execWorker = null;
+  let execWorkerBusy = false;
+
+  function bytesOf(obj) {
+    try {
+      return utf8.enc.encode(typeof obj === "string" ? obj : JSON.stringify(obj)).byteLength;
+    } catch {
+      return Infinity;
+    }
   }
-};
 
+  function ensureWorker() {
+    if (execWorker) return execWorker;
+
+    const workerSource = `
+      // JavaCrypt Worker — sandboxed execution
+      // NO DOM. NO network. NO importScripts.
+      const ENC = new TextEncoder();
+
+      function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+      // π-KUHUL op interpreter (glyph-weighted)
+      function runProgram(prog, limits) {
+        const started = Date.now();
+        const maxOps = limits.maxOps || 10000;
+
+        const S = { vars: Object.create(null), out: [] };
+        const ops = Array.isArray(prog.ops) ? prog.ops : [];
+
+        for (let i = 0; i < ops.length; i++) {
+          if (i > maxOps) throw new Error("maxOps exceeded");
+          if (Date.now() - started > (limits.maxExecMs || 1200)) throw new Error("timeout");
+
+          const op = ops[i] || {};
+          const t = op.op;
+
+          if (t === "set") {
+            S.vars[String(op.k || "")] = op.v;
+          } else if (t === "push") {
+            S.out.push(op.v);
+          } else if (t === "math.add") {
+            S.out.push(Number(op.a || 0) + Number(op.b || 0));
+          } else if (t === "math.mul") {
+            S.out.push(Number(op.a || 0) * Number(op.b || 0));
+          } else if (t === "math.sin") {
+            S.out.push(Math.sin(Number(op.a || 0)));
+          } else if (t === "math.pi") {
+            S.out.push(Math.PI * Number(op.factor || 1));
+          } else if (t === "glyph.weight") {
+            // Return glyph base weight
+            const glyphTable = {
+              "@": 1.0, "@@": 2.0, "@@@": 3.0,
+              "π": Math.PI, "φ": 1.6180339887, "e": Math.E,
+              "τ": Math.PI * 2, "⤍": 0.87, "↻": 0.93, "⟲": 0.76
+            };
+            S.out.push(glyphTable[op.glyph] || 0);
+          } else if (t === "tokenize.pi") {
+            // π token emission
+            const n = clamp(Number(op.n || 24), 1, 256);
+            const seed = Number(op.seed || 1);
+            const glyphs = ["@", "@@", "@@@", "π", "φ", "e", "τ", "⤍", "↻", "⟲"];
+            const tokens = [];
+            for (let j = 0; j < n; j++) {
+              const g = glyphs[(seed + j * 7) % glyphs.length];
+              const strength = Math.abs(Math.sin(seed + j));
+              tokens.push({ glyph: g, strength, phase: j });
+            }
+            S.out.push({ tokens });
+          } else {
+            throw new Error("op_not_allowed:" + t);
+          }
+        }
+
+        return { vars: S.vars, out: S.out, ms: Date.now() - started };
+      }
+
+      self.onmessage = (ev) => {
+        const msg = ev.data || {};
+        const id = msg.id;
+        try {
+          if (msg.type !== "exec") throw new Error("bad_type");
+          const result = runProgram(msg.program || {}, msg.limits || {});
+          const bytes = ENC.encode(JSON.stringify(result)).byteLength;
+          if (bytes > (msg.limits?.maxResultBytes || 262144)) throw new Error("result_too_large");
+          self.postMessage({ id, ok: true, result });
+        } catch (e) {
+          self.postMessage({ id, ok: false, error: String(e?.message || e) });
+        }
+      };
+    `;
+
+    const blob = new Blob([workerSource], { type: "application/javascript" });
+    execWorker = new Worker(URL.createObjectURL(blob));
+    return execWorker;
+  }
+
+  async function exec(program, caps = {}) {
+    const payloadBytes = bytesOf(program);
+    if (payloadBytes > KERNEL.limits.maxPayloadBytes) {
+      throw new Error("payload_too_large");
+    }
+
+    if (execWorkerBusy) {
+      throw new Error("executor_busy");
+    }
+    execWorkerBusy = true;
+
+    const worker = ensureWorker();
+    const id = "jc_" + Math.random().toString(16).slice(2);
+
+    const limits = {
+      maxExecMs: KERNEL.limits.maxExecMs,
+      maxOps: KERNEL.limits.maxOps,
+      maxResultBytes: KERNEL.limits.maxResultBytes,
+    };
+
+    const res = await new Promise((resolve) => {
+      const onMsg = (ev) => {
+        const msg = ev.data || {};
+        if (msg.id !== id) return;
+        worker.removeEventListener("message", onMsg);
+        resolve(msg);
+      };
+      worker.addEventListener("message", onMsg);
+      worker.postMessage({ id, type: "exec", program, limits });
+
+      setTimeout(() => {
+        worker.removeEventListener("message", onMsg);
+        resolve({ id, ok: false, error: "timeout_host" });
+      }, limits.maxExecMs + 200);
+    });
+
+    execWorkerBusy = false;
+
+    if (!res.ok) throw new Error(res.error || "exec_failed");
+    return res.result;
+  }
+
+  return { exec, bytesOf };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [5] π-K'UHUL CLUSTER RUNTIME
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const Cluster = (() => {
+  const state = {
+    boot: Date.now(),
+    jobsTotal: 0,
+    jobsOk: 0,
+    jobsFail: 0,
+    inFlight: 0,
+    workers: [],
+    rr: 0,
+  };
+
+  function init(n = 4) {
+    state.workers = [];
+    for (let i = 0; i < n; i++) {
+      state.workers.push({
+        id: i,
+        state: "ready",
+        jobsOk: 0,
+        jobsFail: 0,
+        lastMs: 0,
+      });
+    }
+  }
+
+  async function runJob(job) {
+    if (state.inFlight >= KERNEL.limits.maxJobsInFlight) {
+      return { ok: false, error: "cluster_backpressure" };
+    }
+
+    const worker = state.workers[state.rr % state.workers.length];
+    state.rr++;
+    state.inFlight++;
+    state.jobsTotal++;
+    worker.state = "busy";
+
+    try {
+      const result = await JavaCrypt.exec(job.program || {}, job.caps || {});
+      worker.jobsOk++;
+      worker.lastMs = result.ms || 0;
+      state.jobsOk++;
+      return { ok: true, worker: worker.id, result };
+    } catch (e) {
+      worker.jobsFail++;
+      state.jobsFail++;
+      return { ok: false, worker: worker.id, error: String(e?.message || e) };
+    } finally {
+      worker.state = "ready";
+      state.inFlight--;
+    }
+  }
+
+  async function runBatch(jobs = []) {
+    const started = Date.now();
+    const results = [];
+    const concurrency = Math.min(state.workers.length, 8);
+    let idx = 0;
+
+    async function pump() {
+      while (idx < jobs.length) {
+        const j = jobs[idx++];
+        const r = await runJob(j);
+        results.push(r);
+      }
+    }
+
+    const runners = [];
+    for (let i = 0; i < concurrency; i++) runners.push(pump());
+    await Promise.all(runners);
+
+    const elapsed = (Date.now() - started) / 1000;
+    const okCount = results.filter((r) => r.ok).length;
+
+    return {
+      ok: true,
+      total: jobs.length,
+      completed: okCount,
+      failed: jobs.length - okCount,
+      elapsed_s: Math.round(elapsed * 100) / 100,
+      throughput: elapsed > 0 ? Math.round((jobs.length / elapsed) * 10) / 10 : 0,
+      results,
+    };
+  }
+
+  function status() {
+    return {
+      ok: true,
+      kernel: KERNEL.v,
+      mode: KERNEL.mode,
+      up_s: Math.floor((Date.now() - state.boot) / 1000),
+      workers: state.workers.length,
+      inFlight: state.inFlight,
+      jobsTotal: state.jobsTotal,
+      jobsOk: state.jobsOk,
+      jobsFail: state.jobsFail,
+      workerStates: state.workers.map((w) => ({
+        id: w.id,
+        state: w.state,
+        jobsOk: w.jobsOk,
+        jobsFail: w.jobsFail,
+        lastMs: w.lastMs,
+      })),
+    };
+  }
+
+  // π Token Emission (NO TOKENIZER)
+  function piEmit(query, steps = 24) {
+    const seed = query.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+    const glyphKeys = Object.keys(KERNEL.glyphs);
+    const tokens = [];
+
+    for (let i = 0; i < steps; i++) {
+      const glyph = glyphKeys[(seed + i * 7) % glyphKeys.length];
+      const strength = Math.abs(Math.sin(seed + i)) * KERNEL.glyphs[glyph].base;
+      tokens.push({ glyph, strength, phase: i });
+    }
+
+    return tokens;
+  }
+
+  return { init, runJob, runBatch, status, piEmit };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [6] OPTIONAL NATIVE HOST BRIDGE (mx2lm-host.exe / kuhul_pi_merged_runtime.py)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const Host = (() => {
+  let cached = { ok: false, base: null, ts: 0 };
+
+  async function probe(force = false) {
+    const ttl = 5000;
+    if (!force && cached.ts && Date.now() - cached.ts < ttl) return cached;
+
+    for (const base of KERNEL.hostCandidates) {
+      try {
+        const res = await fetch(base + "/", { method: "GET" });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          cached = { ok: true, base, ts: Date.now(), runtime: data.runtime || "unknown" };
+          return cached;
+        }
+      } catch { /* continue */ }
+    }
+    cached = { ok: false, base: null, ts: Date.now() };
+    return cached;
+  }
+
+  async function proxy(path, init) {
+    const p = await probe(false);
+    if (!p.ok) return { ok: false, error: "host_not_found" };
+
+    const url = p.base + path;
+    try {
+      const res = await fetch(url, init);
+      const ct = res.headers.get("content-type") || "application/octet-stream";
+      const buf = await res.arrayBuffer();
+      return { ok: res.ok, status: res.status, contentType: ct, body: buf };
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) };
+    }
+  }
+
+  // Forward inference to Python host
+  async function infer(query, events = [], ticks = 50) {
+    const p = await probe(false);
+    if (!p.ok) {
+      // Fallback: run locally via Cluster
+      const tokens = Cluster.piEmit(query, 24);
+      return {
+        ok: true,
+        local: true,
+        answer: "Local π emission (no host)",
+        tokens,
+        confidence: 0.5,
+        agents: tokens.length,
+      };
+    }
+
+    try {
+      const res = await fetch(p.base + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, events, ticks }),
+      });
+      const data = await res.json();
+      return { ok: true, local: false, ...data };
+    } catch (e) {
+      return { ok: false, error: String(e?.message || e) };
+    }
+  }
+
+  return { probe, proxy, infer };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [7] INTERNAL REST / MESSAGE ROUTER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+function jsonResponse(obj, status = 200, headers = {}) {
+  const body = utf8.enc.encode(JSON.stringify(obj, null, 2));
+  return new Response(body, {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Access-Control-Allow-Origin": "*",
+      ...headers,
+    },
+  });
+}
+
+function badRequest(message) {
+  return jsonResponse({ ok: false, error: message }, 400);
+}
+
+function notFound(message = "Not found") {
+  return jsonResponse({ ok: false, error: message }, 404);
+}
+
+async function handleApi(req) {
+  const url = new URL(req.url);
+  const path = url.pathname;
+
+  async function readJson() {
+    const ct = req.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return null;
+    const txt = await req.text();
+    if (!txt) return null;
+    return JSON.parse(txt);
+  }
+
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
+
+  // Storage
+  if (path === KERNEL.routes.storageGet && req.method === "GET") {
+    const key = url.searchParams.get("key") || "";
+    const v = await idbGet(DB.stores.kv, key);
+    return jsonResponse({ ok: true, key, value: v ?? null });
+  }
+  if (path === KERNEL.routes.storagePut && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (!body.key) return badRequest("missing_key");
+    await idbPut(DB.stores.kv, String(body.key), body.value);
+    return jsonResponse({ ok: true });
+  }
+
+  // JavaCrypt Exec
+  if (path === KERNEL.routes.exec && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (!body.program) return badRequest("missing_program");
+    try {
+      const result = await JavaCrypt.exec(body.program, body.caps || {});
+      return jsonResponse({ ok: true, result });
+    } catch (e) {
+      return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+    }
+  }
+
+  // Cluster
+  if (path === KERNEL.routes.clusterRun && req.method === "POST") {
+    const body = (await readJson()) || {};
+    if (Array.isArray(body.batch)) {
+      const out = await Cluster.runBatch(body.batch);
+      return jsonResponse(out);
+    }
+    const out = await Cluster.runJob(body);
+    return jsonResponse(out);
+  }
+  if (path === KERNEL.routes.clusterStatus && req.method === "GET") {
+    return jsonResponse(Cluster.status());
+  }
+
+  // π Emit
+  if (path === KERNEL.routes.piEmit && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const tokens = Cluster.piEmit(body.query || "", body.steps || 24);
+    return jsonResponse({ ok: true, tokens });
+  }
+
+  // π Infer (uses Host if available)
+  if (path === KERNEL.routes.piInfer && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const result = await Host.infer(body.query || "", body.events || [], body.ticks || 50);
+    return jsonResponse(result);
+  }
+
+  // Host
+  if (path === KERNEL.routes.hostProbe && req.method === "GET") {
+    const out = await Host.probe(true);
+    return jsonResponse(out);
+  }
+  if (path === KERNEL.routes.hostProxy && req.method === "POST") {
+    const body = (await readJson()) || {};
+    const proxyPath = String(body.path || "");
+    if (!proxyPath.startsWith("/")) return badRequest("path_must_start_with_slash");
+    const init = {
+      method: body.method || "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body.body ? JSON.stringify(body.body) : undefined,
+    };
+    const prox = await Host.proxy(proxyPath, init);
+    if (!prox.ok) return jsonResponse(prox, 502);
+
+    return new Response(prox.body, {
+      status: prox.status || 200,
+      headers: {
+        "Content-Type": prox.contentType || "application/octet-stream",
+        "Cache-Control": "no-store",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  }
+
+  return notFound("unknown_api_route");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [8] FETCH STRATEGY & CACHE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+async function handleFetch(event) {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only same-origin routing
+  if (url.origin !== self.location.origin) {
+    // Cross-origin with projection cache for CORS bypass
+    return fetchWithProjection(req, url);
+  }
+
+  // Kernel API
+  if (url.pathname.startsWith(KERNEL.routes.apiPrefix)) {
+    return handleApi(req);
+  }
+
+  // Dynamic manifest (unless seed fetch)
+  if (url.pathname === KERNEL.routes.manifest && !url.searchParams.has("__seed")) {
+    const dyn = await getDynamicManifest();
+    return jsonResponse(dyn, 200, {
+      "Content-Type": "application/manifest+json; charset=utf-8",
+    });
+  }
+
+  // Virtual atomic endpoints
+  const virtualPaths = ['/atomic.css', '/atomic.xjson', '/atomic.khl', '/atomic.html'];
+  if (virtualPaths.includes(url.pathname)) {
+    const v = await virtualFromAtomicFold(url.pathname);
+    return v || new Response('Not found', { status: 404 });
+  }
+
+  // π projection routes
+  if (url.pathname.startsWith('/π/') || url.searchParams.has('π')) {
+    const piType = url.pathname.split('/')[2] || url.searchParams.get('π');
+    const targetUrl = url.searchParams.get('url') || url.pathname.split('/').slice(3).join('/');
+    return jsonResponse({
+      ok: true,
+      projection: {
+        type: piType,
+        url: targetUrl,
+        renderer: `canvas-${piType}`
+      }
+    });
+  }
+
+  // Cache-first for same-origin
+  const cache = await caches.open(KERNEL.cache.staticName);
+  const cached = await cache.match(req);
+  if (cached) return cached;
+
+  const res = await fetch(req);
+  if (req.method === "GET" && res.ok) {
+    cache.put(req, res.clone()).catch(() => {});
+  }
+  return res;
+}
+
+// Projection cache for cross-origin (CORS bypass via caching)
 async function fetchWithProjection(request, url) {
-  const projectionCache = await caches.open(PROJECTION_CACHE);
+  const projectionCache = await caches.open(KERNEL.cache.projectionName);
 
-  // Check cache first
   const cached = await projectionCache.match(request);
   if (cached) {
     const age = Date.now() - parseInt(cached.headers.get('x-cached-at') || '0');
@@ -128,7 +887,7 @@ async function fetchWithProjection(request, url) {
       const clone = res.clone();
       const headers = new Headers(clone.headers);
       headers.set('x-cached-at', Date.now().toString());
-      headers.set('x-projection-version', SW_VERSION);
+      headers.set('x-kernel-version', KERNEL.v);
 
       const body = await clone.arrayBuffer();
       const cachedRes = new Response(body, {
@@ -142,1048 +901,195 @@ async function fetchWithProjection(request, url) {
 
     return res;
   } catch (err) {
-    // Return cached even if stale on network failure
     if (cached) return cached;
     throw err;
   }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   SW FETCH ROUTER
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [9] LIFECYCLE & BOOT SEQUENCING
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+self.addEventListener("install", (event) => {
+  event.waitUntil((async () => {
+    // Precache minimal assets
+    const cache = await caches.open(KERNEL.cache.staticName);
+    await cache.addAll([
+      "/",
+      KERNEL.routes.manifest + "?__seed=1",
+      "/sw.js",
+    ]);
 
-  // Virtual atomic endpoints
-  if (url.origin === location.origin) {
-    const virtualPaths = ['/atomic.css', '/atomic.xjson', '/atomic.khl', '/atomic.html'];
-    if (virtualPaths.includes(url.pathname)) {
-      event.respondWith((async () => {
-        const v = await virtualFromAtomicFold(url.pathname);
-        return v || new Response('Not found', { status: 404 });
-      })());
-      return;
+    // Boot cluster
+    Cluster.init(4);
+
+    // Seed dynamic manifest if not present
+    const existing = await idbGet(DB.stores.kv, MANIFEST_KEY);
+    if (!existing) {
+      await patchMutableManifest({
+        mx2: {
+          kernel: { v: KERNEL.v, mode: KERNEL.mode, installed_at: Date.now() },
+          session: { canvasTabs: [], activeTab: null },
+          host: { enabled: true },
+        },
+      });
     }
-  }
 
-  // π projection routes (video/stream/image)
-  if (url.pathname.startsWith('/π/') || url.searchParams.has('π')) {
-    event.respondWith((async () => {
-      const piType = url.pathname.split('/')[2] || url.searchParams.get('π');
-      const targetUrl = url.searchParams.get('url') || url.pathname.split('/').slice(3).join('/');
-
-      if (PROJECTION_HANDLERS[`π:${piType}`]) {
-        const meta = await PROJECTION_HANDLERS[`π:${piType}`](targetUrl);
-        return jsonResponse({ ok: true, projection: meta });
-      }
-
-      return jsonResponse({ ok: false, error: 'Unknown π route' }, 400);
-    })());
-    return;
-  }
-
-  // Cache-first for same-origin core assets
-  if (url.origin === location.origin) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(event.request);
-      if (cached) return cached;
-
-      const res = await fetch(event.request);
-      if (event.request.method === 'GET' && res.ok) {
-        cache.put(event.request, res.clone());
-      }
-      return res;
-    })());
-    return;
-  }
-
-  // Cross-origin with projection cache
-  event.respondWith(fetchWithProjection(event.request, url));
+    self.skipWaiting();
+  })());
 });
 
-/* ══════════════════════════════════════════════════════════════
-   INDEXEDDB — IDB SESSION STORE
-   ══════════════════════════════════════════════════════════════ */
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
 
-const IDB = {
-  dbp: null,
-  DB_NAME: 'mx2db_blackcode',
-  DB_VERSION: 2,
-
-  STORES: {
-    tapes: { keyPath: 'id', indexes: ['name', 'type', 'modified'] },
-    settings: { keyPath: 'k' },
-    endpoints: { keyPath: 'id' },
-    activity: { keyPath: 'ts' },
-    sessions: { keyPath: 'id', indexes: ['url', 'updatedAt'] },
-    tabs: { keyPath: 'id', indexes: ['order', 'active'] },
-    projectionCache: { keyPath: 'url', indexes: ['cachedAt', 'type'] }
-  },
-
-  open() {
-    if (this.dbp) return this.dbp;
-
-    this.dbp = new Promise((resolve, reject) => {
-      const req = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-
-      req.onupgradeneeded = (e) => {
-        const db = req.result;
-
-        for (const [name, config] of Object.entries(this.STORES)) {
-          if (!db.objectStoreNames.contains(name)) {
-            const store = db.createObjectStore(name, { keyPath: config.keyPath });
-            if (config.indexes) {
-              for (const idx of config.indexes) {
-                store.createIndex(idx, idx, { unique: false });
-              }
-            }
-          }
-        }
-      };
-
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-
-    return this.dbp;
-  },
-
-  async tx(store, mode, fn) {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const t = db.transaction(store, mode);
-      const s = t.objectStore(store);
-      const out = fn(s);
-      t.oncomplete = () => resolve(out);
-      t.onerror = () => reject(t.error);
-    });
-  },
-
-  async get(store, key) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.get(key);
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async all(store) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.getAll();
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async put(store, val) {
-    return this.tx(store, 'readwrite', (s) => s.put(val));
-  },
-
-  async del(store, key) {
-    return this.tx(store, 'readwrite', (s) => s.delete(key));
-  },
-
-  async clear(store) {
-    return this.tx(store, 'readwrite', (s) => s.clear());
-  },
-
-  async count(store) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const r = s.count();
-      r.onsuccess = () => res(r.result);
-      r.onerror = () => rej(r.error);
-    }));
-  },
-
-  async query(store, indexName, range) {
-    return this.tx(store, 'readonly', (s) => new Promise((res, rej) => {
-      const idx = s.index(indexName);
-      const r = idx.getAll(range);
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => rej(r.error);
-    }));
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   SESSION MANAGEMENT (IDB-based)
-   ══════════════════════════════════════════════════════════════ */
-
-const SessionStore = {
-  async create(url, opts = {}) {
-    const session = {
-      id: uid(),
-      url: String(url || '').trim(),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      open: true,
-      token: uid(),
-      caps: {
-        dom_read: opts.dom_read ?? false,
-        dom_write: opts.dom_write ?? false,
-        net_fetch: opts.net_fetch ?? true,
-        storage: opts.storage ?? true,
-        js_run: opts.js_run ?? false,
-        console: opts.console ?? true
-      },
-      title: opts.title || url,
-      favicon: opts.favicon || null
-    };
-
-    await IDB.put('sessions', session);
-    await IDB.put('activity', { ts: Date.now(), op: 'session_create', id: session.id, url });
-    return session;
-  },
-
-  async get(id) {
-    return IDB.get('sessions', id);
-  },
-
-  async update(id, updates) {
-    const session = await this.get(id);
-    if (!session) return null;
-
-    Object.assign(session, updates, { updatedAt: Date.now() });
-    await IDB.put('sessions', session);
-    return session;
-  },
-
-  async close(id) {
-    return this.update(id, { open: false });
-  },
-
-  async delete(id) {
-    await IDB.del('sessions', id);
-    await IDB.put('activity', { ts: Date.now(), op: 'session_delete', id });
-  },
-
-  async listOpen() {
-    const all = await IDB.all('sessions');
-    return all.filter(s => s.open).sort((a, b) => b.updatedAt - a.updatedAt);
-  },
-
-  async listAll() {
-    return IDB.all('sessions');
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   TAB MANAGEMENT (with reorder support)
-   ══════════════════════════════════════════════════════════════ */
-
-const TabManager = {
-  async create(sessionId, opts = {}) {
-    const tabs = await IDB.all('tabs');
-    const maxOrder = tabs.reduce((max, t) => Math.max(max, t.order || 0), 0);
-
-    const tab = {
-      id: uid(),
-      sessionId,
-      order: maxOrder + 1,
-      active: opts.active ?? true,
-      pinned: opts.pinned ?? false,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-
-    // Deactivate other tabs if this one is active
-    if (tab.active) {
-      for (const t of tabs) {
-        if (t.active) {
-          t.active = false;
-          await IDB.put('tabs', t);
-        }
-      }
-    }
-
-    await IDB.put('tabs', tab);
-    return tab;
-  },
-
-  async get(id) {
-    return IDB.get('tabs', id);
-  },
-
-  async close(id) {
-    const tab = await this.get(id);
-    if (!tab) return false;
-
-    await IDB.del('tabs', id);
-
-    // Close associated session
-    if (tab.sessionId) {
-      await SessionStore.close(tab.sessionId);
-    }
-
-    // Activate next tab if this was active
-    if (tab.active) {
-      const remaining = await this.list();
-      if (remaining.length > 0) {
-        remaining[0].active = true;
-        await IDB.put('tabs', remaining[0]);
-      }
-    }
-
-    await IDB.put('activity', { ts: Date.now(), op: 'tab_close', id });
-    return true;
-  },
-
-  async activate(id) {
-    const tabs = await IDB.all('tabs');
-    for (const t of tabs) {
-      const wasActive = t.active;
-      t.active = t.id === id;
-      if (wasActive !== t.active) {
-        t.updatedAt = Date.now();
-        await IDB.put('tabs', t);
-      }
-    }
-  },
-
-  async reorder(tabId, newOrder) {
-    const tabs = await IDB.all('tabs');
-    const tab = tabs.find(t => t.id === tabId);
-    if (!tab) return false;
-
-    const oldOrder = tab.order;
-
-    for (const t of tabs) {
-      if (t.id === tabId) {
-        t.order = newOrder;
-      } else if (newOrder < oldOrder) {
-        if (t.order >= newOrder && t.order < oldOrder) t.order++;
-      } else {
-        if (t.order > oldOrder && t.order <= newOrder) t.order--;
-      }
-      await IDB.put('tabs', t);
-    }
-
-    return true;
-  },
-
-  async list() {
-    const tabs = await IDB.all('tabs');
-    return tabs.sort((a, b) => a.order - b.order);
-  },
-
-  async getActive() {
-    const tabs = await IDB.all('tabs');
-    return tabs.find(t => t.active) || null;
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   SCXQ2 COMPRESSION ENGINE
-   ══════════════════════════════════════════════════════════════ */
-
-const SCXQ2 = {
-  // Micro-agent field definitions for compression
-  FIELD_MAP: {
-    'id': 0x01, 'name': 0x02, 'type': 0x03, 'content': 0x04,
-    'tags': 0x05, 'created': 0x06, 'modified': 0x07, 'size': 0x08,
-    'compression': 0x09, 'version': 0x0A, 'author': 0x0B, 'meta': 0x0C
-  },
-
-  FIELD_MAP_REV: null,
-
-  init() {
-    this.FIELD_MAP_REV = Object.fromEntries(
-      Object.entries(this.FIELD_MAP).map(([k, v]) => [v, k])
+    // Clean old caches
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter(k => k.startsWith('mx2lm-') && !Object.values(KERNEL.cache).includes(k))
+          .map(k => caches.delete(k))
     );
-  },
 
-  compressUTF8(str) {
-    const enc = new TextEncoder().encode(str);
-    let bin = '';
-    for (let i = 0; i < enc.length; i++) bin += String.fromCharCode(enc[i]);
-    return btoa(bin);
-  },
+    // Probe host in background
+    Host.probe(false).catch(() => {});
 
-  decompressUTF8(b64) {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  },
-
-  // Field-aware compression for tapes
-  compressTape(tape) {
-    if (!this.FIELD_MAP_REV) this.init();
-
-    const compressed = {};
-    for (const [key, val] of Object.entries(tape)) {
-      const fieldId = this.FIELD_MAP[key];
-      if (fieldId && val !== undefined) {
-        if (key === 'content' && typeof val === 'string' && val.length > 100) {
-          compressed[fieldId] = this.compressUTF8(val);
-          compressed[0xFF] = true; // content compressed flag
-        } else {
-          compressed[fieldId] = val;
-        }
-      }
-    }
-    return compressed;
-  },
-
-  decompressTape(compressed) {
-    if (!this.FIELD_MAP_REV) this.init();
-
-    const tape = {};
-    const contentCompressed = compressed[0xFF];
-
-    for (const [fieldId, val] of Object.entries(compressed)) {
-      const numId = parseInt(fieldId);
-      if (numId === 0xFF) continue;
-
-      const key = this.FIELD_MAP_REV[numId];
-      if (key) {
-        if (key === 'content' && contentCompressed) {
-          tape[key] = this.decompressUTF8(val);
-        } else {
-          tape[key] = val;
-        }
-      }
-    }
-    return tape;
-  }
-};
-
-SCXQ2.init();
-
-/* ══════════════════════════════════════════════════════════════
-   TAPE EXPORT / IMPORT
-   ══════════════════════════════════════════════════════════════ */
-
-const TapeIO = {
-  async exportAll(compress = true) {
-    const tapes = await IDB.all('tapes');
-    const settings = await IDB.all('settings');
-    const endpoints = await IDB.all('endpoints');
-
-    const bundle = {
-      version: SW_VERSION,
-      exportedAt: Date.now(),
-      format: compress ? 'scxq2' : 'json',
-      tapes: compress ? tapes.map(t => SCXQ2.compressTape(t)) : tapes,
-      settings,
-      endpoints
-    };
-
-    return compress ? SCXQ2.compressUTF8(JSON.stringify(bundle)) : JSON.stringify(bundle, null, 2);
-  },
-
-  async importBundle(data, merge = false) {
-    let bundle;
-
-    try {
-      // Try to decompress first
-      const decompressed = SCXQ2.decompressUTF8(data);
-      bundle = JSON.parse(decompressed);
-    } catch {
-      // Try parsing as plain JSON
-      bundle = JSON.parse(data);
-    }
-
-    if (!bundle.version || !bundle.tapes) {
-      throw new Error('Invalid bundle format');
-    }
-
-    // Clear existing data if not merging
-    if (!merge) {
-      await IDB.clear('tapes');
-      await IDB.clear('settings');
-      await IDB.clear('endpoints');
-    }
-
-    // Import tapes
-    const tapes = bundle.format === 'scxq2'
-      ? bundle.tapes.map(t => SCXQ2.decompressTape(t))
-      : bundle.tapes;
-
-    for (const tape of tapes) {
-      if (merge) {
-        tape.id = uid(); // New ID to avoid conflicts
-      }
-      await IDB.put('tapes', tape);
-    }
-
-    // Import settings and endpoints
-    for (const s of (bundle.settings || [])) {
-      await IDB.put('settings', s);
-    }
-
-    for (const e of (bundle.endpoints || [])) {
-      await IDB.put('endpoints', e);
-    }
-
-    await IDB.put('activity', {
-      ts: Date.now(),
-      op: 'import',
-      note: `Imported ${tapes.length} tapes`,
-      merge
-    });
-
-    return { imported: tapes.length, version: bundle.version };
-  },
-
-  async exportSingleTape(id, compress = true) {
-    const tape = await IDB.get('tapes', id);
-    if (!tape) throw new Error('Tape not found');
-
-    const data = compress ? SCXQ2.compressTape(tape) : tape;
-    return compress ? SCXQ2.compressUTF8(JSON.stringify(data)) : JSON.stringify(data, null, 2);
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   CANVAS DOM PROJECTION
-   ══════════════════════════════════════════════════════════════ */
-
-const CanvasProjection = {
-  // Convert fetched HTML to canvas-renderable structure
-  async projectDOM(url) {
-    try {
-      const res = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit',
-        headers: { 'Accept': 'text/html,application/xhtml+xml,*/*' }
+    // Notify clients
+    const list = await self.clients.matchAll({ includeUncontrolled: true });
+    for (const c of list) {
+      c.postMessage({
+        type: "mx2.kernel.ready",
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode }
       });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const html = await res.text();
-      const contentType = res.headers.get('content-type') || '';
-
-      return {
-        ok: true,
-        url: res.url,
-        status: res.status,
-        contentType,
-        html,
-        projectedAt: Date.now(),
-        renderer: contentType.includes('json') ? 'json-view' : 'html-canvas'
-      };
-    } catch (err) {
-      return {
-        ok: false,
-        url,
-        error: err.message,
-        projectedAt: Date.now()
-      };
     }
-  },
+  })());
+});
 
-  // π video/media routing
-  routePiContent(url, type) {
-    const routes = {
-      'video': { renderer: 'canvas-video', controls: true },
-      'stream': { renderer: 'canvas-stream', live: true },
-      'image': { renderer: 'canvas-image', zoomable: true },
-      'audio': { renderer: 'canvas-audio', waveform: true }
-    };
-
-    return routes[type] || routes.video;
-  }
-};
-
-/* ══════════════════════════════════════════════════════════════
-   UTILITY FUNCTIONS
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [10] MESSAGE / AGENT BRIDGE
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
-
-function clamp(n, a, b) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function guessType(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  const typeMap = {
-    'js': 'javascript', 'htm': 'html', 'html': 'html',
-    'md': 'markdown', 'json': 'json', 'xml': 'xml',
-    'css': 'css', 'txt': 'text', 'svg': 'svg',
-    'mp4': 'video', 'webm': 'video', 'mp3': 'audio',
-    'wav': 'audio', 'png': 'image', 'jpg': 'image',
-    'jpeg': 'image', 'gif': 'image', 'webp': 'image'
-  };
-  return typeMap[ext] || 'binary';
-}
-
-function typeIcon(type) {
-  const icons = {
-    json: '{}', xml: '</>', html: '🌐', css: '🎨',
-    javascript: '⚡', markdown: '📝', binary: '📦',
-    video: '🎬', audio: '🎵', image: '🖼️', svg: '◇', text: '📄'
-  };
-  return icons[type] || '📄';
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + 'B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CLIENT BRIDGE
-   ══════════════════════════════════════════════════════════════ */
 
 function postAll(msg) {
   return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(list => list.forEach(c => c.postMessage(msg)));
 }
 
-function postOne(clientId, msg) {
-  return self.clients.get(clientId).then(c => c && c.postMessage(msg));
-}
+self.addEventListener("message", (event) => {
+  const msg = event.data || {};
+  const src = event.source;
 
-/* ══════════════════════════════════════════════════════════════
-   UI BOOT & SYNC
-   ══════════════════════════════════════════════════════════════ */
-
-async function uiBoot() {
-  const m = await getManifestJSON();
-  const settings = await IDB.all('settings');
-  const endpoints = await IDB.all('endpoints');
-
-  // Seed settings from manifest
-  if (settings.length === 0 && m?.mx2db?.settings) {
-    await IDB.put('settings', { k: 'settings', v: m.mx2db.settings });
+  async function reply(payload) {
+    try { src && src.postMessage(payload); } catch {}
   }
-
-  // Seed endpoints from manifest
-  if (endpoints.length === 0 && Array.isArray(m?.mx2db?.api_endpoints)) {
-    for (const ep of m.mx2db.api_endpoints) {
-      await IDB.put('endpoints', ep);
-    }
-  }
-
-  // Seed sample tapes if empty
-  const tapes = await IDB.all('tapes');
-  if (tapes.length === 0) {
-    const samples = [
-      {
-        id: uid(),
-        name: 'welcome.json',
-        type: 'json',
-        tags: ['sample', 'config'],
-        compression: 'none',
-        content: JSON.stringify({
-          app: 'Black Code Browser',
-          version: SW_VERSION,
-          features: ['IDB Sessions', 'Tab Management', 'Canvas Projection', 'Tape I/O', 'π Routing'],
-          author: 'ATOMIC ⊗ KUHUL'
-        }, null, 2),
-        created: Date.now(),
-        modified: Date.now()
-      },
-      {
-        id: uid(),
-        name: 'canvas-demo.html',
-        type: 'html',
-        tags: ['sample', 'demo'],
-        compression: 'none',
-        content: `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Canvas Demo</title></head>
-<body style="background:#020409;color:#16f2aa;font-family:monospace;padding:40px">
-<h1>⟁ BLACK CODE BROWSER</h1>
-<p>Canvas-based DOM projection active. CORS bypassed via fetch projection.</p>
-<svg id="kuhul_svg_root" width="400" height="100" style="border:1px solid #16f2aa33">
-  <path d="M0 50 Q100 0 200 50 T400 50" stroke="#16f2aa" fill="none" stroke-width="2"/>
-</svg>
-</body></html>`,
-        created: Date.now(),
-        modified: Date.now()
-      }
-    ];
-
-    for (const tape of samples) {
-      tape.size = new Blob([tape.content]).size;
-      await IDB.put('tapes', tape);
-    }
-
-    await IDB.put('activity', { ts: Date.now(), op: 'seed_samples', note: 'Created sample tapes' });
-  }
-
-  await uiRefreshAll();
-}
-
-async function uiRefreshAll() {
-  const tapes = await IDB.all('tapes');
-  tapes.sort((a, b) => (b.modified || 0) - (a.modified || 0));
-
-  const endpoints = await IDB.all('endpoints');
-  const settingsObj = (await IDB.all('settings')).find(x => x.k === 'settings')?.v || {};
-  const tabs = await TabManager.list();
-  const sessions = await SessionStore.listOpen();
-  const activity = await IDB.all('activity');
-
-  // Calculate storage stats
-  let totalSize = tapes.reduce((s, t) => s + (t.size || 0), 0);
-  const m = await getManifestJSON();
-  const limit = m?.mx2db?.storage_limit_bytes || (100 * 1024 * 1024);
-  const usedMB = Math.round((totalSize / 1024 / 1024) * 100) / 100;
-  const totalMB = Math.round((limit / 1024 / 1024) * 100) / 100;
-  const pct = limit ? clamp((totalSize / limit) * 100, 0, 100) : 0;
-
-  postAll({
-    t: 'UI_SYNC',
-    version: SW_VERSION,
-    settings: settingsObj,
-    dashboard: {
-      totalTapes: tapes.length,
-      apiConnections: endpoints.length,
-      compressionRatio: 'SCXQ2',
-      recentActivity: activity.filter(a => Date.now() - a.ts < 86400000).length,
-      systemStatus: 'OK',
-      storage: { usedMB, totalMB, pct }
-    },
-    tapes: tapes.map(t => ({
-      id: t.id, name: t.name, type: t.type, tags: t.tags || [],
-      size: t.size || 0, modified: t.modified || 0,
-      icon: typeIcon(t.type), sizeLabel: formatSize(t.size || 0)
-    })),
-    endpoints,
-    tabs: tabs.map(t => ({ id: t.id, sessionId: t.sessionId, order: t.order, active: t.active, pinned: t.pinned })),
-    sessions: sessions.map(s => ({ id: s.id, url: s.url, title: s.title, open: s.open }))
-  });
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CANVAS STATE (for animation/rendering loop)
-   ══════════════════════════════════════════════════════════════ */
-
-const CANVAS = {
-  grid: true,
-  playing: false,
-  tick: 0,
-  fps: 20
-};
-
-function canvasFrame() {
-  CANVAS.tick++;
-  postAll({ t: 'CANVAS_FRAME', state: { ...CANVAS } });
-}
-
-let canvasTimer = null;
-function canvasPlay(on) {
-  CANVAS.playing = !!on;
-  if (CANVAS.playing) {
-    if (canvasTimer) clearInterval(canvasTimer);
-    canvasTimer = setInterval(canvasFrame, 1000 / CANVAS.fps);
-  } else {
-    if (canvasTimer) clearInterval(canvasTimer);
-    canvasTimer = null;
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   MESSAGE HANDLING (UI ↔ SW)
-   ══════════════════════════════════════════════════════════════ */
-
-self.addEventListener('message', (e) => {
-  const msg = e.data || {};
-  const clientId = e.source?.id;
 
   (async () => {
-    switch (msg.t) {
-      /* ─────── BOOT ─────── */
-      case 'BOOT':
-        await uiBoot();
-        postAll({ t: 'STATUS', text: `Ready (v${SW_VERSION})` });
-        break;
-
-      /* ─────── NAVIGATION ─────── */
-      case 'NAV':
-        postAll({ t: 'STATUS', text: `Switched to ${msg.view || 'view'}` });
-        break;
-
-      /* ─────── SEARCH ─────── */
-      case 'SEARCH':
-        postAll({ t: 'STATUS', text: `Search: ${msg.q || ''}` });
-        break;
-
-      /* ─────── TAPE CRUD ─────── */
-      case 'TAPE_CREATE': {
-        const name = String(msg.name || '').trim();
-        if (!name) return postAll({ t: 'STATUS', text: 'Tape create failed: missing name' });
-
-        const type = msg.type || guessType(name);
-        let content = String(msg.content || '');
-        const compression = msg.compression || 'none';
-        const tags = Array.isArray(msg.tags) ? msg.tags : String(msg.tags || '').split(',').map(s => s.trim()).filter(Boolean);
-
-        if (compression === 'scxq2' && content) {
-          content = SCXQ2.compressUTF8(content);
-        }
-
-        const tape = {
-          id: uid(), name, type, tags, compression, content,
-          created: Date.now(), modified: Date.now()
-        };
-        tape.size = new Blob([tape.content]).size;
-
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_create', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Created tape: ${name}` });
-        break;
-      }
-
-      case 'TAPE_UPDATE': {
-        const tape = await IDB.get('tapes', msg.id);
-        if (!tape) return postAll({ t: 'STATUS', text: 'Tape not found' });
-
-        Object.assign(tape, msg.updates, { modified: Date.now() });
-        if (msg.updates.content) {
-          tape.size = new Blob([tape.content]).size;
-        }
-
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_update', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Updated tape: ${tape.name}` });
-        break;
-      }
-
-      case 'TAPE_DELETE': {
-        if (!msg.id) return;
-        await IDB.del('tapes', msg.id);
-        await IDB.put('activity', { ts: Date.now(), op: 'tape_delete', id: msg.id });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: 'Deleted tape' });
-        break;
-      }
-
-      case 'TAPE_OPEN': {
-        const tape = await IDB.get('tapes', msg.id);
-        if (!tape) return;
-
-        // Decompress if needed
-        let content = tape.content;
-        if (tape.compression === 'scxq2') {
-          try { content = SCXQ2.decompressUTF8(content); } catch {}
-        }
-
-        postAll({ t: 'TAPE_OPENED', tape: { ...tape, content } });
-        postAll({ t: 'STATUS', text: `Opened: ${tape.name}` });
-        break;
-      }
-
-      /* ─────── TAPE EXPORT/IMPORT ─────── */
-      case 'TAPE_EXPORT_ALL': {
-        const data = await TapeIO.exportAll(msg.compress !== false);
-        postAll({ t: 'TAPE_EXPORT_RESULT', data, format: msg.compress !== false ? 'scxq2' : 'json' });
-        postAll({ t: 'STATUS', text: 'Exported all tapes' });
-        break;
-      }
-
-      case 'TAPE_EXPORT_SINGLE': {
-        const data = await TapeIO.exportSingleTape(msg.id, msg.compress !== false);
-        postAll({ t: 'TAPE_EXPORT_RESULT', data, id: msg.id, format: msg.compress !== false ? 'scxq2' : 'json' });
-        postAll({ t: 'STATUS', text: 'Exported tape' });
-        break;
-      }
-
-      case 'TAPE_IMPORT': {
-        try {
-          const result = await TapeIO.importBundle(msg.data, msg.merge);
-          await uiRefreshAll();
-          postAll({ t: 'TAPE_IMPORT_RESULT', ok: true, ...result });
-          postAll({ t: 'STATUS', text: `Imported ${result.imported} tapes` });
-        } catch (err) {
-          postAll({ t: 'TAPE_IMPORT_RESULT', ok: false, error: err.message });
-          postAll({ t: 'STATUS', text: 'Import failed' });
-        }
-        break;
-      }
-
-      /* ─────── EDITOR ─────── */
-      case 'EDITOR_SAVE_AS_TAPE': {
-        const name = msg.name || `editor-${Date.now()}.${msg.type || 'txt'}`;
-        const type = msg.type || guessType(name);
-        const content = String(msg.content || '');
-        const tape = { id: uid(), name, type, tags: ['editor'], compression: 'none', content, created: Date.now(), modified: Date.now() };
-        tape.size = new Blob([tape.content]).size;
-        await IDB.put('tapes', tape);
-        await IDB.put('activity', { ts: Date.now(), op: 'editor_save', id: tape.id, name: tape.name });
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: `Saved editor → ${tape.name}` });
-        break;
-      }
-
-      /* ─────── COMPRESSION ─────── */
-      case 'SCX_COMPRESS': {
-        const out = SCXQ2.compressUTF8(String(msg.content || ''));
-        postAll({ t: 'SCX_RESULT', mode: 'compress', out });
-        postAll({ t: 'STATUS', text: 'Compressed' });
-        break;
-      }
-
-      case 'SCX_DECOMPRESS': {
-        let out = '';
-        try { out = SCXQ2.decompressUTF8(String(msg.content || '')); }
-        catch { out = 'Decompression failed'; }
-        postAll({ t: 'SCX_RESULT', mode: 'decompress', out });
-        postAll({ t: 'STATUS', text: 'Decompressed' });
-        break;
-      }
-
-      /* ─────── TAB MANAGEMENT ─────── */
-      case 'TAB_CREATE': {
-        const session = await SessionStore.create(msg.url, msg.opts);
-        const tab = await TabManager.create(session.id, { active: true });
-        await uiRefreshAll();
-        postAll({ t: 'TAB_CREATED', tab, session });
-        postAll({ t: 'STATUS', text: `Opened tab: ${msg.url}` });
-        break;
-      }
-
-      case 'TAB_CLOSE': {
-        await TabManager.close(msg.id);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_CLOSED', id: msg.id });
-        postAll({ t: 'STATUS', text: 'Closed tab' });
-        break;
-      }
-
-      case 'TAB_ACTIVATE': {
-        await TabManager.activate(msg.id);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_ACTIVATED', id: msg.id });
-        break;
-      }
-
-      case 'TAB_REORDER': {
-        await TabManager.reorder(msg.id, msg.order);
-        await uiRefreshAll();
-        postAll({ t: 'TAB_REORDERED', id: msg.id, order: msg.order });
-        break;
-      }
-
-      /* ─────── SESSION MANAGEMENT ─────── */
-      case 'SESSION_UPDATE': {
-        await SessionStore.update(msg.id, msg.updates);
-        await uiRefreshAll();
-        break;
-      }
-
-      case 'SESSION_CLOSE': {
-        await SessionStore.close(msg.id);
-        await uiRefreshAll();
-        break;
-      }
-
-      /* ─────── API REQUESTS ─────── */
-      case 'API_SEND': {
-        const url = String(msg.url || '').trim();
-        const method = String(msg.method || 'GET').toUpperCase();
-        const headers = msg.headers || {};
-        const body = msg.body ?? null;
-
-        // Local mx2db:// handler
-        if (url.startsWith('mx2db://')) {
-          if (url === 'mx2db://local/tapes') {
-            const tapes = await IDB.all('tapes');
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: tapes, time: 0, size: JSON.stringify(tapes).length } });
-            postAll({ t: 'STATUS', text: 'API: mx2db tapes' });
-            return;
-          }
-          if (url === 'mx2db://local/sessions') {
-            const sessions = await SessionStore.listAll();
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: sessions, time: 0 } });
-            return;
-          }
-          if (url === 'mx2db://local/tabs') {
-            const tabs = await TabManager.list();
-            postAll({ t: 'API_RESPONSE', result: { status: 200, data: tabs, time: 0 } });
-            return;
-          }
-        }
-
-        const t0 = Date.now();
-        try {
-          const opt = { method, headers: { 'Content-Type': 'application/json', ...headers } };
-          if (body && method !== 'GET') opt.body = typeof body === 'string' ? body : JSON.stringify(body);
-          const res = await fetch(url, opt);
-          const ct = res.headers.get('content-type') || '';
-          const data = ct.includes('application/json') ? await res.json() : await res.text();
-          const result = {
-            status: res.status,
-            statusText: res.statusText,
-            headers: Object.fromEntries(res.headers.entries()),
-            data,
-            time: Date.now() - t0,
-            size: typeof data === 'string' ? data.length : JSON.stringify(data).length
-          };
-          postAll({ t: 'API_RESPONSE', result });
-          postAll({ t: 'STATUS', text: `API ${res.status} in ${result.time}ms` });
-        } catch (err) {
-          postAll({ t: 'API_RESPONSE', result: { error: String(err?.message || err), time: Date.now() - t0 } });
-          postAll({ t: 'STATUS', text: 'API error' });
-        }
-        break;
-      }
-
-      /* ─────── CANVAS PROJECTION ─────── */
-      case 'CANVAS_PROJECT': {
-        const projection = await CanvasProjection.projectDOM(msg.url);
-        postAll({ t: 'CANVAS_PROJECTED', projection });
-        postAll({ t: 'STATUS', text: projection.ok ? `Projected: ${msg.url}` : 'Projection failed' });
-        break;
-      }
-
-      case 'CANVAS_CLEAR':
-        CANVAS.tick = 0;
-        postAll({ t: 'CANVAS_CLEAR' });
-        break;
-
-      case 'CANVAS_GRID':
-        CANVAS.grid = !CANVAS.grid;
-        postAll({ t: 'CANVAS_FLAGS', state: { ...CANVAS } });
-        break;
-
-      case 'CANVAS_PLAY':
-        canvasPlay(!CANVAS.playing);
-        postAll({ t: 'CANVAS_FLAGS', state: { ...CANVAS } });
-        break;
-
-      case 'CANVAS_PUSH':
-        postAll({ t: 'STATUS', text: 'Canvas pushed to mesh (stub)' });
-        break;
-
-      /* ─────── π VIDEO ROUTING ─────── */
-      case 'PI_ROUTE': {
-        const route = CanvasProjection.routePiContent(msg.url, msg.type || 'video');
-        postAll({ t: 'PI_ROUTED', url: msg.url, route });
-        break;
-      }
-
-      /* ─────── SETTINGS ─────── */
-      case 'SETTINGS_UPDATE': {
-        const settings = (await IDB.all('settings')).find(x => x.k === 'settings') || { k: 'settings', v: {} };
-        Object.assign(settings.v, msg.updates);
-        await IDB.put('settings', settings);
-        await uiRefreshAll();
-        postAll({ t: 'STATUS', text: 'Settings updated' });
-        break;
-      }
-
-      case 'SETTINGS_GET': {
-        const settings = (await IDB.all('settings')).find(x => x.k === 'settings')?.v || {};
-        postAll({ t: 'SETTINGS_DATA', settings });
-        break;
-      }
+    // Kernel ready check
+    if (msg.type === "mx2.ping") {
+      await reply({ type: "mx2.pong", kernel: { v: KERNEL.v, mode: KERNEL.mode } });
+      return;
     }
-  })();
+
+    // Manifest patch
+    if (msg.type === "mx2.manifest.patch") {
+      const patch = msg.patch || {};
+      await patchMutableManifest(patch);
+      await reply({ type: "mx2.manifest.patched", ok: true });
+      return;
+    }
+
+    // Session canvas tabs
+    if (msg.type === "mx2.session.setCanvasTabs") {
+      const tabs = Array.isArray(msg.tabs) ? msg.tabs : [];
+      const activeTab = msg.activeTab ?? null;
+      await patchMutableManifest({
+        mx2: { session: { canvasTabs: tabs, activeTab } },
+      });
+      await reply({ type: "mx2.session.saved", ok: true });
+      return;
+    }
+
+    // JavaCrypt exec via message
+    if (msg.type === "mx2.exec") {
+      try {
+        const result = await JavaCrypt.exec(msg.program || {}, msg.caps || {});
+        await reply({ type: "mx2.exec.result", ok: true, result, rid: msg.rid || null });
+      } catch (e) {
+        await reply({ type: "mx2.exec.result", ok: false, error: String(e), rid: msg.rid || null });
+      }
+      return;
+    }
+
+    // π inference via message
+    if (msg.type === "mx2.pi.infer") {
+      const result = await Host.infer(msg.query || "", msg.events || [], msg.ticks || 50);
+      await reply({ type: "mx2.pi.result", ...result, rid: msg.rid || null });
+      return;
+    }
+
+    // π emit via message
+    if (msg.type === "mx2.pi.emit") {
+      const tokens = Cluster.piEmit(msg.query || "", msg.steps || 24);
+      await reply({ type: "mx2.pi.tokens", ok: true, tokens, rid: msg.rid || null });
+      return;
+    }
+
+    // Host probe
+    if (msg.type === "mx2.host.probe") {
+      const out = await Host.probe(true);
+      await reply({ type: "mx2.host.status", ...out });
+      return;
+    }
+
+    // Cluster status
+    if (msg.type === "mx2.cluster.status") {
+      await reply({ type: "mx2.cluster.info", ...Cluster.status() });
+      return;
+    }
+
+    // Boot request
+    if (msg.type === "BOOT" || msg.type === "mx2.boot") {
+      await reply({
+        type: "mx2.kernel.ready",
+        kernel: { v: KERNEL.v, name: KERNEL.name, mode: KERNEL.mode },
+        glyphs: Object.keys(KERNEL.glyphs),
+      });
+      postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} ready` });
+      return;
+    }
+
+    // UI navigation / search (legacy compat)
+    if (msg.t === 'NAV') {
+      postAll({ t: 'STATUS', text: `Switched to ${msg.view || 'view'}` });
+      return;
+    }
+    if (msg.t === 'SEARCH') {
+      postAll({ t: 'STATUS', text: `Search: ${msg.q || ''}` });
+      return;
+    }
+
+    // Unknown
+    if (msg && (msg.type || msg.t)) {
+      await reply({ type: "mx2.kernel.error", ok: false, error: "unknown_message", got: msg.type || msg.t });
+    }
+  })().catch((e) => {
+    reply({ type: "mx2.kernel.error", ok: false, error: String(e) });
+  });
 });
 
-/* ══════════════════════════════════════════════════════════════
-   BOOT STATUS
-   ══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FETCH HOOK
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-postAll({ t: 'STATUS', text: `SW v${SW_VERSION} online` });
+self.addEventListener("fetch", (event) => {
+  event.respondWith(handleFetch(event));
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   KERNEL BOOT COMPLETE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+Cluster.init(4);
+postAll({ t: 'STATUS', text: `K'UHUL π Kernel v${KERNEL.v} loaded` });
