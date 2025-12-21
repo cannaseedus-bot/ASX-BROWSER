@@ -44,6 +44,7 @@
    [20] ASM v1.0 — Atomic Symbolic Markup Transformer
    [21] XCFE Replay Verifier v1
    [22] K'UHUL π Virtual Cluster v1.0
+   [23] Semantic Gating Layer (Vocab + Tokenizer + Lex.Resolve)
 
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -70,7 +71,7 @@ if (SYSTEM_MODE !== "FIELD_ONLY") {
  */
 
 const KUHUL_KERNEL_ID = "kuhul-pi-" + Date.now().toString(36);
-const KUHUL_KERNEL_VERSION = "1.2.7";
+const KUHUL_KERNEL_VERSION = "1.2.8";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    [1] IMMUTABLE KERNEL CONSTANTS
@@ -3001,6 +3002,419 @@ const VirtualCluster = (() => {
     RecoveryProtocol,
     ClusterController,
     getInstance,
+  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   [23] SEMANTIC GATING LAYER (Vocab + Tokenizer + Lex.Resolve)
+   ═══════════════════════════════════════════════════════════════════════════════
+   Control decides WHEN execution may branch (⚡)
+   Vocab + Tokenizers decide WHAT symbols mean (🧠 + 🔡)
+
+   Pipeline:
+   INPUT → TOKENIZER → VOCAB → CLUSTER → COLLAPSE → ⚡ → BRANCH_GATE → @then/@else
+
+   Core Invariant:
+   > Cluster output MUST NEVER be referenced directly by control flow.
+   > Only resolve_hash, vocab_hash, tokenizer_hash, policy_hash may be referenced.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const SemanticGating = (() => {
+  // Registered vocabs and tokenizers (epoch-pinned)
+  const vocabs = new Map();
+  const tokenizers = new Map();
+  const resolveCache = new Map();
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @vocab — Semantic vocabulary for glyphs, operators, literals
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function createVocab(epoch, vocabId, entries, policyHash) {
+    const entriesCanon = XCFE.canonValue(entries);
+    const vocabHash = `h:sha256:${XCFE.sha256Hex(entriesCanon).then ? 'pending' : ''}`;
+
+    // Sync hash computation
+    const vocab = {
+      epoch,
+      vocab_id: vocabId,
+      policy_hash: policyHash,
+      canon: 'MX2_CANON_JSON_v1.0',
+      entries,
+      vocab_hash: null, // Filled async
+    };
+
+    return vocab;
+  }
+
+  async function registerVocab(vocab) {
+    const entriesCanon = XCFE.canonValue(vocab.entries);
+    const hex = await XCFE.sha256Hex(entriesCanon);
+    vocab.vocab_hash = `h:sha256:${hex}`;
+
+    vocabs.set(vocab.vocab_hash, vocab);
+    audit_event('semantic.vocab.register', {
+      vocab_id: vocab.vocab_id,
+      epoch: vocab.epoch,
+      entries: Object.keys(vocab.entries).length,
+    });
+
+    return vocab;
+  }
+
+  function getVocab(vocabHash) {
+    return vocabs.get(vocabHash) || null;
+  }
+
+  function lookupSymbol(vocabHash, symbol) {
+    const vocab = vocabs.get(vocabHash);
+    if (!vocab) return null;
+    return vocab.entries[symbol] || null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @tokenizer — Deterministic pattern → token mapping
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function createTokenizer(epoch, tokenizerId, rules, policyHash) {
+    return {
+      epoch,
+      tokenizer_id: tokenizerId,
+      policy_hash: policyHash,
+      canon: 'MX2_CANON_JSON_v1.0',
+      rules, // Array of { match, emit }
+      tokenizer_hash: null,
+    };
+  }
+
+  async function registerTokenizer(tokenizer) {
+    const rulesCanon = XCFE.canonValue(tokenizer.rules);
+    const hex = await XCFE.sha256Hex(rulesCanon);
+    tokenizer.tokenizer_hash = `h:sha256:${hex}`;
+
+    tokenizers.set(tokenizer.tokenizer_hash, tokenizer);
+    audit_event('semantic.tokenizer.register', {
+      tokenizer_id: tokenizer.tokenizer_id,
+      epoch: tokenizer.epoch,
+      rules: tokenizer.rules.length,
+    });
+
+    return tokenizer;
+  }
+
+  function getTokenizer(tokenizerHash) {
+    return tokenizers.get(tokenizerHash) || null;
+  }
+
+  // Deterministic tokenization (no ML, no ambiguity)
+  function tokenize(tokenizerHash, input) {
+    const tokenizer = tokenizers.get(tokenizerHash);
+    if (!tokenizer) return { ok: false, error: 'tokenizer_not_found' };
+
+    const tokens = [];
+    let remaining = String(input);
+    let position = 0;
+
+    while (remaining.length > 0) {
+      let matched = false;
+
+      for (const rule of tokenizer.rules) {
+        if (remaining.startsWith(rule.match)) {
+          tokens.push(...rule.emit);
+          remaining = remaining.slice(rule.match.length);
+          position += rule.match.length;
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        // Unknown character — emit as TOK_UNKNOWN
+        tokens.push(`TOK_UNKNOWN_${remaining.charCodeAt(0)}`);
+        remaining = remaining.slice(1);
+        position++;
+      }
+    }
+
+    return { ok: true, tokens, input, position };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // @lex.resolve — Semantic resolution (symbols → meaning)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function createResolve(epoch, policyHash, vocabHash, tokenizerHash, input, resolved) {
+    const tokenResult = tokenize(tokenizerHash, input);
+    if (!tokenResult.ok) {
+      return { ok: false, error: tokenResult.error };
+    }
+
+    const resolveObj = {
+      epoch,
+      policy_hash: policyHash,
+      vocab_hash: vocabHash,
+      tokenizer_hash: tokenizerHash,
+      input,
+      tokens: tokenResult.tokens,
+      resolved,
+    };
+
+    const canon = XCFE.canonValue({
+      input: resolveObj.input,
+      tokens: resolveObj.tokens,
+      resolved: resolveObj.resolved,
+    });
+    const hex = await XCFE.sha256Hex(canon);
+    resolveObj.resolve_hash = `h:sha256:${hex}`;
+
+    resolveCache.set(resolveObj.resolve_hash, resolveObj);
+    audit_event('semantic.resolve', {
+      input,
+      tokens: tokenResult.tokens.length,
+      resolve_hash: resolveObj.resolve_hash,
+    });
+
+    return { ok: true, resolve: resolveObj };
+  }
+
+  function getResolve(resolveHash) {
+    return resolveCache.get(resolveHash) || null;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Cluster Proposal Collapse
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Cluster generates proposals, but only ONE canonical result is committed
+  function collapseProposals(proposals, collapsePolicy = 'highest_confidence') {
+    if (!proposals || proposals.length === 0) {
+      return { ok: false, error: 'no_proposals' };
+    }
+
+    let selected;
+
+    switch (collapsePolicy) {
+      case 'highest_confidence':
+        selected = proposals.reduce((best, p) =>
+          (p.confidence || 0) > (best.confidence || 0) ? p : best
+        );
+        break;
+
+      case 'first':
+        selected = proposals[0];
+        break;
+
+      case 'majority':
+        // Group by value, pick most common
+        const groups = new Map();
+        for (const p of proposals) {
+          const key = stable_stringify(p.value);
+          if (!groups.has(key)) groups.set(key, { proposal: p, count: 0 });
+          groups.get(key).count++;
+        }
+        let maxCount = 0;
+        for (const g of groups.values()) {
+          if (g.count > maxCount) {
+            maxCount = g.count;
+            selected = g.proposal;
+          }
+        }
+        break;
+
+      default:
+        selected = proposals[0];
+    }
+
+    return {
+      ok: true,
+      collapsed: {
+        ast: selected.ast,
+        value: selected.value,
+        confidence: selected.confidence,
+        source: 'cluster_collapse',
+        policy: collapsePolicy,
+        proposalCount: proposals.length,
+      },
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Extended ⚡ Creation (with semantic hashes)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function createSemanticLightning(epoch, policyHash, vocabHash, tokenizerHash, resolveHash, truth) {
+    const inputHash = resolveHash; // resolve_hash is the semantic input
+
+    const proofPayload = `${inputHash}:${truth ? 'true' : 'false'}`;
+    const proofHex = await XCFE.sha256Hex(proofPayload);
+    const proofHash = `h:sha256:${proofHex}`;
+
+    const lightning = {
+      epoch,
+      policy_hash: policyHash,
+      vocab_hash: vocabHash,
+      tokenizer_hash: tokenizerHash,
+      resolve_hash: resolveHash,
+      runtime: '⚡',
+      resolved: true,
+      truth,
+      proof: {
+        input_hash: inputHash,
+        proof_hash: proofHash,
+      },
+    };
+
+    audit_event('semantic.lightning', {
+      epoch,
+      truth,
+      resolve_hash: resolveHash,
+      proof_hash: proofHash,
+    });
+
+    return lightning;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Extended Branch Gate Verification
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function verifySemanticBranchGate(gate, lightningEvents) {
+    // Must have all required hashes
+    if (!gate.policy_hash || !gate.resolve_hash) {
+      return { ok: false, error: 'missing_required_hashes' };
+    }
+
+    // Find matching lightning event
+    const matchingLightning = lightningEvents.find(ev =>
+      ev.policy_hash === gate.policy_hash &&
+      ev.resolve_hash === gate.resolve_hash &&
+      ev.proof?.proof_hash === gate.proof_hash
+    );
+
+    if (!matchingLightning) {
+      return { ok: false, error: 'no_matching_lightning' };
+    }
+
+    // Verify truth → selected mapping
+    const expectedSelected = matchingLightning.truth ? '@then' : '@else';
+    if (gate.selected !== expectedSelected) {
+      return { ok: false, error: 'truth_selected_mismatch' };
+    }
+
+    // Verify resolve exists
+    const resolve = getResolve(gate.resolve_hash);
+    if (!resolve) {
+      return { ok: false, error: 'resolve_not_found' };
+    }
+
+    // Verify vocab and tokenizer if specified
+    if (matchingLightning.vocab_hash && !getVocab(matchingLightning.vocab_hash)) {
+      return { ok: false, error: 'vocab_not_found' };
+    }
+    if (matchingLightning.tokenizer_hash && !getTokenizer(matchingLightning.tokenizer_hash)) {
+      return { ok: false, error: 'tokenizer_not_found' };
+    }
+
+    return {
+      ok: true,
+      gate,
+      lightning: matchingLightning,
+      resolve,
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Default Core Vocab (glyph-vocab-v1)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const CORE_VOCAB_ENTRIES = Object.freeze({
+    '⚡': { kind: 'control', meaning: 'branch_decision', domain: 'xcfe', allowed_outputs: ['@then', '@else'] },
+    '@': { kind: 'glyph', meaning: 'weight_1', domain: 'kuhul', base: 1.0 },
+    '@@': { kind: 'glyph', meaning: 'weight_2', domain: 'kuhul', base: 2.0 },
+    '@@@': { kind: 'glyph', meaning: 'weight_3', domain: 'kuhul', base: 3.0 },
+    'π': { kind: 'constant', meaning: 'pi', domain: 'math', value: Math.PI },
+    'φ': { kind: 'constant', meaning: 'golden_ratio', domain: 'math', value: 1.618033988749895 },
+    'e': { kind: 'constant', meaning: 'euler', domain: 'math', value: Math.E },
+    'τ': { kind: 'constant', meaning: 'tau', domain: 'math', value: Math.PI * 2 },
+    '+': { kind: 'operator', meaning: 'addition', arity: 2 },
+    '-': { kind: 'operator', meaning: 'subtraction', arity: 2 },
+    '*': { kind: 'operator', meaning: 'multiplication', arity: 2 },
+    '/': { kind: 'operator', meaning: 'division', arity: 2 },
+    '=': { kind: 'operator', meaning: 'equality', arity: 2 },
+    '(': { kind: 'delimiter', meaning: 'open_paren' },
+    ')': { kind: 'delimiter', meaning: 'close_paren' },
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Default Core Tokenizer (glyph-tokenizer-v1)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const CORE_TOKENIZER_RULES = Object.freeze([
+    { match: '⚡', emit: ['TOK_LIGHTNING'] },
+    { match: '@@@', emit: ['TOK_GLYPH_3'] },
+    { match: '@@', emit: ['TOK_GLYPH_2'] },
+    { match: '@', emit: ['TOK_GLYPH_1'] },
+    { match: 'π', emit: ['TOK_PI'] },
+    { match: 'φ', emit: ['TOK_PHI'] },
+    { match: 'τ', emit: ['TOK_TAU'] },
+    { match: '+', emit: ['TOK_ADD'] },
+    { match: '-', emit: ['TOK_SUB'] },
+    { match: '*', emit: ['TOK_MUL'] },
+    { match: '/', emit: ['TOK_DIV'] },
+    { match: '=', emit: ['TOK_EQ'] },
+    { match: '(', emit: ['TOK_LPAREN'] },
+    { match: ')', emit: ['TOK_RPAREN'] },
+    { match: '0', emit: ['TOK_NUM_0'] },
+    { match: '1', emit: ['TOK_NUM_1'] },
+    { match: '2', emit: ['TOK_NUM_2'] },
+    { match: '3', emit: ['TOK_NUM_3'] },
+    { match: '4', emit: ['TOK_NUM_4'] },
+    { match: '5', emit: ['TOK_NUM_5'] },
+    { match: '6', emit: ['TOK_NUM_6'] },
+    { match: '7', emit: ['TOK_NUM_7'] },
+    { match: '8', emit: ['TOK_NUM_8'] },
+    { match: '9', emit: ['TOK_NUM_9'] },
+    { match: ' ', emit: [] }, // Whitespace ignored
+  ]);
+
+  // Status
+  function status() {
+    return {
+      vocabs: vocabs.size,
+      tokenizers: tokenizers.size,
+      resolves: resolveCache.size,
+      vocabList: [...vocabs.keys()],
+      tokenizerList: [...tokenizers.keys()],
+    };
+  }
+
+  return {
+    // Vocab
+    createVocab,
+    registerVocab,
+    getVocab,
+    lookupSymbol,
+    CORE_VOCAB_ENTRIES,
+
+    // Tokenizer
+    createTokenizer,
+    registerTokenizer,
+    getTokenizer,
+    tokenize,
+    CORE_TOKENIZER_RULES,
+
+    // Resolve
+    createResolve,
+    getResolve,
+
+    // Cluster collapse
+    collapseProposals,
+
+    // Extended ⚡
+    createSemanticLightning,
+    verifySemanticBranchGate,
+
+    // Status
+    status,
   };
 })();
 

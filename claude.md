@@ -481,6 +481,94 @@ cluster.shutdown()                     // Graceful shutdown
 
 ---
 
+## Semantic Gating Layer (Vocab + Tokenizer + Lex.Resolve)
+
+### Core Principle
+```
+⚡ gates WHEN execution may branch (control)
+🧠 gates WHAT symbols mean (vocab)
+🔡 gates symbol → token mapping (tokenizer)
+```
+
+### Execution Pipeline
+```
+INPUT → TOKENIZER → VOCAB → CLUSTER → COLLAPSE → ⚡ → BRANCH_GATE → @then/@else
+```
+
+### Block Types
+
+**@vocab** — Semantic vocabulary
+```json
+{
+  "@vocab": {
+    "epoch": 42,
+    "vocab_id": "core-glyph-vocab",
+    "entries": { "⚡": { "kind": "control", "meaning": "branch_decision" } },
+    "vocab_hash": "h:sha256:..."
+  }
+}
+```
+
+**@tokenizer** — Deterministic pattern matching
+```json
+{
+  "@tokenizer": {
+    "epoch": 42,
+    "tokenizer_id": "glyph-tokenizer-v1",
+    "rules": [{ "match": "⚡", "emit": ["TOK_LIGHTNING"] }],
+    "tokenizer_hash": "h:sha256:..."
+  }
+}
+```
+
+**@lex.resolve** — Semantic resolution
+```json
+{
+  "@lex.resolve": {
+    "input": "2+2",
+    "tokens": ["TOK_NUM_2", "TOK_ADD", "TOK_NUM_2"],
+    "resolved": { "ast": ["+", 2, 2], "value": 4 },
+    "resolve_hash": "h:sha256:..."
+  }
+}
+```
+
+### Cluster Collapse Policies
+- `highest_confidence` — Select proposal with highest confidence
+- `first` — Select first proposal
+- `majority` — Group by value, select most common
+
+### Extended ⚡ (with semantic hashes)
+```json
+{
+  "@⚡": [{
+    "policy_hash": "h:sha256:...",
+    "vocab_hash": "h:sha256:...",
+    "tokenizer_hash": "h:sha256:...",
+    "resolve_hash": "h:sha256:...",
+    "truth": true,
+    "proof": { "proof_hash": "h:sha256:..." }
+  }]
+}
+```
+
+### Critical Invariant
+> Cluster output MUST NEVER be referenced directly by control flow.
+> Only `resolve_hash`, `vocab_hash`, `tokenizer_hash`, `policy_hash` may be referenced.
+
+### Semantic Gating API
+```js
+SemanticGating.registerVocab(vocab)           // Register vocab
+SemanticGating.registerTokenizer(tokenizer)   // Register tokenizer
+SemanticGating.tokenize(hash, input)          // Deterministic tokenization
+SemanticGating.createResolve(...)             // Create @lex.resolve
+SemanticGating.collapseProposals(proposals)   // Cluster → single result
+SemanticGating.createSemanticLightning(...)   // Extended ⚡
+SemanticGating.verifySemanticBranchGate(...)  // Verify with all hashes
+```
+
+---
+
 ## Quick Reference Functions
 
 ```js
