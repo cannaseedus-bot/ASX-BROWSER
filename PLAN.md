@@ -14,3 +14,9 @@ Near-term improvements and guardrails for ASX Browser development.
 - Expand the semantic glyph table with concrete UI mappings (e.g., inventory windows, chat overlays) and example fragments.
 - Build a small demo scene in `index.html` that exercises the bundle parser and shows the projected state stream.
 - Sketch an adapter that converts SCXQ2 token streams into bundle-friendly JSON for round-trip experiments.
+## PLAN
+
+- [ ] Document runtime setup and onboarding steps.
+- [ ] Align the parser entrypoints with the SCXQ2 symbolic mapping.
+- [ ] Add a demo page showing symbolic markup compiled to DOM output.
+- [ ] Back automated tests for the parser and transformation pipeline.
