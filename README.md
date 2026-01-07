@@ -1,5 +1,29 @@
 <img style="width:70px;" src="https://github.com/cannaseedus-bot/ASX-BROWSER/blob/main/asx.png">
 
+# ASX Browser
+
+An experimental explorer for the Atomic Symbolic Markup stack: a symbolic HTML dialect (⚛️ structural glyphs) plus a semantic styling alphabet (⟁ glyphs) that feeds a Pi kernel and SCX runtime. This repo packages the symbolic grammar, transformation contract, and Python pipeline that walks a bundle file into a physics-ready world specification.
+
+## Quick start
+
+1. Provide a bundle that follows the `%pi` schema (see `π-bundle.schema.json` for shape hints). A minimal invocation expects world, bodies, and constraints keys plus an optional `⟁tree` binding map.
+2. Run the CLI to tick the kernel and emit projections:
+   ```bash
+   python main.py <bundle.json> [ticks]
+   ```
+   Each tick prints a JSON payload containing the epoch, tick metadata, projected body states, and queued symbolic intents.
+
+## Repository map
+
+- `main.py` — CLI entry point that loads a bundle, builds `PiWorldSpec` + bodies/constraints, and advances the `PiKernel` tick loop.
+- `pi_kernel.py` — kernel orchestrating simulation state, constraint solving, and event handling.
+- `pi_types.py` — dataclasses describing world, body, constraint, and projection primitives.
+- `pi_constraints.py`, `pi_fields.py`, `pi_hash.py`, `pi_symbolic.py` — supporting modules for forces, hashing, symbolic intent handling, and constraint implementations.
+- `index.html`, `black-code-editor.html`, `quantum-runtime.html` — front-end experiment surfaces for rendering and interacting with the symbolic markup.
+- `manifest*.json`, `pi.*.schema.json`, `π-bundle.schema.json` — schema and manifest references for browser/runtime integrations.
+
+## Symbolic token quick reference
+
 ```
 MX2LM.com
 ```
@@ -29,45 +53,27 @@ Active planning now lives in [PLAN.md](PLAN.md). Key upcoming tasks:
 ⟁NB  = <button class="nav-btn">      ⟁N0  = active state
 ⟁C0  = Performance card              ⟁N1  = inactive state
 ⟁C1  = Uptime card                  ⟁N2  = inactive state
-
 ```
+
 1) SCXQ2 Structural Tokens
 2) KUHUL Semantic Tokens
 3) HTML Elements
 
-
-You’ve basically invented a **symbolic HTML dialect** plus a **semantic styling alphabet**. Let’s lock it in as:
-
-1. A **formal grammar** for the Atomic Symbolic Markup.  
-2. A **symbolic → SCX mapping** that plugs into the v4.2 runtime.
-
-I’ll keep it tight but precise.
-
----
-
-## 1. Atomic symbolic markup grammar (formalized)
+## Formal grammar (reference)
 
 Think of it as **HTML + two symbolic channels**:
 
-- **⚛️ channel**: structural element glyphs (maps to actual tags).  
+- **⚛️ channel**: structural element glyphs (maps to actual tags).
 - **⟁ channel**: semantic/atomic glyphs (maps to roles, states, utilities).
 
-### 1.1 Lexical elements
+### Lexical elements
 
 **Glyph tokens:**
 
-- Structural glyph:  
-  - `⚛️D`, `⚛️H`, `⚛️M`, `⚛️N`, `⚛️C`, `⚛️S`, `⚛️A`, `⚛️F`, `⚛️B`, `⚛️I`, `⚛️L`, `⚛️P`, `⚛️T`  
-- Semantic glyph:  
-  - Core layout: `⟁D`, `⟁H`, `⟁M`, `⟁MC`, `⟁MV`, `⟁NB`, `⟁T`, `⟁SD`, `⟁SL`, `⟁SN`, `⟁CA`, `⟁GR`, `⟁GC2`, `⟁GC3`, `⟁GC4`  
-  - States/variants: `⟁N0`, `⟁N1`, `⟁N2`, `⟁C0..⟁C3`, `⟁S0..⟁S3`, etc.  
-  - Utilities: `⟁F`, `⟁FC`, `⟁FR`, `⟁AC`, `⟁JC`, `⟁JSB`, `⟁G1..⟁G3`, `⟁P2..⟁P4`, `⟁WF`, `⟁HF`, etc.  
+- Structural glyph: `⚛️D`, `⚛️H`, `⚛️M`, `⚛️N`, `⚛️C`, `⚛️S`, `⚛️A`, `⚛️F`, `⚛️B`, `⚛️I`, `⚛️L`, `⚛️P`, `⚛️T`
+- Semantic glyph: core layout (`⟁D`, `⟁H`, `⟁M`, `⟁MC`, `⟁MV`, `⟁NB`, `⟁T`, `⟁SD`, `⟁SL`, `⟁SN`, `⟁CA`, `⟁GR`, `⟁GC2`, `⟁GC3`, `⟁GC4`), state/variant glyphs (`⟁N0`, `⟁N1`, `⟁N2`, `⟁C0..⟁C3`, `⟁S0..⟁S3`), and utilities (`⟁F`, `⟁FC`, `⟁FR`, `⟁AC`, `⟁JC`, `⟁JSB`, `⟁G1..⟁G3`, `⟁P2..⟁P4`, `⟁WF`, `⟁HF`, etc.).
 
-We treat glyphs as **identifiers** from a fixed alphabet `GLYPH`.
-
-### 1.2 High-level grammar (EBNF-ish)
-
-We’ll assume markup is embedded in HTML, so this is the grammar just for the *symbolic nodes*:
+### High-level grammar (EBNF)
 
 ```ebnf
 Document      ::= Node*
@@ -102,18 +108,12 @@ AttributeValueChars ::= [^"'&]  (* simplified *)
 TextNode      ::= [^<]+
 ```
 
-**Constraints:**
+Constraints:
 
-- Every **element** may be either:
-  - a normal HTML tag (`div`, `header`, etc.), or  
-  - a **structural glyph tag** like `<⚛️D>`.  
-- Attributes may mix:
-  - standard attributes (`id`, `class`, `data-*`, etc.)  
-  - symbolic attributes (e.g. `⟁D`, `⟁C0` as boolean attributes).  
+- Elements may be normal HTML tags or structural glyph tags like `<⚛️D>`.
+- Attributes may mix standard attributes (`id`, `class`, `data-*`) with symbolic attributes (e.g., `⟁D`, `⟁C0`).
 
-### 1.3 Symbolic element semantics
-
-Define:
+### Symbolic element semantics
 
 ```ebnf
 StructuralGlyphTag ::= "⚛️" GlyphId
@@ -138,716 +138,26 @@ GlyphCode          ::= "D" | "H" | "M" | "MC" | "MV" | "NB" | "T" | "C0" | "C1" 
                      | ...   (* extendable *)
 ```
 
-**Semantics rules:**
+Semantics rules:
 
-- If `TagName` is `StructuralGlyphTag`, it **defines the base HTML tag**.  
-- If an element has glyph attributes (e.g. `⟁D ⟁P4`), they **decorate** the element with semantics and style.
+- Structural glyph tags define the base HTML tag and are preserved as data markers (e.g., `<⚛️D>` → `<div data-⚛="D">`).
+- Semantic glyph attributes decorate the element as `data-⟁` attributes and can be combined alongside standard HTML attributes.
 
----
+## Parser → DOM transformation contract
 
-## 2. Parser → DOM transformation contract
+1. Structural glyph tag `<⚛️X ...>` becomes `<TAG data-⚛="X" ...>`, where `TAG` maps glyphs to familiar elements:
+   - `⚛️D → div`, `⚛️H → header`, `⚛️M → main`, `⚛️N → nav`, `⚛️C → div`, `⚛️S → section`, `⚛️A → article`, `⚛️F → footer`, `⚛️B → button`, `⚛️I → span`, `⚛️L → a`, `⚛️P → p`, `⚛️T → h1 (or h*)`.
+2. Semantic glyph attributes like `⟁D` or `⟁C0` attach as `data-⟁` flags. Keep the HTML tag chosen by the ⚛️ glyph and avoid flattening semantic glyphs into separate elements.
 
-The AtomicSymbolParser you wrote is basically the “compiler” from this grammar to DOM.
+## Symbolic → SCX mapping (v4.2)
 
-Formally:
+DOM (⚛️/⟁) → **Symbolic Layout IR** → **SCX op sequence**. Geometry primitives (sphere, lattice, torus, etc.) map from symbolic nodes into SCX opcodes through the runtime in `pi_kernel.py` and supporting modules.
 
-1. **Structural glyph tag** `<⚛️X ...>` becomes:
-   - `<TAG data-⚛="X" ...>`  
-   - where `TAG` is the mapping:
-
-     ```text
-     ⚛️D → div
-     ⚛️H → header
-     ⚛️M → main
-     ⚛️N → nav
-     ⚛️C → div
-     ⚛️S → section
-     ⚛️A → article
-     ⚛️F → footer
-     ⚛️B → button
-     ⚛️I → span
-     ⚛️L → a
-     ⚛️P → p
-     ⚛️T → h1 (or h*) 
-     ```
-
-2. **Semantic glyph attributes** like `⟁D`, `⟁C0` on any element become:
-
-   ```html
-   data-⟁="D"           // for one main glyph
-   data-⟁-C0="true"     // or multiple, depending on how you want to encode
-   ```
-
-   In your current code you flatten `⟁D` as another tag, but better is:
-
-   - Keep the original HTML tag from the ⚛️ glyph.  
-   - Attach semantic glyphs as attributes only.
-
-This split is important for SCX mapping.
+For any root (dashboard, window, inventory, etc.), build a tree of symbolic nodes and lower them to runtime intents that the kernel can resolve into bodies, constraints, and UI bindings.
 
 ---
 
-## 3. Symbolic → SCX mapping (v4.2)
-
-Now: how do these glyphs map into **SCX opcodes + geometry + SCXQ2**?
-
-You already have:
-
-- SCX opcode set (data, geometry, runtime, scxq2, etc.).  
-- Geometry primitives (sphere, lattice, torus, torus‑lattice, fractal‑sphere, etc.).  
-
-We’ll define a **symbolic lowering layer**:
-
-> DOM (⚛️/⟁) → Symbolic Layout IR → SCX op sequence.
-
-### 3.1 Symbolic layout IR
-
-For any root element (dashboard, window, inventory, etc.), build a tree of **symbolic nodes**:
-
-```ts
-SymbolicNode {
-  tag: string;                  // div, header, main, etc.
-  atomic: string | null;        // data-⚛, e.g. "D", "H"
-  semantic: string[];           // all ⟁ glyph codes, e.g. ["D","P4"], ["MC","C0"]
-  children: SymbolicNode[];
-}
-```
-
-You walk the DOM:
-
-```js
-function extractSymbolicTree(root) {
-  function visit(el) {
-    const atomic = el.getAttribute('data-⚛');
-    const semanticMain = el.getAttribute('data-⟁');
-    const semanticExtra = Array.from(el.attributes)
-      .filter(a => a.name.startsWith('data-⟁-'))
-      .map(a => a.name.slice('data-⟁-'.length));
-    const node = {
-      tag: el.tagName.toLowerCase(),
-      atomic,
-      semantic: [semanticMain, ...semanticExtra].filter(Boolean),
-      children: [],
-    };
-    el.childNodes.forEach(child => {
-      if (child.nodeType === Node.ELEMENT_NODE) {
-        node.children.push(visit(child));
-      }
-    });
-    return node;
-  }
-  return visit(root);
-}
-```
-
-That IR is **exactly what SCX lowering eats**.
-
----
-
-### 3.2 Mapping symbolic roles → geometry primitives
-
-We define a mapping from **combined semantic roles** (`⟁*`) → geometry primitives & weights.
-
-Example canonical table:
-
-| Semantic pattern | Meaning | Geometry Primitive | SCX opcodes |
-|------------------|---------|--------------------|------------|
-| `⟁MC` + `⟁C0` | performance metric card | sphere / torus (high trust) | `SCX_GEOM_SET_PRIMITIVE(SPHERE)` + `SCX_GEOM_SET_WEIGHT(TRUST)` |
-| `⟁MC` + `⟁C1` | uptime card | torus‑lattice (cyclical) | `SCX_GEOM_SET_PRIMITIVE(TORUS_LATTICE)` + `SCX_GEOM_SET_WEIGHT(CYCLICAL)` |
-| `⟁MC` + `⟁C2` | CPU card | pyramid/prism (load, strain) | `SCX_GEOM_SET_PRIMITIVE(PYRAMID)` + `SCX_GEOM_SET_WEIGHT(SEMANTIC)` |
-| `⟁MC` + `⟁C3` | memory card | lattice (capacity, spread) | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` + `SCX_GEOM_SET_WEIGHT(COHERENCE)` |
-| `⟁HP` | health bar | linear segment | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` + trust weight |
-| `⟁XP` | XP bar | linear segment | `SCX_GEOM_SET_PRIMITIVE(TORUS)` + cyclical weight |
-| `⟁INV` | inventory | grid lattice | `SCX_GEOM_SET_PRIMITIVE(LATTICE)` |
-| `⟁WIN` | window | frame/box primitive | `SCX_GEOM_SET_PRIMITIVE(PYRAMID)` (hierarchy) |
-
-Translation rule, per symbolic node:
-
-```ts
-function lowerSymbolicNodeToSCX(node: SymbolicNode): SCXInstruction[] {
-  const ops: SCXInstruction[] = [];
-
-  // 1. Choose primitive
-  const prim = choosePrimitive(node.semantic);
-  if (prim) {
-    ops.push({ op: "GEOM_SET_PRIMITIVE", primitive: prim });
-  }
-
-  // 2. Set weights from semantics
-  const weights = chooseWeights(node.semantic);
-  for (const [kind, value] of Object.entries(weights)) {
-    ops.push({ op: "GEOM_SET_WEIGHT", kind, value });
-  }
-
-  // 3. Recurse to children if you want nested geom contexts (optional)
-  node.children.forEach(child => {
-    ops.push(...lowerSymbolicNodeToSCX(child));
-  });
-
-  return ops;
-}
-```
-
-`choosePrimitive` and `chooseWeights` are where you encode your semantics:
-
-```js
-function choosePrimitive(semantic) {
-  if (semantic.includes("MC") && semantic.includes("C0")) return "SPHERE";
-  if (semantic.includes("MC") && semantic.includes("C1")) return "TORUS_LATTICE";
-  if (semantic.includes("MC") && semantic.includes("C2")) return "PYRAMID";
-  if (semantic.includes("MC") && semantic.includes("C3")) return "LATTICE";
-  if (semantic.includes("HP")) return "LATTICE";
-  if (semantic.includes("XP")) return "TORUS";
-  if (semantic.includes("INV")) return "LATTICE";
-  if (semantic.includes("WIN")) return "PYRAMID";
-  return null;
-}
-
-function chooseWeights(semantic) {
-  const weights = {};
-  if (semantic.includes("C0")) weights.trust = 0.95;
-  if (semantic.includes("C1")) weights.cyclical = 0.9;      // uptime cycles
-  if (semantic.includes("C2")) weights.semantic = 0.7;      // CPU load
-  if (semantic.includes("C3")) weights.coherence = 0.8;     // memory consistency
-  if (semantic.includes("S0")) weights.trust = 0.9;         // success
-  if (semantic.includes("S2")) weights.trust = 0.3;         // danger
-  return weights;
-}
-```
-
-Those weights flow into SCX via:
-
-- `SCX_GEOM_SET_PRIMITIVE` (`0x40`)  
-- `SCX_GEOM_SET_WEIGHT` (`0x41`)  
-
-And then a later `SCX_SCXQ2_COMPUTE` to hash the symbolic layout.
-
----
-
-### 3.3 Layout → SCXQ2 fingerprint
-
-Once you have the symbolic tree, you build a canonical “fingerprint payload”:
-
-```js
-function computeSymbolicFingerprintPayload(rootSymbolicNode) {
-  const nodes = [];
-  (function visit(node) {
-    nodes.push({
-      tag: node.tag,
-      atomic: node.atomic,
-      semantic: node.semantic.sort(),  // stable
-    });
-    node.children.forEach(visit);
-  })(rootSymbolicNode);
-
-  return JSON.stringify(nodes);
-}
-```
-
-Then emit SCX IR:
-
-```js
-[
-  ...lowerSymbolicNodeToSCX(rootSymbolicNode),
-  { op: "SCXQ2_COMPUTE", scope: "GEOM_CTX" }
-]
-```
-
-Which assembles to bytecode:
-
-- `SCX_GEOM_SET_PRIMITIVE` / `SCX_GEOM_SET_WEIGHT`  
-- `SCX_SCXQ2_COMPUTE(GEOM_CTX)`  
-
-And your runtime’s `scxq2` implementation uses `computeSymbolicFingerprintPayload` as its input.
-
-That means the **visual layout itself** is part of the SCXQ2 identity.
-
----
-
-## 4. Putting it together with one example
-
-Symbolic:
-
-```html
-<⚛️D ⟁D ⟁P4>
-  <⚛️H ⟁H ⟁F ⟁AC ⟁JSB>
-    <⚛️T ⟁T ⟁CTC>Atomic Dashboard</⚛️T>
-    <⚛️N ⟁F ⟁G2>
-      <⚛️B ⟁NB ⟁N0>Home</⚛️B>
-      <⚛️B ⟁NB ⟁N1>Analytics</⚛️B>
-    </⚛️N>
-  </⚛️H>
-
-  <⚛️M ⟁M ⟁GR ⟁GC3>
-    <⚛️C ⟁MC ⟁C0> ... </⚛️C>
-    <⚛️C ⟁MC ⟁C1> ... </⚛️C>
-    <⚛️C ⟁MC ⟁C2> ... </⚛️C>
-  </⚛️M>
-</⚛️D>
-```
-
-Pipeline:
-
-1. **Grammar** parses tags + attributes as structural/semantic glyphs.  
-2. AtomicSymbolParser → DOM with `data-⚛` / `data-⟁*`.  
-3. Extract symbolic tree.  
-4. Lower to SCX:
-
-   - For each `⟁MC ⟁C0/1/2`: emit geometry primitive + weight ops.  
-   - After processing the root: `SCX_SCXQ2_COMPUTE(GEOM_CTX)`.
-
-5. Interpreter runs bytecode; SCXQ2 hash reflects **both layout and semantics**.
-
-Now your **dashboard layout itself is a cognitive artifact** with a stable SCXQ2 identity.
-
----
-
-Michael — here is the **formal, canonical v4.2 specification** for the entire pipeline:
-
-# ✅ **Symbolic Layout → SCX IR Specification (v4.2 Canonical)**  
-### *Atomic Symbolic Markup → Symbolic Layout IR → SCX Instruction Plan*
-
-This is the official compiler contract for transforming your **⚛️ / ⟁ symbolic DOM dialect** into **SCX IR**, which then assembles into SCX bytecode and executes inside the Mesh Kernel.
-
-This spec is written in the same style as the K’uhul → XJSON → SCX spec, but tailored for the DOM‑surface symbolic language.
-
----
-
-# ✅ **SECTION 1 — Purpose**
-
-The Symbolic Layout → SCX IR compiler:
-
-- Reads **symbolic DOM** (⚛️ structural glyphs, ⟁ semantic glyphs).  
-- Produces a **Symbolic Layout IR** tree.  
-- Lowers that IR into **SCX IR instructions**.  
-- Enables:
-  - geometry mapping  
-  - verification weights  
-  - SCXQ2 hashing  
-  - symbolic identity  
-  - mesh‑aware UI semantics  
-
-This is the DOM‑surface equivalent of the K’uhul compiler.
-
----
-
-# ✅ **SECTION 2 — Input Format**
-
-The compiler consumes **symbolic DOM**, either:
-
-### 2.1 Symbolic HTML
-```html
-<⚛️D ⟁D ⟁P4>
-  <⚛️H ⟁H>
-    <⚛️T ⟁T>Dashboard</⚛️T>
-  </⚛️H>
-</⚛️D>
-```
-
-### 2.2 Parsed DOM with attributes
-```html
-<div data-⚛="D" data-⟁="D" data-⟁-P4>
-  <header data-⚛="H" data-⟁="H">
-    <h1 data-⚛="T" data-⟁="T">Dashboard</h1>
-  </header>
-</div>
-```
-
-Both forms are equivalent after parsing.
-
----
-
-# ✅ **SECTION 3 — Symbolic Layout IR**
-
-The compiler’s first output is a **Symbolic Layout IR tree**.
-
-### 3.1 Node structure
-
-```ts
-SymbolicNode {
-  tag: string;              // actual HTML tag: div, header, main, etc.
-  atomic: string | null;    // structural glyph: D, H, M, C, etc.
-  semantic: string[];       // semantic glyphs: ["D","P4"], ["MC","C0"], etc.
-  children: SymbolicNode[];
-}
-```
-
-### 3.2 Extraction rules
-
-Given a DOM element `el`:
-
-- `atomic = el.getAttribute("data-⚛")`
-- `semanticMain = el.getAttribute("data-⟁")`
-- `semanticExtras = all attributes starting with "data-⟁-"`
-
-Then:
-
-```ts
-semantic = [semanticMain, ...semanticExtras].filter(Boolean)
-```
-
-### 3.3 IR example
-
-Symbolic:
-
-```html
-<⚛️C ⟁MC ⟁C0>
-  <⟁MV>98%</⟁MV>
-</⚛️C>
-```
-
-IR:
-
-```json
-{
-  "tag": "div",
-  "atomic": "C",
-  "semantic": ["MC", "C0"],
-  "children": [
-    {
-      "tag": "div",
-      "atomic": null,
-      "semantic": ["MV"],
-      "children": []
-    }
-  ]
-}
-```
-
----
-
-# ✅ **SECTION 4 — Semantic Interpretation Layer**
-
-The compiler interprets semantic glyphs into **roles**, **variants**, and **weights**.
-
-### 4.1 Role categories
-
-| Category | Glyphs | Meaning |
-|----------|--------|---------|
-| Layout | ⟁D, ⟁H, ⟁M, ⟁GR, ⟁GC2/3/4 | Dashboard, header, grid |
-| Cards | ⟁MC, ⟁C0..C3 | Metric cards + variants |
-| States | ⟁N0..N2 | Active/inactive/disabled |
-| Stats | ⟁S0..S3 | Success/warning/danger/info |
-| OS | ⟁WIN, ⟁WTB, ⟁WCT | Window system |
-| Gaming | ⟁HP, ⟁XP, ⟁INV | HUD elements |
-| Utilities | ⟁F, ⟁FC, ⟁P4, ⟁G2 | Flex/grid/spacing |
-
-### 4.2 Semantic → Geometry mapping
-
-Each semantic glyph contributes:
-
-- a **geometry primitive**  
-- one or more **verification weights**  
-
-Example:
-
-| Semantic | Primitive | Weight |
-|----------|-----------|--------|
-| ⟁C0 (performance) | SPHERE | trust = 0.95 |
-| ⟁C1 (uptime) | TORUS_LATTICE | cyclical = 0.9 |
-| ⟁C2 (CPU) | PYRAMID | semantic = 0.7 |
-| ⟁C3 (memory) | LATTICE | coherence = 0.8 |
-| ⟁HP | LATTICE | trust = health% |
-| ⟁XP | TORUS | cyclical = xp% |
-
----
-
-# ✅ **SECTION 5 — SCX IR Instruction Model**
-
-The compiler lowers symbolic nodes into **SCX IR instructions**.
-
-### 5.1 SCX IR instruction shape
-
-```ts
-SCXInstruction {
-  op: string;          // SCX opcode name
-  args?: object;       // opcode-specific arguments
-}
-```
-
-### 5.2 Relevant SCX opcodes
-
-| Opcode | Meaning |
-|--------|---------|
-| `GEOM_SET_PRIMITIVE` | Set geometry primitive |
-| `GEOM_SET_WEIGHT` | Set trust/semantic/coherence/etc |
-| `SCXQ2_COMPUTE` | Compute symbolic fingerprint |
-| `RUNTIME_SEQUENCE_BEGIN` | Begin sequence |
-| `RUNTIME_SEQUENCE_END` | End sequence |
-
----
-
-# ✅ **SECTION 6 — Lowering Rules**
-
-### 6.1 Primitive selection
-
-```ts
-function choosePrimitive(semantic) {
-  if (semantic.includes("MC") && semantic.includes("C0")) return "SPHERE";
-  if (semantic.includes("MC") && semantic.includes("C1")) return "TORUS_LATTICE";
-  if (semantic.includes("MC") && semantic.includes("C2")) return "PYRAMID";
-  if (semantic.includes("MC") && semantic.includes("C3")) return "LATTICE";
-  if (semantic.includes("HP")) return "LATTICE";
-  if (semantic.includes("XP")) return "TORUS";
-  if (semantic.includes("INV")) return "LATTICE";
-  if (semantic.includes("WIN")) return "PYRAMID";
-  return null;
-}
-```
-
-### 6.2 Weight selection
-
-```ts
-function chooseWeights(semantic) {
-  const w = {};
-  if (semantic.includes("C0")) w.trust = 0.95;
-  if (semantic.includes("C1")) w.cyclical = 0.9;
-  if (semantic.includes("C2")) w.semantic = 0.7;
-  if (semantic.includes("C3")) w.coherence = 0.8;
-  if (semantic.includes("S0")) w.trust = 0.9;
-  if (semantic.includes("S2")) w.trust = 0.3;
-  return w;
-}
-```
-
-### 6.3 Node lowering
-
-```ts
-function lowerNode(node) {
-  const ops = [];
-
-  const prim = choosePrimitive(node.semantic);
-  if (prim) {
-    ops.push({ op: "GEOM_SET_PRIMITIVE", args: { primitive: prim } });
-  }
-
-  const weights = chooseWeights(node.semantic);
-  for (const [kind, value] of Object.entries(weights)) {
-    ops.push({ op: "GEOM_SET_WEIGHT", args: { kind, value } });
-  }
-
-  node.children.forEach(child => ops.push(...lowerNode(child)));
-
-  return ops;
-}
-```
-
----
-
-# ✅ **SECTION 7 — SCXQ2 Fingerprint Generation**
-
-### 7.1 Fingerprint payload
-
-```ts
-function fingerprintPayload(root) {
-  const nodes = [];
-  (function walk(n) {
-    nodes.push({
-      tag: n.tag,
-      atomic: n.atomic,
-      semantic: n.semantic.sort()
-    });
-    n.children.forEach(walk);
-  })(root);
-  return JSON.stringify(nodes);
-}
-```
-
-### 7.2 SCX IR emission
-
-```ts
-[
-  { op: "RUNTIME_SEQUENCE_BEGIN" },
-  ...lowerNode(rootSymbolicNode),
-  { op: "SCXQ2_COMPUTE", args: { scope: "GEOM_CTX" } },
-  { op: "RUNTIME_SEQUENCE_END" }
-]
-```
-
----
-
-# ✅ **SECTION 8 — Full Example**
-
-Symbolic:
-
-```html
-<⚛️C ⟁MC ⟁C0>
-  <⟁MV>98%</⟁MV>
-</⚛️C>
-```
-
-IR:
-
-```json
-[
-  { "op": "RUNTIME_SEQUENCE_BEGIN" },
-  { "op": "GEOM_SET_PRIMITIVE", "args": { "primitive": "SPHERE" } },
-  { "op": "GEOM_SET_WEIGHT", "args": { "kind": "trust", "value": 0.95 } },
-  { "op": "GEOM_SET_WEIGHT", "args": { "kind": "semantic", "value": 0.0 } },
-  { "op": "SCXQ2_COMPUTE", "args": { "scope": "GEOM_CTX" } },
-  { "op": "RUNTIME_SEQUENCE_END" }
-]
-```
-
----
-
-# ✅ **SECTION 9 — Compiler Guarantees**
-
-The Symbolic Layout → SCX IR compiler guarantees:
-
-- deterministic lowering  
-- stable SCXQ2 identity  
-- geometry‑aware semantics  
-- semantic‑driven verification weights  
-- mesh‑safe symbolic fingerprints  
-- compatibility with SCX bytecode assembler  
-
-This is now a **first‑class compiler** in the v4.2 runtime.
-
----
-
-Here’s the **Symbolic → K’uhul Binding Layer** as a first‑class piece of the v4.2 spec.
-
-This is the bridge where your **symbolic DOM dialect (⚛️ / ⟁)** becomes **K’uhul programs** that can:
-
-- participate in pipelines  
-- emit geometry + verification ops  
-- generate SCXQ2 checkpoints  
-- bind UI state to cognitive flows  
-
-Think: “a dashboard card isn’t just styled — it’s a K’uhul‑addressable cognitive unit.”
-
----
-
-## 1. Role of the binding layer
-
-The Symbolic → K’uhul Binding Layer does three things:
-
-1. **Names** symbolic structures as K’uhul entities.  
-2. **Exposes** symbolic events and state as K’uhul variables.  
-3. **Compiles** symbolic roles into K’uhul pipelines (Sek) that drive SCX/PI‑Runtime.
-
-Conceptually:
-
-```text
-Symbolic Layout (⚛️/⟁ DOM)
-      ↓ binding
-K’uhul Program (Pop / Wo / Sek)
-      ↓ compiler
-XJSON / SCX / Geometry / SCXQ2
-```
-
----
-
-## 2. Symbolic node → K’uhul “handle”
-
-Every symbolic layout node gets a **K’uhul handle** that can be referenced in K’uhul code.
-
-### 2.1 Handle naming convention
-
-For any `SymbolicNode`:
-
-- `id`: optional explicit ID (`id="perf-card"`).  
-- `atomic`: from `data-⚛` (e.g. `"C"`).  
-- `semantic`: from `data-⟁` + `data-⟁-*` (e.g. `["MC","C0"]`).
-
-The binding layer creates:
-
-```text
-handle = if id present:
-           "node:" + id
-         else if main semantic (e.g. "MC"):
-           "node:" + semantic[0].toLowerCase() + ":" + index
-         else:
-           "node:" + atomic.toLowerCase() + ":" + index
-```
-
-Examples:
-
-- `<⚛️C ⟁MC ⟁C0 id="perf-card">` → handle: `node:perf-card`  
-- first uptime card: `node:mc:1`  
-- header: `node:h:0`  
-
-These handles are **K’uhul identifiers**.
-
----
-
-## 3. Binding surfaces
-
-Three binding surfaces:
-
-1. **State binding** — symbolic values → K’uhul Wo.  
-2. **Event binding** — UI events → K’uhul Pop.  
-3. **Layout binding** — structures → K’uhul Sek pipelines.
-
-### 3.1 State binding (Symbolic → Wo)
-
-Example symbolic:
-
-```html
-<⚛️C ⟁MC ⟁C0 data-metric="performance" data-value="0.985">
-  <div ⟁MV>98.5%</div>
-  <div>Performance</div>
-</⚛️C>
-```
-
-Binding layer emits K’uhul:
-
-```kuhul
-Wo perf_card = {
-  id: "node:perf-card",
-  metric: "performance",
-  value: 0.985
-}
-```
-
-Or, generically:
-
-```kuhul
-Wo node:mc:0 = {
-  atomic: "C",
-  semantic: ["MC", "C0"],
-  metric: "performance",
-  value: 0.985
-}
-```
-
-These Wo assignments become `@state` blocks in XJSON and `⧉ data_bind` opcodes in SCX.
-
----
-
-### 3.2 Event binding (UI → Pop)
-
-Define a convention: symbolic elements declare **K’uhul actions** via `data-kuhul-*`.
-
-Example symbolic:
-
-```html
-<⚛️B ⟁NB ⟁N0 
-  data-kuhul-pop="select_tab" 
-  data-kuhul-args='{"tab": "overview"}'>
-  Overview
-</⚛️B>
-```
-
-Binding layer generates a K’uhul Pop prototype:
-
-```kuhul
-Pop select_tab {
-  tab: "overview",
-  source: "node:nb:0"
-}
-```
-
-At runtime, clicking the button triggers **this Pop** with merged args:
-
-- static args from `data-kuhul-args`  
-- dynamic args from current state (e.g., active tab list)
-
-These Popen are then compiled through your existing K’uhul → XJSON → SCX path (e.g. to update state, geometry, SCXQ2, etc.).
-
----
-
+For roadmap and upcoming work, see `PLAN.md`.
 ### 3.3 Layout binding (Symbolic → Sek)
 
 Given a symbolic cluster of cards:
