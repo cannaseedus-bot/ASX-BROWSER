@@ -9,6 +9,15 @@ MX2LM.app
 ```
 MICRONAUTAI.COM
 ```
+
+## Planning and To-Do
+
+Active planning now lives in [PLAN.md](PLAN.md). Key upcoming tasks:
+
+- [ ] Document runtime setup and onboarding steps.
+- [ ] Align the parser entrypoints with the SCXQ2 symbolic mapping.
+- [ ] Add a demo page showing symbolic markup compiled to DOM output.
+- [ ] Back automated tests for the parser and transformation pipeline.
 ```
 📊 SCXQ2 Token Dictionary
 ⚛D  = <div>                        ⟁D   = <div class="dashboard">
@@ -12496,5 +12505,3 @@ The manifold maps directly to:
 - fractal subdivision  
 
 ---
-
-
